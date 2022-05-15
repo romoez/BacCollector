@@ -13,7 +13,7 @@ BacCollector est un outil de récupération des travaux des candidats à l'épre
   - et crée une copie des travaux du candidat sur la clé USB.
 - à la fin, il efface les travaux, et prépare le dossier de travail Bac202x pour le prochain candidat.
 
-![Interface BacCollector 1](https://github.com/romoez/BacCollector/blob/main/captures_ecran/BacCollector-Interface.png)
+![Interface BacCollector 1](https://github.com/romoez/BacCollector/blob/main/captures_ecran/BacCollector-InAction.gif)
 
 ## Ce que fait BacCollector dès son exécution
 
@@ -120,9 +120,11 @@ Cette opération permet de :
 - Qt Designer
 - Rapid Php
 - Sublime Text
+- Spyder IDE
 - Thonny
 - TPW 1.5
 - UltraEdit
 - Visual Studio Code
 - Webuilder
 - Windows Movie Maker
+- Wing Python IDE
