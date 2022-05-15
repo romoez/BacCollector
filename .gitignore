@@ -14,6 +14,10 @@ BacCollector.ini
 BacCollector.log
 BacCollector.exe
 BacCollector*.7z
+BacCollector*.zip
+
+rapport*.txt
+grille*.xlsx
 
 Tests/
 __dev.txt
