@@ -3302,6 +3302,7 @@ Func _ListeDApplicationsOuvertes()
 			, ["Pascal Editor", "PascalEditor.exe", 1] _
 			, ["Pascal XE", "PascalXE.exe", 1] _
 			, ["PyScripter", "PyScripter.exe", 1] _
+			, ["PyCharm", "pycharm", 0] _
 			, ["Qt Designer", "designer.exe", 1] _
 			, ["Rapid PHP", "rapidphp.exe", 1] _
 			, ["Sublime Text", "sublime_text.exe", 1] _
@@ -3310,7 +3311,7 @@ Func _ListeDApplicationsOuvertes()
 			, ["Visual Studio Code", "Code.exe", 1] _
 			, ["Webuilder", "webuild.exe", 1] _
 			, ["Windows Movie Maker", "Moviemk.exe", 1] _
-			, ["PyCharm", "pycharm", 0] _
+			, ["Wing Python IDE", "wing", 0] _
 			]
 
 	$N = UBound($SoftsToClose, 1) - 1
