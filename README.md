@@ -71,10 +71,10 @@ Cette opération permet de :
 - BacCollector est un outil portable et il ne demande aucune configuration ou paramétrage préalable.
 - On peut utiliser plus d'une Clé USB pour la récupération des dossiers, dans le même &quot;Labo&quot; et en même temps.
 - En cas de besoin (Pc infecté, BacCollector bloqué par un antivirus...), on peut faire la récupération manuelle, et le travail récupéré sera affiché la prochaine fois dans la liste des travaux récupérés.
-- Pour ajouter un candidat absent, il suffit de créer un dossier vide, à côté de BacCollector, qui porte le numéro d'inscription du candidat, et y ajouter un sous-dossier vide intitulé &quot;Absent&quot;. (Par analogie avec ce qu'on fait aux examens théoriques, avec une feuille d'examen blanche)
+- Pour ajouter un candidat absent, il suffit de créer un dossier vide, à côté de BacCollector, qui porte le numéro d'inscription du candidat, et y ajouter un sous-dossier vide intitulé &quot;Absent&quot;. (Par analogie à ce qu'on fait aux examens théoriques, avec une feuille d'examen blanche)
 - Affichage en temps réel, des principales actions des opérations de récupération et sauvegarde.
 - Description en détail, dans un fichier log, de toutes les étapes de récupération et de sauvegarde.
-- Après la fin de l'opération de récupération, si BacBackup est installé, BacCollector lui demande de créer un nouveau dossier de captures d'écran.
+- Après la fin de l'opération de récupération, si [BacBackup](https://github.com/romoez/BacBackup) est installé, BacCollector lui demande de créer un nouveau dossier de captures d'écran.
 - Un double-clic sur un fichier/dossier dans la listview, ouvre son emplacement dans l'explorateur.
 - Un double-clic sur le log, l'ouvre dans Wordpad
 - Un clic sur le nom de la matière, actualise toutes les informations affichées par BacCollector (Logiciels ouverts, liste de dossiers récupérés, contenu du dossier Bac20xx...)
