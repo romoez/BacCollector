@@ -223,20 +223,20 @@ EndFunc   ;==>_KillOtherScript
 
 Func AgeDuFichierEnMinutesModification($cFichier)
 	Local $cFileDate = FileGetTime($cFichier, 0) ;Get the Last Modified date and time
-	If @error Then
-		Return 9999
-	Else
-		Return _DateDiff("n", $cFileDate[0] & "/" & $cFileDate[1] & "/" & $cFileDate[2] & " " & $cFileDate[3] & ":" & $cFileDate[4] & ":" & $cFileDate[5], _NowCalc())
-	EndIf
+	If @error Then Return 9999
+
+	Local $iMinutes = _DateDiff("n", $cFileDate[0] & "/" & $cFileDate[1] & "/" & $cFileDate[2] & " " & $cFileDate[3] & ":" & $cFileDate[4] & ":" & $cFileDate[5], _NowCalc())
+	if $iMinutes < 0 Then $iMinutes = 9999
+	Return $iMinutes
 EndFunc   ;==>AgeDuFichierEnMinutesModification
 
 Func AgeDuFichierEnMinutesCreation($cFichier)
 	Local $cFileDate = FileGetTime($cFichier, 1) ;Get Creation date and time
-	If @error Then
-		Return 9999
-	Else
-		Return _DateDiff("n", $cFileDate[0] & "/" & $cFileDate[1] & "/" & $cFileDate[2] & " " & $cFileDate[3] & ":" & $cFileDate[4] & ":" & $cFileDate[5], _NowCalc())
-	EndIf
+	If @error Then Return 9999
+
+	Local $iMinutes = _DateDiff("n", $cFileDate[0] & "/" & $cFileDate[1] & "/" & $cFileDate[2] & " " & $cFileDate[3] & ":" & $cFileDate[4] & ":" & $cFileDate[5], _NowCalc())
+	if $iMinutes < 0 Then $iMinutes = 9999
+	Return $iMinutes
 EndFunc   ;==>AgeDuFichierEnMinutesCreation
 
 Func _LockFolder($sObj)

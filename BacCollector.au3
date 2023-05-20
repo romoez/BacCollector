@@ -11,15 +11,15 @@
 #pragma compile(Out, BacCollector.exe)
 #pragma compile(UPX, True) ;
 #pragma compile(Compression, 9)
-#pragma compile(FileDescription, RÃ©cupÃ©ration des travaux des candidats Ã  l'Ã©preuve pratique d'informatique des examens du baccalaurÃ©at)
+#pragma compile(FileDescription, Récupération des travaux des candidats à l'épreuve pratique d'informatique des examens du baccalauréat)
 #pragma compile(ProductName, BacCollector)
-#pragma compile(ProductVersion, 0.8.9.0515)
-#pragma compile(FileVersion, 0.8.9.0515, 0.8.9.0515) ; Le dernier param est facultatif.
-#pragma compile(LegalCopyright, 2018-2022 Â© La CommunautÃ© Tunisienne des Enseignants d'Informatique)
-#pragma compile(Comments, BacCollector: RÃ©cupÃ©ration des travaux des candidats Ã  l'Ã©preuve pratique d'informatique des examens du baccalaurÃ©at)
+#pragma compile(ProductVersion, 0.8.10.0520)
+#pragma compile(FileVersion, 0.8.10.0520, 0.8.10.0520) ; Le dernier param est facultatif.
+#pragma compile(LegalCopyright, 2018-2023 © La Communauté Tunisienne des Enseignants d'Informatique)
+#pragma compile(Comments, BacCollector: Récupération des travaux des candidats à l'épreuve pratique d'informatique des examens du baccalauréat)
 #pragma compile(ProductContact,moez.romdhane@tarbia.tn)
 #pragma compile(ProductPublisherURL, https://github.com/romoez/BacCollector)
-#pragma compile(CompanyName, La CommunautÃ© Tunisienne des Enseignants d'Informatique)
+#pragma compile(CompanyName, La Communauté Tunisienne des Enseignants d'Informatique)
 #pragma compile(AutoItExecuteAllowed, False)
 
 #include <Array.au3>
@@ -53,7 +53,7 @@ _KillOtherScript()
 Global Const $PROG_TITLE = "BacCollector "
 Global Const $PROG_VERSION = FileGetVersion(@ScriptFullPath) ;"0.8"
 
-Global Const $ANNEES_BAC[5] = ["2022", "2023", "2024", "2025", "2026"]
+Global Const $ANNEES_BAC[5] = ["2023", "2024", "2025", "2026", "2027"]
 
 ;#GUI.Taille.Const
 Global Const $GUI_LARGEUR = 800
@@ -79,18 +79,18 @@ If $CMDLINE[0] Then
 	Select
 		Case StringInStr($CMDLINE[1], "Unlock") Or StringInStr($CMDLINE[1], "Deblo") _
 				Or StringInStr($CMDLINE[1], "Clea") Or StringInStr($CMDLINE[1], "Nett") _
-				Or StringInStr($CMDLINE[1], "Deverr") Or StringInStr($CMDLINE[1], "DÃ©verr") _
-				Or StringInStr($CMDLINE[1], "DÃ©blo") ;Debloquer Deblocage Unlock Clean CleanUp Clear Unlock Deverrouillage Deverrouiller Nettoyage Nettoyer...
+				Or StringInStr($CMDLINE[1], "Deverr") Or StringInStr($CMDLINE[1], "Déverr") _
+				Or StringInStr($CMDLINE[1], "Déblo") ;Debloquer Deblocage Unlock Clean CleanUp Clear Unlock Deverrouillage Deverrouiller Nettoyage Nettoyer...
 			_UnLockAll()
 			Exit
 		Case Else
 			MsgBox(262144, $PROG_TITLE & $PROG_VERSION, "Syntaxe de ligne de commande: " & @CRLF & @CRLF _
-					 & "Â» DÃ©verrouillage des dossiers ""X:\Sauvegardes\"" : " & @CRLF _
-					 & @TAB & "- BacCollector /DÃ©verrouiller, ou:" & @CRLF _
+					 & "» Déverrouillage des dossiers ""X:\Sauvegardes\"" : " & @CRLF _
+					 & @TAB & "- BacCollector /Déverrouiller, ou:" & @CRLF _
 					 & @TAB & "- BacCollector /Unlock, ou encore:" & @CRLF _
-					 & @TAB & "- BacCollector /DÃ©bloquer" & @CRLF & @CRLF _
-					 & "Â» RÃ©cupÃ©ration automatique des dossiers de travail du candidat: " & @CRLF _
-					 & @TAB & "- [Cette fonctionnalitÃ© n'est pas encore implÃ©mentÃ©e.]") ; & @CRLF _
+					 & @TAB & "- BacCollector /Débloquer" & @CRLF & @CRLF _
+					 & "» Récupération automatique des dossiers de travail du candidat: " & @CRLF _
+					 & @TAB & "- [Cette fonctionnalité n'est pas encore implémentée.]") ; & @CRLF _
 			Exit
 	EndSelect
 EndIf
@@ -135,7 +135,7 @@ While 1
 			_LockFoldersBC()
 			GUISetState(@SW_ENABLE, $hMainGUI) ;
 			WinActivate($hMainGUI)
-;~ 			WinActivate($hMainGUI) dÃ©placÃ© vers la fonction, si affich Rapport, on n'acive pas la fenÃªtre
+;~ 			WinActivate($hMainGUI) déplacé vers la fonction, si affich Rapport, on n'acive pas la fenêtre
 		Case $bOpenBackupFldr
 			_CheckBacCollectorExists()
 			_InitialParams()
@@ -156,7 +156,7 @@ While 1
 		Case $rInfoProg, $tInfoProg
 			_CheckBacCollectorExists()
 			If $Matiere <> 'InfoProg' Then
-				_Logging("Changement de la matiÃ¨re : ""STI/TIC"" --> ""Info/Prog""", 2, 0)
+				_Logging("Changement de la matière : ""STI/TIC"" --> ""Info/Prog""", 2, 0)
 				$Matiere = 'InfoProg'
 				_InitialisationInfo()
 			EndIf
@@ -164,14 +164,14 @@ While 1
 		Case $rTic, $tTic
 			_CheckBacCollectorExists()
 			If $Matiere <> 'Tic' Then
-				_Logging("Changement de la matiÃ¨re : ""Info/Prog"" --> ""STI/TIC""", 2, 0)
+				_Logging("Changement de la matière : ""Info/Prog"" --> ""STI/TIC""", 2, 0)
 				$Matiere = 'Tic'
 				_InitialisationTic()
 			EndIf
 
 		Case $lblMatiere
 			_CheckBacCollectorExists()
-			_Logging("Demande d'actualisation des donnÃ©es suite au clic sur le label de la matiÃ¨re : " & $Matiere, 2, 0)
+			_Logging("Demande d'actualisation des données suite au clic sur le label de la matière : " & $Matiere, 2, 0)
 			_Initialisation()
 
 		Case $cBac
@@ -189,8 +189,8 @@ While 1
 	EndSwitch
 WEnd
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _Initialisation($initNumeroCandidat = 1)
 	If $Matiere = "Tic" Then
@@ -200,18 +200,18 @@ Func _Initialisation($initNumeroCandidat = 1)
 	EndIf
 EndFunc   ;==>_Initialisation
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 #Region Function "_InitialisationInfo" ------------------------------------------------------------------------
 Func _InitialisationInfo($initNumeroCandidat = 1)
-	SplashTextOn("Sans Titre", "Initialisation de l'opÃ©ration." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	SplashTextOn("Sans Titre", "Initialisation de l'opération." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 
-	GUICtrlSetData($HeadContenuDossiersBac, "Contenu des dossiers â—–Bac*2*â——:")
+	GUICtrlSetData($HeadContenuDossiersBac, "Contenu des dossiers ?Bac*2*?:")
 	GUICtrlSetData($HeadContenuAutresDossiers, "Autres Fichiers dans ""Mes Documents"", ""Bureau"", racine des lecteurs du hdd :")
 
-	GUICtrlSetTip($HeadContenuDossiersBac, " ", "Contenu des dossiers â—–Bac*2*â——", 1,1)
-	GUICtrlSetTip($HeadContenuAutresDossiers, "- Bureau" & @CRLF & "- Mes documents" & @CRLF & "- Dossier du profil de l'utilisateur" & @CRLF & "- Racines des lecteurs C:, D: ..." & @CRLF & @CRLF &  "(Double-clic sur un Ã©lÃ©ment pour l'afficher dans l'Explorateur.)", "Ã‰lÃ©ments rÃ©cemment crÃ©Ã©s/modifiÃ©s dans :", 1,1)
+	GUICtrlSetTip($HeadContenuDossiersBac, " ", "Contenu des dossiers ?Bac*2*?", 1,1)
+	GUICtrlSetTip($HeadContenuAutresDossiers, "- Bureau" & @CRLF & "- Mes documents" & @CRLF & "- Dossier du profil de l'utilisateur" & @CRLF & "- Racines des lecteurs C:, D: ..." & @CRLF & @CRLF &  "(Double-clic sur un élément pour l'afficher dans l'Explorateur.)", "Éléments récemment créés/modifiés dans :", 1,1)
 
 	_GUICtrlListView_SetColumn($GUI_AfficherLeContenuDesDossiersBac, 0, "Dossiers & Fichiers")
 	_GUICtrlListView_SetColumn($GUI_AfficherLeContenuDesDossiersBac, 1, "Taille")
@@ -223,7 +223,7 @@ Func _InitialisationInfo($initNumeroCandidat = 1)
 		GUICtrlSetData($GUI_NumeroCandidat, _NumeroCandidat())
 	EndIf
 
-	;;;Section - DÃ©but ===================================
+	;;;Section - Début ===================================
 	Local $sFiltreFichiersAChercher
 	IniWrite(StringTrimRight(@ScriptFullPath, 4) & ".ini", "Params", "Matiere", $Matiere)
 	Switch $Matiere
@@ -259,7 +259,7 @@ Func _InitialisationInfo($initNumeroCandidat = 1)
 	If $sDossiersRecuperes <> "" Then
 		GUICtrlSetData($TextDossiersRecuperes, $sDossiersRecuperes)
 		$TmpSpaces = "                         "
-		_Logging("Liste de dossiers de travail dÃ©jÃ  rÃ©cupÃ©rÃ©s : " & StringReplace($sDossiersRecuperes, @CRLF, @CRLF & $TmpSpaces), 2, 0)
+		_Logging("Liste de dossiers de travail déjà récupérés : " & StringReplace($sDossiersRecuperes, @CRLF, @CRLF & $TmpSpaces), 2, 0)
 ;~ 		_Logging("Liste : " & _ArrayToString($Liste, "", 1, -1, @CRLF & $TmpSpaces, 0, 0), 2, 0) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 	Else
 		GUICtrlSetData($TextDossiersRecuperes, "-")
@@ -273,17 +273,17 @@ Func _InitialisationInfo($initNumeroCandidat = 1)
 	GUISetState(@SW_ENABLE, $hMainGUI) ;
 ;~ 	WinActivate ($hMainGUI);
 	If $DossiersNonConformesPourCandidatsAbsents <> "" Then
-		If _NbOccurrences("Â»", $DossiersNonConformesPourCandidatsAbsents) = 1 Then
+		If _NbOccurrences("»", $DossiersNonConformesPourCandidatsAbsents) = 1 Then
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
 			_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "Pour le canditat absent suivant :" & @CRLF & @CRLF _
 					 & $DossiersNonConformesPourCandidatsAbsents & @CRLF _
-					 & "Veuillez crÃ©er dans son dossier, un sous-dossier vide intitulÃ© :" & @CRLF & @CRLF _
+					 & "Veuillez créer dans son dossier, un sous-dossier vide intitulé :" & @CRLF & @CRLF _
 					 & @TAB & """Absent""", 0)
 		Else
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
 			_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "Pour les canditats absents suivants :" & @CRLF & @CRLF _
 					 & $DossiersNonConformesPourCandidatsAbsents & @CRLF _
-					 & "Veuillez crÃ©er dans le dossier de chacun, un sous-dossier vide intitulÃ© :" & @CRLF & @CRLF _
+					 & "Veuillez créer dans le dossier de chacun, un sous-dossier vide intitulé :" & @CRLF & @CRLF _
 					 & @TAB & """Absent""", 0)
 		EndIf
 	EndIf
@@ -291,22 +291,22 @@ Func _InitialisationInfo($initNumeroCandidat = 1)
 EndFunc   ;==>_InitialisationInfo
 #EndRegion Function "_InitialisationInfo" ------------------------------------------------------------------------
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 #Region Function "_InitialisationTic" ------------------------------------------------------------------------
 Func _InitialisationTic($initNumeroCandidat = 1)
-	SplashTextOn("Sans Titre", "Initialisation de l'opÃ©ration." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	SplashTextOn("Sans Titre", "Initialisation de l'opération." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 
-	GUICtrlSetData($HeadContenuDossiersBac, "Contenu des Dossiers d'hÃ©bergement des serveurs Web :")
-	GUICtrlSetData($HeadContenuAutresDossiers, "Bases de DonnÃ©es et tables MySql:")
+	GUICtrlSetData($HeadContenuDossiersBac, "Contenu des Dossiers d'hébergement des serveurs Web :")
+	GUICtrlSetData($HeadContenuAutresDossiers, "Bases de Données et tables MySql:")
 
-	GUICtrlSetTip($HeadContenuDossiersBac, " ", "Contenu des Dossiers d'hÃ©bergement des serveurs Web", 1,1)
-	GUICtrlSetTip($HeadContenuAutresDossiers, " ", "Bases de DonnÃ©es et tables MySql", 1,1)
+	GUICtrlSetTip($HeadContenuDossiersBac, " ", "Contenu des Dossiers d'hébergement des serveurs Web", 1,1)
+	GUICtrlSetTip($HeadContenuAutresDossiers, " ", "Bases de Données et tables MySql", 1,1)
 
 	_GUICtrlListView_SetColumn($GUI_AfficherLeContenuDesDossiersBac, 0, "Sites Web & Fichiers")
 	_GUICtrlListView_SetColumn($GUI_AfficherLeContenuDesDossiersBac, 1, "Type")
-	_GUICtrlListView_SetColumn($GUI_AfficherLeContenuDesAutresDossiers, 0, "Bases de DonnÃ©es & Tables")
+	_GUICtrlListView_SetColumn($GUI_AfficherLeContenuDesAutresDossiers, 0, "Bases de Données & Tables")
 	_GUICtrlListView_SetColumn($GUI_AfficherLeContenuDesAutresDossiers, 1, "Type")
 
 	GUISetState(@SW_DISABLE, $hMainGUI) ;
@@ -354,17 +354,17 @@ Func _InitialisationTic($initNumeroCandidat = 1)
 	GUISetState(@SW_ENABLE, $hMainGUI) ;
 ;~ 	WinActivate ($hMainGUI);
 	If $DossiersNonConformesPourCandidatsAbsents <> "" Then
-		If _NbOccurrences("Â»", $DossiersNonConformesPourCandidatsAbsents) = 1 Then
+		If _NbOccurrences("»", $DossiersNonConformesPourCandidatsAbsents) = 1 Then
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
 			_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "Pour le canditat absent suivant :" & @CRLF & @CRLF _
 					 & $DossiersNonConformesPourCandidatsAbsents & @CRLF _
-					 & "Veuillez crÃ©er dans son dossier, un sous-dossier vide intitulÃ© :" & @CRLF & @CRLF _
+					 & "Veuillez créer dans son dossier, un sous-dossier vide intitulé :" & @CRLF & @CRLF _
 					 & @TAB & """Absent""", 0)
 		Else
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
 			_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "Pour les canditats absents suivants :" & @CRLF & @CRLF _
 					 & $DossiersNonConformesPourCandidatsAbsents & @CRLF _
-					 & "Veuillez crÃ©er dans le dossier de chacun, un sous-dossier vide intitulÃ© :" & @CRLF & @CRLF _
+					 & "Veuillez créer dans le dossier de chacun, un sous-dossier vide intitulé :" & @CRLF & @CRLF _
 					 & @TAB & """Absent""", 0)
 		EndIf
 	EndIf
@@ -372,27 +372,27 @@ Func _InitialisationTic($initNumeroCandidat = 1)
 EndFunc   ;==>_InitialisationTic
 #EndRegion Function "_InitialisationTic" ------------------------------------------------------------------------
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 #Region Function "_InitialParams" --------------------------------------------------------------------------
 Func _InitialParams()
 	If not FileExists(StringTrimRight(@ScriptFullPath, 4) & ".ini") Then
-		_GUIExtender_Section_Action($hMainGUI, 1, 1) ;2Ã¨me paramÃ¨tre (1) NumÃ©ro de la Section  -  3Ã¨me paramÃ¨tre (0) to retract the Section
+		_GUIExtender_Section_Action($hMainGUI, 1, 1) ;2ème paramètre (1) Numéro de la Section  -  3ème paramètre (0) to retract the Section
 	EndIf
 
-;~ 	SplashTextOn("Sans Titre", "Lecture des paramÃ¨tres de ""BacCollector""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
-	ProgressOn($PROG_TITLE & $PROG_VERSION, "Mise Ã  jour des paramÃ¨tres...", "[0%] Veuillez patienter un moment, initialisation...", Default, Default, 1)
+;~ 	SplashTextOn("Sans Titre", "Lecture des paramètres de ""BacCollector""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	ProgressOn($PROG_TITLE & $PROG_VERSION, "Mise à jour des paramètres...", "[0%] Veuillez patienter un moment, initialisation...", Default, Default, 1)
 
 	Global $DossierBacCollector = "0-BacCollector"
 	Global $DossierSauve = "Sauvegardes"
 	Global $Lecteur = ""
 
-	;ContrÃ´le ajoutÃ© aprÃ¨s la Demo au Crefoc de Tunis 1
+	;Contrôle ajouté après la Demo au Crefoc de Tunis 1
 	Local $aDrive = DriveGetDrive('FIXED')
 
 ;~ 		_ArraySort($aDrive, 0, 1)
-	$Lecteur = @HomeDrive ; "C:" ; $aDrive[1] ; $aDrive[1] peut Ãªtre A: !!
+	$Lecteur = @HomeDrive ; "C:" ; $aDrive[1] ; $aDrive[1] peut être A: !!
 	For $i = 1 To $aDrive[0]
 		If $aDrive[$i] = @HomeDrive Then ContinueLoop
 		If (DriveGetType($aDrive[$i], $DT_BUSTYPE) <> "USB") _ ; to Exclude external Hdd(s)
@@ -404,15 +404,15 @@ Func _InitialParams()
 		EndIf
 	Next
 	$Lecteur = StringUpper($Lecteur) & "\"
-	_Logging("Mise Ã  jour des paramÃ¨tres ____DÃ©but___", 2, 0)
+	_Logging("Mise à jour des paramètres ____Début___", 2, 0)
 	ProgressSet(20, "[" & 20 & "%] " & "")
 	Local $Ok
 	If Not FileExists($Lecteur & $DossierSauve) Then
 		$Ok = DirCreate($Lecteur & $DossierSauve)
 		If $Ok Then
-			_Logging("CrÃ©ation du dossier de sauvegarde : " & $Lecteur & $DossierSauve, 1, 0)
+			_Logging("Création du dossier de sauvegarde : " & $Lecteur & $DossierSauve, 1, 0)
 		Else
-			_Logging("CrÃ©ation du dossier de sauvegarde : " & $Lecteur & $DossierSauve, 0, 0)
+			_Logging("Création du dossier de sauvegarde : " & $Lecteur & $DossierSauve, 0, 0)
 		EndIf
 	Else
 		_Logging("Dossier de sauvegarde : """ & $Lecteur & $DossierSauve & """", 2, 0)
@@ -425,7 +425,7 @@ Func _InitialParams()
 			$Success = DirCreate($Lecteur & $DossierSauve & "\" & $DossierBacCollector)
 			$Repeated += 1
 			If $Success Then
-				_Logging("CrÃ©ation du dossier  BacCollector : " & $Lecteur & $DossierSauve & "\" & $DossierBacCollector, 1, 0)
+				_Logging("Création du dossier  BacCollector : " & $Lecteur & $DossierSauve & "\" & $DossierBacCollector, 1, 0)
 				ExitLoop
 			Else
 				Sleep(20)
@@ -433,12 +433,12 @@ Func _InitialParams()
 		WEnd
 		If Not $Success Then
 			ProgressOff()
-			_Logging("CrÃ©ation du dossier  BacCollector : " & $Lecteur & $DossierSauve & "\" & $DossierBacCollector, 0, 0)
+			_Logging("Création du dossier  BacCollector : " & $Lecteur & $DossierSauve & "\" & $DossierBacCollector, 0, 0)
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Ã‰chec lors de la crÃ©ation du dossier de sauvegarde local, " & @CRLF _
+			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Échec lors de la création du dossier de sauvegarde local, " & @CRLF _
 					 & "     """ & $Lecteur & $DossierSauve & "\" & $DossierBacCollector & """" & @CRLF _
-					 & "Ã§a peut provoquer des erreurs lors de la copie de rÃ©cupÃ©ration!", 0)
-			ProgressOn($PROG_TITLE & $PROG_VERSION, "Mise Ã  jour des paramÃ¨tres...", "", Default, Default, 1)
+					 & "ça peut provoquer des erreurs lors de la copie de récupération!", 0)
+			ProgressOn($PROG_TITLE & $PROG_VERSION, "Mise à jour des paramètres...", "", Default, Default, 1)
 		EndIf
 	Else
 		_Logging("Dossier BacCollector  : """ & $Lecteur & $DossierSauve & "\" & $DossierBacCollector & """", 2, 0)
@@ -450,7 +450,7 @@ Func _InitialParams()
 	Global $Matiere = IniRead(StringTrimRight(@ScriptFullPath, 4) & ".ini", "Params", "Matiere", "-1")
 ;~ 	If ($Matiere = -1) Or ($Matiere <> 'InfoProg' And $Matiere <> 'Tic') Then
 	If ($Matiere = -1) Or (($Matiere <> 'InfoProg') And ($Matiere <> 'Tic')) Then
-		$Matiere = 'InfoProg' ;Valeur Par dÃ©faut
+		$Matiere = 'InfoProg' ;Valeur Par défaut
 		IniWrite(StringTrimRight(@ScriptFullPath, 4) & ".ini", "Params", "Matiere", $Matiere)
 	EndIf
 	ProgressSet(55, "[" & 55 & "%] " & "")
@@ -463,7 +463,7 @@ Func _InitialParams()
 	EndIf
 	_GUICtrlComboBox_SelectString($cBac, $Bac20xx)
 	GUICtrlSetData($lblBac, "Bac" & $Bac20xx)
-	_Logging("BaccalaurÃ©at          : " & "Bac" & $Bac20xx, 2, 0)
+	_Logging("Baccalauréat          : " & "Bac" & $Bac20xx, 2, 0)
 	ProgressSet(70, "[" & 70 & "%] " & "")
 
 	;;;Labo-x?
@@ -477,29 +477,29 @@ Func _InitialParams()
 	_Logging("Laboratoire           : " & "Labo-" & $Laboxx, 2, 0)
 	ProgressSet(85, "[" & 85 & "%] " & "")
 
-	;;;SÃ©ance?
+	;;;Séance?
 	Local $Seancexx = IniRead(StringTrimRight(@ScriptFullPath, 4) & ".ini", "Params", "Seance", "-1")
 	If StringIsInt($Seancexx) = 0 Or $Seancexx < 1 Or $Seancexx > 6 Then
 		$Seancexx = '1'
 		IniWrite(StringTrimRight(@ScriptFullPath, 4) & ".ini", "Params", "Seance", $Seancexx)
 	EndIf
-	_GUICtrlComboBox_SelectString($cSeance, "SÃ©ance-" & $Seancexx)
-	GUICtrlSetData($lblSeance, "SÃ©ance-" & $Seancexx)
-	_Logging("SÃ©ance                : " & "SÃ©ance-" & $Seancexx, 2, 0)
+	_GUICtrlComboBox_SelectString($cSeance, "Séance-" & $Seancexx)
+	GUICtrlSetData($lblSeance, "Séance-" & $Seancexx)
+	_Logging("Séance                : " & "Séance-" & $Seancexx, 2, 0)
 	ProgressSet(95, "[" & 95 & "%] " & "")
 
-	;;;BacBackup dÃ©tectÃ©
+	;;;BacBackup détecté
 	If _IsRegistryExist("HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{498AA8A4-2CBE-4368-BFA0-E0CF3F338536}_is1", "DisplayName") And ProcessExists('BacBackup.exe') Then
 		GUICtrlSetState($lblBacBackup, $GUI_SHOW)
-;~ 		_Logging("BacBackup est installÃ©, et surveille les dossiers de travail des candidats.", 2, 0)
+;~ 		_Logging("BacBackup est installé, et surveille les dossiers de travail des candidats.", 2, 0)
 	Else
 		GUICtrlSetState($lblBacBackup, $GUI_HIDE)
-;~ 		_Logging("BacBackup n'est pas installÃ©" & $Bac20xx, 2, 0)
+;~ 		_Logging("BacBackup n'est pas installé" & $Bac20xx, 2, 0)
 	EndIf
 
 	ProgressSet(99, "[" & 99 & "%] " & "")
 
-	_Logging("Mise Ã  jour des paramÃ¨tres ____Fin___", 2, 0)
+	_Logging("Mise à jour des paramètres ____Fin___", 2, 0)
 	ProgressOff()
 ;~ 	SplashOff()
 ;~ 	WinActivate ($hMainGUI)
@@ -507,14 +507,14 @@ Func _InitialParams()
 EndFunc   ;==>_InitialParams
 #EndRegion Function "_InitialParams" --------------------------------------------------------------------------
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 #Region Functions _SaveParams & _SaveData_xxxx
 Func _SaveParams()
-	;;; En cas oÃ¹ le fichier ini est effacÃ© aprÃ¨s l'ouvertur du BacCollector,
-	;;; Exple: AprÃ¨s l'ouvertur de BacCollector, l'utilisateur a volu effacer le contenu du Flash USB
-	SplashTextOn("Sans Titre", "Enregistrement des paramÃ¨tres de ""BacCollector""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	;;; En cas où le fichier ini est effacé après l'ouvertur du BacCollector,
+	;;; Exple: Après l'ouvertur de BacCollector, l'utilisateur a volu effacer le contenu du Flash USB
+	SplashTextOn("Sans Titre", "Enregistrement des paramètres de ""BacCollector""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	;;;Save $Matiere From Interface to ini File
 	If GUICtrlGetState($rInfoProg) = $GUI_CHECKED Then
 		$Matiere = 'InfoProg'
@@ -535,9 +535,9 @@ Func _SaveData_Bacxx()
 	Local $Bac20xx_combo = GUICtrlRead($cBac)
 	If $Bac20xx_lbl <> $Bac20xx_combo Then
 ;~ 		_ExtMsgBox ($vIcon, $vButton, $sTitle, $sText, [$iTimeout, [$hWin, [$iVPos, [$bMain = True]]]])
-		_Logging("MsgBox: Modifier l'annÃ©e du Bac : " & $Bac20xx_lbl & " --> " & $Bac20xx_combo & ". (Oui/Non)?", 2, 0)
+		_Logging("MsgBox: Modifier l'année du Bac : " & $Bac20xx_lbl & " --> " & $Bac20xx_combo & ". (Oui/Non)?", 2, 0)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "~Non|Oui", $PROG_TITLE & $PROG_VERSION, "ÃŠtes-vous sÃ»r(e) de vouloir modifier : " & @CRLF _
+		Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "~Non|Oui", $PROG_TITLE & $PROG_VERSION, "Êtes-vous sûr(e) de vouloir modifier : " & @CRLF _
 				 & "    " & "<<Bac" & $Bac20xx_lbl & ">>" & "   en   " & "<<Bac" & $Bac20xx_combo & ">>", 0)
 		If $Rep = 2 Then
 			GUICtrlSetData($lblBac, "Bac" & $Bac20xx_combo)
@@ -555,15 +555,15 @@ Func _SaveData_Seancexx()
 	Local $Seancexx_combo = StringRight(GUICtrlRead($cSeance), 1)
 	If $Seancexx_lbl <> $Seancexx_combo Then
 ;~ 		_ExtMsgBox ($vIcon, $vButton, $sTitle, $sText, [$iTimeout, [$hWin, [$iVPos, [$bMain = True]]]])
-		_Logging("MsgBox: Modifier la sÃ©ance : " & $Seancexx_lbl & " --> " & $Seancexx_combo & ". (Oui/Non)?", 2, 0)
+		_Logging("MsgBox: Modifier la séance : " & $Seancexx_lbl & " --> " & $Seancexx_combo & ". (Oui/Non)?", 2, 0)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "~Non|Oui", $PROG_TITLE & $PROG_VERSION, "ÃŠtes-vous sÃ»r(e) de vouloir modifier : " & @CRLF _
-				 & "    " & "<<SÃ©ance-" & $Seancexx_lbl & ">>" & "   en   " & "<<SÃ©ance-" & $Seancexx_combo & ">>", 0)
+		Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "~Non|Oui", $PROG_TITLE & $PROG_VERSION, "Êtes-vous sûr(e) de vouloir modifier : " & @CRLF _
+				 & "    " & "<<Séance-" & $Seancexx_lbl & ">>" & "   en   " & "<<Séance-" & $Seancexx_combo & ">>", 0)
 		If $Rep = 2 Then
-			GUICtrlSetData($lblSeance, "SÃ©ance-" & $Seancexx_combo)
-			_Logging("Oui. Nouvelle sÃ©ance  : """ & GUICtrlRead($lblSeance) & """", 2, 0)
+			GUICtrlSetData($lblSeance, "Séance-" & $Seancexx_combo)
+			_Logging("Oui. Nouvelle séance  : """ & GUICtrlRead($lblSeance) & """", 2, 0)
 		Else
-			_GUICtrlComboBox_SelectString($cSeance, "SÃ©ance-" & $Seancexx_lbl)
+			_GUICtrlComboBox_SelectString($cSeance, "Séance-" & $Seancexx_lbl)
 			_Logging("Non.", 2, 0)
 		EndIf
 	EndIf
@@ -577,7 +577,7 @@ Func _SaveData_Laboxx()
 ;~ 		_ExtMsgBox ($vIcon, $vButton, $sTitle, $sText, [$iTimeout, [$hWin, [$iVPos, [$bMain = True]]]])
 		_Logging("MsgBox: Modifier du laboratoire : " & $Laboxx_lbl & " --> " & $Laboxx_combo & ". (Oui/Non)?", 2, 0)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "~Non|Oui", $PROG_TITLE & $PROG_VERSION, "ÃŠtes-vous sÃ»r(e) de vouloir modifier : " & @CRLF _
+		Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "~Non|Oui", $PROG_TITLE & $PROG_VERSION, "Êtes-vous sûr(e) de vouloir modifier : " & @CRLF _
 				 & "    " & "<<Labo-" & $Laboxx_lbl & ">>" & "   en   " & "<<Labo-" & $Laboxx_combo & ">>", 0)
 		If $Rep = 2 Then
 			GUICtrlSetData($lblLabo, "Labo-" & $Laboxx_combo)
@@ -587,9 +587,9 @@ Func _SaveData_Laboxx()
 			If StringLen($sScriptDrive) = 3 And StringRegExp($sScriptDrive, "^([a-zA-Z]{1,1}:)?(\\|\/)$", 0) = 1 And DriveGetType($sScriptDrive) = "Removable" Then
 				Local $Ok = DriveSetLabel($sScriptDrive, "Labo-" & $Laboxx_combo)
 				If $Ok Then
-					_Logging("Changemant du nom de la clÃ© USB """ & $sScriptDrive & """ vers """ & GUICtrlRead($lblLabo) & """", 1, 0)
+					_Logging("Changemant du nom de la clé USB """ & $sScriptDrive & """ vers """ & GUICtrlRead($lblLabo) & """", 1, 0)
 				Else
-					_Logging("Changemant du nom de la clÃ© USB """ & $sScriptDrive & """ vers """ & GUICtrlRead($lblLabo) & """", 0, 0)
+					_Logging("Changemant du nom de la clé USB """ & $sScriptDrive & """ vers """ & GUICtrlRead($lblLabo) & """", 0, 0)
 				EndIf
 			EndIf
 		Else
@@ -601,8 +601,8 @@ Func _SaveData_Laboxx()
 EndFunc   ;==>_SaveData_Laboxx
 #EndRegion Functions _SaveParams & _SaveData_xxxx
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _ShowHelp()
 	DirCreate(@TempDir & "\BacCollector")
@@ -611,8 +611,8 @@ Func _ShowHelp()
 
 EndFunc   ;==>_ShowHelp
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 #Region Functions BB
 Func _NouvelleSessionBacBackup()
@@ -621,7 +621,7 @@ Func _NouvelleSessionBacBackup()
 	If $iID = 0 Then
 		Return 0
 	EndIf
-	Run(_WinAPI_GetProcessFileName($iID)) ;selon la conception de BacBackup, le lancement du prog arrÃªte l'ancienne instance, et crÃ©e un nouveau dossier de capture
+	Run(_WinAPI_GetProcessFileName($iID)) ;selon la conception de BacBackup, le lancement du prog arrête l'ancienne instance, et crée un nouveau dossier de capture
 	Return 1
 EndFunc   ;==>_NouvelleSessionBacBackup
 
@@ -638,15 +638,15 @@ Func _OpenBacBackupInterface()
 	$sBBInterface = $sDrive & $sDir & "BacBackup_Interface.exe"
 ;~ 	MsgBox(0,"",$sBBInterface)
 	If FileExists($sBBInterface) Then
-		_Logging("Ouverture de la fenÃªtre de BacBackup", 2, 0)
+		_Logging("Ouverture de la fenêtre de BacBackup", 2, 0)
 		Return Run("""" & $sBBInterface & """")
 	EndIf
 	Return -1
 EndFunc   ;==>_OpenBacBackupInterface
 #EndRegion Functions BB
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _TogglePart3()
 	Switch _GUIExtender_Section_State($hMainGUI, 1)
@@ -661,31 +661,31 @@ Func _TogglePart3()
 	EndSwitch
 EndFunc   ;==>_TogglePart3
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 #Region Function "_CreateGui" -----------------------------------------------------------------------------
 Func _CreateGui()
-	;;; FenÃªtre principale  - DÃ©but
+	;;; Fenêtre principale  - Début
 	Global $hMainGUI = GUICreate($PROG_TITLE & $PROG_VERSION, $GUI_LARGEUR, $GUI_HAUTEUR, -1, -1, -1, 0)
 	GUISetFont(8, 400, 0, "Tahoma")
 	GUISetBkColor($GUI_COLOR_CENTER)
-	;;; FenÃªtre principale  - Fin
+	;;; Fenêtre principale  - Fin
 
-	;;; Partie 3 Ã  droite + bouton Slider - DÃ©but===================================================================================
+	;;; Partie 3 à droite + bouton Slider - Début===================================================================================
 	_GUIExtender_Init($hMainGUI, 1)
 	Global $bTogglePart3 = GUICtrlCreateButton(" ", $GUI_LARGEUR - $GUI_LARGEUR_PARTIE - 5, $GUI_HAUTEUR / 4, 5, $GUI_HAUTEUR / 2) ;"text", left, top [, width [, height
 	GUICtrlSetColor(-1, $GUI_COLOR_SIDES)
 	GUICtrlSetBkColor(-1, $GUI_COLOR_SIDES)
 	_GUIExtender_Section_Create($hMainGUI, $GUI_LARGEUR - $GUI_LARGEUR_PARTIE, $GUI_LARGEUR_PARTIE)
 	_GUIExtender_Section_Activate($hMainGUI, 1)
-	GUICtrlSetTip($bTogglePart3, " ", "â—¨  Cliquez ici pour afficher/masquer la partie droite de la fenÃªtre.", 0,1)
+	GUICtrlSetTip($bTogglePart3, " ", "?  Cliquez ici pour afficher/masquer la partie droite de la fenêtre.", 0,1)
 
 
-	; DÃ©placÃ© vers _InitialParams(), si le fichier de config existe...
-	_GUIExtender_Section_Action($hMainGUI, 1, 0) ;2Ã¨me paramÃ¨tre (1) NumÃ©ro de la Section  -  3Ã¨me paramÃ¨tre (0) to retract the Section
+	; Déplacé vers _InitialParams(), si le fichier de config existe...
+	_GUIExtender_Section_Action($hMainGUI, 1, 0) ;2ème paramètre (1) Numéro de la Section  -  3ème paramètre (0) to retract the Section
 
-	;;; Partie 3 Ã  droite + bouton Slider - Fin=====================================================================================
+	;;; Partie 3 à droite + bouton Slider - Fin=====================================================================================
 
 	$Gui_Partie_Gauche = GUICtrlCreateGraphic(0, 0, $GUI_LARGEUR_PARTIE, $GUI_HAUTEUR)
 	GUICtrlSetBkColor($Gui_Partie_Gauche, $GUI_COLOR_SIDES)
@@ -695,7 +695,7 @@ Func _CreateGui()
 	GUICtrlSetBkColor($Gui_Partie_Droite, $GUI_COLOR_SIDES)
 	GUICtrlSetState($Gui_Partie_Droite, $GUI_DISABLE)
 
-	;;;Grand Cadre - DÃ©but==================================================================================
+	;;;Grand Cadre - Début==================================================================================
 	Local $Left_Header = $GUI_LARGEUR_PARTIE + $GUI_MARGE
 	Local $Top_Header = $GUI_MARGE
 	Local $WidthHeader = 2 * ($GUI_LARGEUR_PARTIE - $GUI_MARGE)
@@ -704,67 +704,67 @@ Func _CreateGui()
 	GUICtrlSetState($Header, $GUI_DISABLE)
 	;;;Grand Cadre - Fin==================================================================================
 
-	;;;NumÃ©ro du Candidat - DÃ©but==================================================================================
+	;;;Numéro du Candidat - Début==================================================================================
 	;;;========Header============
 	$Top_Header = $GUI_MARGE
 	$Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $GUI_HEADER_HAUTEUR)
 	GUICtrlSetColor($Header, 0x696A65)
 	GUICtrlSetState($Header, $GUI_DISABLE)
-	$Text = GUICtrlCreateLabel("NumÃ©ro d'Inscription du Candidat :", $Left_Header + $GUI_MARGE, $Top_Header + 3, ($WidthHeader - 2 * $GUI_MARGE)/2, $GUI_HEADER_HAUTEUR - 6)
+	$Text = GUICtrlCreateLabel("Numéro d'Inscription du Candidat :", $Left_Header + $GUI_MARGE, $Top_Header + 3, ($WidthHeader - 2 * $GUI_MARGE)/2, $GUI_HEADER_HAUTEUR - 6)
 	GUICtrlSetColor($Text, $GUI_COLOR_CENTER_HEADERS_TEXT)
 	GUICtrlSetBkColor($Text, $GUI_BKCOLOR_TRANSPARENT)
-	GUICtrlSetTip($Text, "Veuillez vÃ©rifier ce numÃ©ro avant de commencer la rÃ©cupÃ©ration.", "NumÃ©ro d'Inscription du Candidat", 1,1)
+	GUICtrlSetTip($Text, "Veuillez vérifier ce numéro avant de commencer la récupération.", "Numéro d'Inscription du Candidat", 1,1)
 	;;;========Content============
 	Local $GUI_Largeur_Label = 121
 	Local $GUI_Hateur_Label = 35
 	Global $GUI_NumeroCandidat = GUICtrlCreateInput("", 1.5 * $GUI_LARGEUR_PARTIE - $GUI_Largeur_Label / 2, $Top_Header + $GUI_HEADER_HAUTEUR + $GUI_MARGE, $GUI_Largeur_Label, $GUI_Hateur_Label, $ES_NUMBER, BitOR($WS_EX_WINDOWEDGE, $WS_EX_CLIENTEDGE))
 	GUICtrlSetFont($GUI_NumeroCandidat, 22, 900, 0, "Arial") ; Bold
 	GUICtrlSetColor($GUI_NumeroCandidat, $GUI_COLOR_CENTER)
-	GUICtrlSetTip($GUI_NumeroCandidat, "Veuillez vÃ©rifier ce numÃ©ro avant de commencer la rÃ©cupÃ©ration.", "NumÃ©ro d'Inscription du Candidat", 1,1)
-	;;;NumÃ©ro du Candidat - Fin====================================================================================
+	GUICtrlSetTip($GUI_NumeroCandidat, "Veuillez vérifier ce numéro avant de commencer la récupération.", "Numéro d'Inscription du Candidat", 1,1)
+	;;;Numéro du Candidat - Fin====================================================================================
 
-	;;;MatiÃ¨re - DÃ©but==================================================================================
+	;;;Matière - Début==================================================================================
 	;;;========Header============
 	$Top_Header = $GUI_MARGE
 	$Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader / 2, $GUI_HEADER_HAUTEUR + 2 * $GUI_MARGE + $GUI_Hateur_Label + 2 * $GUI_MARGE + 1)
 	GUICtrlSetColor($Header, 0x696A65)
 	GUICtrlSetState($Header, $GUI_DISABLE)
-	$Text = GUICtrlCreateLabel("MatiÃ¨re :", $Left_Header + $WidthHeader / 2 + $GUI_MARGE, $Top_Header + 3, ($WidthHeader - 2 * $GUI_MARGE)/2, $GUI_HEADER_HAUTEUR - 6)
+	$Text = GUICtrlCreateLabel("Matière :", $Left_Header + $WidthHeader / 2 + $GUI_MARGE, $Top_Header + 3, ($WidthHeader - 2 * $GUI_MARGE)/2, $GUI_HEADER_HAUTEUR - 6)
 	GUICtrlSetColor($Text, $GUI_COLOR_CENTER_HEADERS_TEXT)
 	GUICtrlSetBkColor($Text, $GUI_BKCOLOR_TRANSPARENT)
-	GUICtrlSetTip($Text, "ðŸ•® Info/Prog." & @CRLF & "ðŸ•® STI/TIC.", "ðŸ“š MatiÃ¨re:", 1,1)
+	GUICtrlSetTip($Text, "?? Info/Prog." & @CRLF & "?? STI/TIC.", "?? Matière:", 1,1)
 	;;;========Content============
 	Local $TmpTop = $Top_Header + $GUI_HEADER_HAUTEUR + $GUI_MARGE / 2
 	Local $TmpLeft = $Left_Header + $WidthHeader / 2 + $GUI_MARGE
-	Global $lblMatiere = GUICtrlCreateLabel("MatiÃ¨re...", $TmpLeft, $TmpTop, $WidthHeader / 2 - 2 * $GUI_MARGE, $GUI_HEADER_HAUTEUR + 10, BitOR($SS_CENTER, $SS_CENTERIMAGE))
+	Global $lblMatiere = GUICtrlCreateLabel("Matière...", $TmpLeft, $TmpTop, $WidthHeader / 2 - 2 * $GUI_MARGE, $GUI_HEADER_HAUTEUR + 10, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor(-1, 0xFFFFFF)
 	GUICtrlSetFont(-1, 16, 100, 4, "Segoe UI Light")
-	GUICtrlSetTip($lblMatiere, "Cliquez ici pour Actualiser tout.", "ðŸ”ƒ Actualiser.", 0,1)
+	GUICtrlSetTip($lblMatiere, "Cliquez ici pour Actualiser tout.", "?? Actualiser.", 0,1)
 
-	;;;***** MatiÃ¨re Info || Prog
+	;;;***** Matière Info || Prog
 	$TmpTop = $TmpTop + $GUI_HEADER_HAUTEUR + 2 * $GUI_MARGE
 	$TmpLeft = $Left_Header + $WidthHeader / 2 + $GUI_MARGE + $GUI_MARGE + $GUI_MARGE
 	Global $rInfoProg = GUICtrlCreateRadio("", $TmpLeft, $TmpTop, 10, 20) ;Bouton Radio Sc./M./Tech.
 	Global $tInfoProg = GUICtrlCreateLabel("Info/Prog", $TmpLeft + 15, $TmpTop + 3, 65, 20)
 	GUICtrlSetColor(-1, 0xEEEEEE)
-	GUICtrlSetTip($rInfoProg, "ðŸ•® Algorithmique et programmation pour la section SI, " & @CRLF & "ðŸ•® Informatique pour les autres sections.", "MatiÃ¨re:", 1,1)
-	GUICtrlSetTip($tInfoProg, "ðŸ•® Algorithmique et programmation pour la section SI, " & @CRLF & "ðŸ•® Informatique pour les autres sections.", "MatiÃ¨re:", 1,1)
+	GUICtrlSetTip($rInfoProg, "?? Algorithmique et programmation pour la section SI, " & @CRLF & "?? Informatique pour les autres sections.", "Matière:", 1,1)
+	GUICtrlSetTip($tInfoProg, "?? Algorithmique et programmation pour la section SI, " & @CRLF & "?? Informatique pour les autres sections.", "Matière:", 1,1)
 
 
-	;;;***** MatiÃ¨re Tic
+	;;;***** Matière Tic
 	$TmpLeft = $TmpLeft + $WidthHeader / 4
 	Global $rTic = GUICtrlCreateRadio("", $TmpLeft, $TmpTop, 10, 20) ;Bouton Radio Sc./M./Tech.
 	Global $tTic = GUICtrlCreateLabel("STI/TIC", $TmpLeft + 15, $TmpTop + 3, 35, 20)
 	GUICtrlSetColor(-1, 0xEEEEEE)
-	GUICtrlSetTip($rTic, "ðŸ•® STI: SystÃ¨mes & Technologies Informatiques (Nouveau RÃ©gime)" & @CRLF& "ðŸ•® TIC: Technologies de lâ€™Information et de la Communication (Ancien RÃ©gime)", "MatiÃ¨re:", 1,1)
-	GUICtrlSetTip($tTic, "ðŸ•® STI: SystÃ¨mes & Technologies Informatiques (Nouveau RÃ©gime)" & @CRLF& "ðŸ•® TIC: Technologies de lâ€™Information et de la Communication (Ancien RÃ©gime)", "MatiÃ¨re:", 1,1)
+	GUICtrlSetTip($rTic, "?? STI: Systèmes & Technologies Informatiques (Nouveau Régime)" & @CRLF& "?? TIC: Technologies de l’Information et de la Communication (Ancien Régime)", "Matière:", 1,1)
+	GUICtrlSetTip($tTic, "?? STI: Systèmes & Technologies Informatiques (Nouveau Régime)" & @CRLF& "?? TIC: Technologies de l’Information et de la Communication (Ancien Régime)", "Matière:", 1,1)
 ;~ 	GUICtrlSetState($rTic, $GUI_DISABLE) ;Voir aussi _InitialParams
 ;~ 	GUICtrlSetState($tTic, $GUI_DISABLE) ;Voir aussi _InitialParams
 
 
-	;;;MatiÃ¨re - Fin====================================================================================
+	;;;Matière - Fin====================================================================================
 
-	;;;Contenu des Dossiers Bac*2* - DÃ©but=============================================================================================
+	;;;Contenu des Dossiers Bac*2* - Début=============================================================================================
 	;;;========Header============
 	$Top_Header = $Top_Header + $GUI_HEADER_HAUTEUR + 2 * $GUI_MARGE + $GUI_Hateur_Label + 2 * $GUI_MARGE
 	$Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $GUI_HEADER_HAUTEUR)
@@ -779,14 +779,14 @@ Func _CreateGui()
 	Local $TmpListTop = $Top_Header + $GUI_HEADER_HAUTEUR + $GUI_MARGE
 	Local $TmpListWidth = $WidthHeader - 2 * $GUI_MARGE
 	Local $TmpListHeight = 125 - 2 * $GUI_MARGE
-	Global $GUI_AfficherLeContenuDesDossiersBac = GUICtrlCreateListView("Dossiers & Fichiers                   |Taille|[CrÃ©Ã© Ã ]  [Modif. Ã ]|FullPath", $TmpListLeft, $TmpListTop, $TmpListWidth, $TmpListHeight, $LVS_REPORT, BitOR($LVS_EX_GRIDLINES, $LVS_EX_FULLROWSELECT))
+	Global $GUI_AfficherLeContenuDesDossiersBac = GUICtrlCreateListView("Dossiers & Fichiers                   |Taille|[Créé à]  [Modif. à]|FullPath", $TmpListLeft, $TmpListTop, $TmpListWidth, $TmpListHeight, $LVS_REPORT, BitOR($LVS_EX_GRIDLINES, $LVS_EX_FULLROWSELECT))
 	_GUICtrlListView_SetColumnWidth($GUI_AfficherLeContenuDesDossiersBac, 0, 185)
 	_GUICtrlListView_SetColumnWidth($GUI_AfficherLeContenuDesDossiersBac, 1, 40)
 	_GUICtrlListView_HideColumn($GUI_AfficherLeContenuDesDossiersBac, 3) ;Hide FullPath column
 	;;;Contenu des Dossiers Bac*20* - Fin=============================================================================================
 
 
-	;;;Contenu des Autres Dossiers  - DÃ©but=============================================================================================
+	;;;Contenu des Autres Dossiers  - Début=============================================================================================
 	;;;========Header============
 	$Top_Header = $TmpListTop + $TmpListHeight + 1.5 * $GUI_MARGE
 	$Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $GUI_HEADER_HAUTEUR)
@@ -800,13 +800,13 @@ Func _CreateGui()
 	Local $TmpListTop = $Top_Header + $GUI_HEADER_HAUTEUR + $GUI_MARGE
 	Local $TmpListWidth = $WidthHeader - 2 * $GUI_MARGE
 	Local $TmpListHeight = 125 - 2 * $GUI_MARGE
-	Global $GUI_AfficherLeContenuDesAutresDossiers = GUICtrlCreateListView("Dossiers & Fichiers                   |Taille|[CrÃ©Ã© Ã ]  [Modif. Ã ]|FullPath", $TmpListLeft, $TmpListTop, $TmpListWidth, $TmpListHeight, $LVS_REPORT, BitOR($LVS_EX_GRIDLINES, $LVS_EX_FULLROWSELECT))
+	Global $GUI_AfficherLeContenuDesAutresDossiers = GUICtrlCreateListView("Dossiers & Fichiers                   |Taille|[Créé à]  [Modif. à]|FullPath", $TmpListLeft, $TmpListTop, $TmpListWidth, $TmpListHeight, $LVS_REPORT, BitOR($LVS_EX_GRIDLINES, $LVS_EX_FULLROWSELECT))
 	_GUICtrlListView_SetColumnWidth($GUI_AfficherLeContenuDesAutresDossiers, 0, 185)
 	_GUICtrlListView_SetColumnWidth($GUI_AfficherLeContenuDesAutresDossiers, 1, 40)
 	_GUICtrlListView_HideColumn($GUI_AfficherLeContenuDesAutresDossiers, 3)
 	;;;Contenu des Autres Dossiers  - Fin=============================================================================================
 
-	;;;Log  - DÃ©but=============================================================================================
+	;;;Log  - Début=============================================================================================
 	$TmpListLeft = $Left_Header + 1 ;+ $GUI_MARGE
 	$TmpListTop = $TmpListTop + $TmpListHeight + 1.5 * $GUI_MARGE ;$Top_Header; + $GUI_HEADER_HAUTEUR ;+ $GUI_MARGE
 	$TmpListWidth = $WidthHeader - 2 ;- 2 * $GUI_MARGE
@@ -814,8 +814,8 @@ Func _CreateGui()
 
 	Global $GUI_Log = _GUICtrlRichEdit_Create($hMainGUI, "", $TmpListLeft, $TmpListTop, $TmpListWidth, $TmpListHeight, BitOR($ES_MULTILINE, $ES_READONLY, $WS_VSCROLL, $WS_HSCROLL, $ES_AUTOVSCROLL))
 	Local $hToolTip = _GUIToolTip_Create(0, BitOR($_TT_ghTTDefaultStyle, $TTS_BALLOON)) ; default style tooltip
-	_GUIToolTip_AddTool($hToolTip, 0, "Journale des opÃ©rations (Double-clic pour l'ouvrir avec Wordpad)", $GUI_Log) ; Multiline ToolTip
-	;~ GUICtrlSetTip($GUI_Log, "ðŸ•® Double-clic pour ouvrir ce journal avec Wordpad", "ðŸ–¶ Journale des opÃ©rations", 0,1)
+	_GUIToolTip_AddTool($hToolTip, 0, "Journale des opérations (Double-clic pour l'ouvrir avec Wordpad)", $GUI_Log) ; Multiline ToolTip
+	;~ GUICtrlSetTip($GUI_Log, "?? Double-clic pour ouvrir ce journal avec Wordpad", "?? Journale des opérations", 0,1)
 	_GUICtrlRichEdit_SetEventMask($GUI_Log, $ENM_MOUSEEVENTS)
 	_GUICtrlRichEdit_SetBkColor($GUI_Log, 0x080808)
 	_GUICtrlRichEdit_SetSel($GUI_Log, 0, -1, True) ; select all
@@ -827,13 +827,13 @@ Func _CreateGui()
 	;;;Log  - Fin=============================================================================================
 
 
-	;;;Partie Ã  gauche  - DÃ©but=============================================================================================
+	;;;Partie à gauche  - Début=============================================================================================
 
 	Global $lblComputerID = GUICtrlCreateLabel(_GetUUID(), 1, 1, $GUI_LARGEUR_PARTIE - 4)
 	GUICtrlSetColor($lblComputerID, 0xFFFFFF)
 	GUICtrlSetBkColor($lblComputerID, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 8, 100, 0, "Segoe UI Light")
-	GUICtrlSetTip($lblComputerID, "L'Identifiant Unique de ce PC.", "ðŸ†” â—–" & GUICtrlRead($lblComputerID) & "â——", 0,1)
+	GUICtrlSetTip($lblComputerID, "L'Identifiant Unique de ce PC.", "?? ?" & GUICtrlRead($lblComputerID) & "?", 0,1)
 
 	Local $TmpButtonWidth = $GUI_LARGEUR_PARTIE - 4 * $GUI_MARGE ; * 2/3
 	Local $TmpButtonHeight = $GUI_HEADER_HAUTEUR * 2
@@ -841,15 +841,15 @@ Func _CreateGui()
 	GUICtrlSetColor($lblBac, 0xFFFFFF)
 	GUICtrlSetBkColor($lblBac, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 18, 100, 4, "Segoe UI Light")
-	GUICtrlSetTip($lblBac, "Pour les matiÃ¨res Informatique & Algorithmique et programmation", "Dossier de travail du Candidat", 1,1)
+	GUICtrlSetTip($lblBac, "Pour les matières Informatique & Algorithmique et programmation", "Dossier de travail du Candidat", 1,1)
 
 	Local $TmpButtonWidth = $GUI_LARGEUR_PARTIE - 4 * $GUI_MARGE ; * 2/3
 	Local $TmpButtonHeight = $GUI_HEADER_HAUTEUR * 2
-	Global $bRecuperer = GUICtrlCreateButton("RÃ©cupÃ©rer", $GUI_LARGEUR_PARTIE / 2 - $TmpButtonWidth / 2, $TmpButtonHeight + 2 * $GUI_MARGE, $TmpButtonWidth, $TmpButtonHeight)
+	Global $bRecuperer = GUICtrlCreateButton("Récupérer", $GUI_LARGEUR_PARTIE / 2 - $TmpButtonWidth / 2, $TmpButtonHeight + 2 * $GUI_MARGE, $TmpButtonWidth, $TmpButtonHeight)
 	GUICtrlSetColor(-1, 0xffffff)
 	GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
 	GUICtrlSetFont(-1, 10)
-	GUICtrlSetTip($bRecuperer, @CRLF & "Cette commande permet de:" & @CRLF 	& @CRLF & "â¶ Sauvegarder le travail du candidat vers un dossier verrouillÃ© sur ce PC." & @CRLF & "â· Copier les dossiers & fichiers du candidat vers la clÃ© USB." & @CRLF & "â¸ Supprimer les travaux du candidat, pour les matiÃ¨res Info & Prog.", " ðŸ’¾ Copier les fichiers du candidat vers la clÃ© USB", 0,1)
+	GUICtrlSetTip($bRecuperer, @CRLF & "Cette commande permet de:" & @CRLF 	& @CRLF & "? Sauvegarder le travail du candidat vers un dossier verrouillé sur ce PC." & @CRLF & "? Copier les dossiers & fichiers du candidat vers la clé USB." & @CRLF & "? Supprimer les travaux du candidat, pour les matières Info & Prog.", " ?? Copier les fichiers du candidat vers la clé USB", 0,1)
 
 	$Top_Header = 4 * $GUI_MARGE + 2 * $TmpButtonHeight
 	$Left_Header = $GUI_MARGE
@@ -863,17 +863,17 @@ Func _CreateGui()
 	GUICtrlSetColor($Header, 0x66c7fc)
 	GUICtrlSetState($Header, $GUI_DISABLE)
 
-	$Text = GUICtrlCreateLabel("Dossiers RÃ©cupÃ©rÃ©s", $Left_Header + $GUI_MARGE, $Top_Header + 3, $WidthHeader - 2 * $GUI_MARGE, $GUI_HEADER_HAUTEUR, BitOR($SS_CENTER, $SS_CENTERIMAGE))
+	$Text = GUICtrlCreateLabel("Dossiers Récupérés", $Left_Header + $GUI_MARGE, $Top_Header + 3, $WidthHeader - 2 * $GUI_MARGE, $GUI_HEADER_HAUTEUR, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor($Text, 0xFFFFFF)
 	GUICtrlSetBkColor($Text, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 9.5, 500)
-	GUICtrlSetTip($Text, "Veuillez crÃ©er un dossier pour chaque candidat absent, et y mettre un sous-dossier intitulÃ© â—–Absentâ——", "ðŸ“‚ Dossiers rÃ©cupÃ©rÃ©s", 0,1)
+	GUICtrlSetTip($Text, "Veuillez créer un dossier pour chaque candidat absent, et y mettre un sous-dossier intitulé ?Absent?", "?? Dossiers récupérés", 0,1)
 
 	Global $TextDossiersRecuperes = GUICtrlCreateLabel("", $Left_Header + $GUI_MARGE, $Top_Header + $GUI_HEADER_HAUTEUR + $GUI_MARGE + 6, $WidthHeader - 2 * $GUI_MARGE, $GUI_HAUTEUR - 310)
 	GUICtrlSetColor(-1, 0xFFFFFF)
 	GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 10, 200)
-	GUICtrlSetTip($TextDossiersRecuperes, "Veuillez crÃ©er un dossier pour chaque candidat absent, et y mettre un sous-dossier intitulÃ© â—–Absentâ——", "ðŸ“‚ Dossiers rÃ©cupÃ©rÃ©s", 0,1)
+	GUICtrlSetTip($TextDossiersRecuperes, "Veuillez créer un dossier pour chaque candidat absent, et y mettre un sous-dossier intitulé ?Absent?", "?? Dossiers récupérés", 0,1)
 
 	$Top_Header = $GUI_HAUTEUR - 100 - $GUI_MARGE
 	$Left_Header = $GUI_MARGE
@@ -888,40 +888,40 @@ Func _CreateGui()
 	GUICtrlSetBkColor($TextApps_Text, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 9.5, 500)
 	GUICtrlSetState($TextApps_Text, $GUI_HIDE)
-	GUICtrlSetTip(-1, @CRLF & "âŒ Veuillez ð„ðð‘ð„ð†ðˆð’ð“ð‘ð„ð‘  le travail ð€ð•ð€ðð“ de quitter ces applications." & @CRLF & @CRLF & "âš  Certaines applications (VSCode, Sublime Text...) ne demandent pas de confirmation de fermeture," & @CRLF & "mÃªme si des fichiers ne sont pas encore enregistrÃ©s:", "ðŸ–¥ Applications Ã  fermer", 0,1)
+	GUICtrlSetTip(-1, @CRLF & "? Veuillez ??????????????????????  le travail ?????????? de quitter ces applications." & @CRLF & @CRLF & "? Certaines applications (VSCode, Sublime Text...) ne demandent pas de confirmation de fermeture," & @CRLF & "même si des fichiers ne sont pas encore enregistrés:", "?? Applications à fermer", 0,1)
 
 	Global $TextApps = GUICtrlCreateLabel("", $Left_Header + $GUI_MARGE, $Top_Header + $GUI_HEADER_HAUTEUR + $GUI_MARGE + 6, $WidthHeader - 2 * $GUI_MARGE, 100 - $GUI_HEADER_HAUTEUR - 2 * $GUI_MARGE)
 	GUICtrlSetColor(-1, 0xFFFFFF)
 	GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 9)
 	GUICtrlSetState($TextApps, $GUI_HIDE)
-	GUICtrlSetTip(-1, @CRLF & "âŒ Veuillez ð„ðð‘ð„ð†ðˆð’ð“ð‘ð„ð‘  le travail ð€ð•ð€ðð“ de quitter ces applications." & @CRLF & @CRLF & "âš  Certaines applications (VSCode, Sublime Text...) ne demandent pas de confirmation de fermeture," & @CRLF & "mÃªme si des fichiers ne sont pas encore enregistrÃ©s:", "ðŸ–¥ Applications Ã  fermer", 0,1)
-	;;;Partie Ã  gauche  - Fin=============================================================================================
+	GUICtrlSetTip(-1, @CRLF & "? Veuillez ??????????????????????  le travail ?????????? de quitter ces applications." & @CRLF & @CRLF & "? Certaines applications (VSCode, Sublime Text...) ne demandent pas de confirmation de fermeture," & @CRLF & "même si des fichiers ne sont pas encore enregistrés:", "?? Applications à fermer", 0,1)
+	;;;Partie à gauche  - Fin=============================================================================================
 
-	;;;Partie Ã  Droite  - DÃ©but=============================================================================================
+	;;;Partie à Droite  - Début=============================================================================================
 	Local $GuiTmpLeft = 3 * $GUI_LARGEUR_PARTIE
 	Local $GuiTmpTop = $GUI_MARGE
 	Global $lblLabo = GUICtrlCreateLabel("", $GuiTmpLeft + $GUI_LARGEUR_PARTIE / 2 - $TmpButtonWidth / 2, $GuiTmpTop, $TmpButtonWidth, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor($lblLabo, 0xFFFFFF)
 	GUICtrlSetBkColor($lblLabo, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 18, 100, 4, "Segoe UI Light")
-	GUICtrlSetTip($lblLabo, " ", "ðŸ¢ Laboratoire d'Informatique", 0,1)
+	GUICtrlSetTip($lblLabo, " ", "?? Laboratoire d'Informatique", 0,1)
 
 	$GuiTmpTop = $GuiTmpTop + $GUI_MARGE + $TmpButtonHeight
 	Global $lblSeance = GUICtrlCreateLabel("", $GuiTmpLeft + $GUI_LARGEUR_PARTIE / 2 - $TmpButtonWidth / 2, $GuiTmpTop, $TmpButtonWidth, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor($lblSeance, 0xFFFFFF)
 	GUICtrlSetBkColor($lblSeance, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 18, 100, 4, "Segoe UI Light")
-	GUICtrlSetTip($lblSeance, " ", "NumÃ©ro de la SÃ©ance", 1,1)
+	GUICtrlSetTip($lblSeance, " ", "Numéro de la Séance", 1,1)
 
 
 	$GuiTmpLeft = ($GUI_LARGEUR_PARTIE / 2 - $TmpButtonWidth / 2) + 3 * $GUI_LARGEUR_PARTIE
 	$GuiTmpTop = $GuiTmpTop + $GUI_MARGE + $TmpButtonHeight
-	Global $bCreerSauvegarde = GUICtrlCreateButton("CrÃ©er Sauvegarde sur PC", $GuiTmpLeft, $GuiTmpTop, $TmpButtonWidth, $TmpButtonHeight)
+	Global $bCreerSauvegarde = GUICtrlCreateButton("Créer Sauvegarde sur PC", $GuiTmpLeft, $GuiTmpTop, $TmpButtonWidth, $TmpButtonHeight)
 	GUICtrlSetColor(-1, 0xffffff)
 	GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
 	GUICtrlSetFont(-1, 10)
-	GUICtrlSetTip($bCreerSauvegarde, @CRLF & "Cette commande permet de:" & @CRLF & @CRLF & "â¶ Sauvegarder les travaux des candidats dans un dossier verrouillÃ©." & @CRLF & "â· GÃ©nÃ©rer un Ã©tat sur les travaux des candidats." & @CRLF & "â¸ GÃ©nÃ©rer la grille d'Ã©valuation correspondante (Excel).", "ðŸ“¤ Sauvegarder les travaux sur serveur/poste rÃ©serve", 0,1)
+	GUICtrlSetTip($bCreerSauvegarde, @CRLF & "Cette commande permet de:" & @CRLF & @CRLF & "? Sauvegarder les travaux des candidats dans un dossier verrouillé." & @CRLF & "? Générer un état sur les travaux des candidats." & @CRLF & "? Générer la grille d'évaluation correspondante (Excel).", "?? Sauvegarder les travaux sur serveur/poste réserve", 0,1)
 
 	$GuiTmpLeft = $GuiTmpLeft
 	$GuiTmpTop = $GuiTmpTop + $GUI_MARGE + $TmpButtonHeight
@@ -929,20 +929,20 @@ Func _CreateGui()
 	GUICtrlSetColor(-1, 0xffffff)
 	GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
 	GUICtrlSetFont(-1, 10)
-	GUICtrlSetTip($bOpenBackupFldr, @CRLF & " ", "ðŸ” Ouvrir le dossier de sauvegarde", 0,1)
+	GUICtrlSetTip($bOpenBackupFldr, @CRLF & " ", "?? Ouvrir le dossier de sauvegarde", 0,1)
 
 	Global $bAide = GUICtrlCreateButton("Aide", $GuiTmpLeft, $GUI_HAUTEUR - $GUI_MARGE - $TmpButtonHeight, $TmpButtonWidth, $TmpButtonHeight)
 	GUICtrlSetColor(-1, 0xffffff)
 	GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
 	GUICtrlSetFont(-1, 10)
-	GUICtrlSetTip($bAide, " ", "Aide & FonctionnalitÃ©s de BacCollector.", 1,1)
+	GUICtrlSetTip($bAide, " ", "Aide & Fonctionnalités de BacCollector.", 1,1)
 
-	Global $lblBacBackup = GUICtrlCreateLabel("BacBackup dÃ©tectÃ©", 3 * $GUI_LARGEUR_PARTIE + $GUI_LARGEUR_PARTIE / 2 - $TmpButtonWidth / 2, $GUI_HAUTEUR - 2 * $GUI_MARGE - 2 * $TmpButtonHeight, $TmpButtonWidth, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
+	Global $lblBacBackup = GUICtrlCreateLabel("BacBackup détecté", 3 * $GUI_LARGEUR_PARTIE + $GUI_LARGEUR_PARTIE / 2 - $TmpButtonWidth / 2, $GUI_HAUTEUR - 2 * $GUI_MARGE - 2 * $TmpButtonHeight, $TmpButtonWidth, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor($lblBacBackup, 0xFFFFFF)
 	GUICtrlSetBkColor($lblBacBackup, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 11, 100, 0, "Segoe UI Light")
 	GUICtrlSetState($lblBacBackup, $GUI_HIDE)
-	GUICtrlSetTip($lblBacBackup, "Cliquez ici pour ouvrir BacBackup", "ðŸ‘€ BacBackup surveille le PC.", 0,1)
+	GUICtrlSetTip($lblBacBackup, "Cliquez ici pour ouvrir BacBackup", "?? BacBackup surveille le PC.", 0,1)
 
 	;;; Cadre
 	$Top_Header = $GuiTmpTop + $TmpButtonHeight + 2 * $GUI_MARGE
@@ -951,16 +951,16 @@ Func _CreateGui()
 	$Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $GUI_HAUTEUR - $Top_Header - 2 * $GUI_MARGE - $TmpButtonHeight)
 	GUICtrlSetColor($Header, 0x66c7fc)
 	GUICtrlSetState($Header, $GUI_DISABLE)
-	;;; ParamÃ¨tres
+	;;; Paramètres
 	$Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $TmpHeaderHauteur)
 	GUICtrlSetColor($Header, 0x66c7fc)
 	GUICtrlSetState($Header, $GUI_DISABLE)
 
-	$Text = GUICtrlCreateLabel("ParamÃ¨tres", $Left_Header + $GUI_MARGE, $Top_Header + 3, $WidthHeader - 2 * $GUI_MARGE, $GUI_HEADER_HAUTEUR, BitOR($SS_CENTER, $SS_CENTERIMAGE))
+	$Text = GUICtrlCreateLabel("Paramètres", $Left_Header + $GUI_MARGE, $Top_Header + 3, $WidthHeader - 2 * $GUI_MARGE, $GUI_HEADER_HAUTEUR, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor($Text, 0xFFFFFF)
 	GUICtrlSetBkColor($Text, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 9.5, 500)
-	GUICtrlSetTip(-1, "Veuillez les mettres Ã  jour chaque sÃ©ance", "ParamÃ¨tres de BacCollector.", 1,1)
+	GUICtrlSetTip(-1, "Veuillez les mettres à jour chaque séance", "Paramètres de BacCollector.", 1,1)
 	;;; Bac:
 	Local $TmpLeft = $Left_Header + $GUI_MARGE
 	Local $TmpTop = $Top_Header + $TmpHeaderHauteur + $GUI_MARGE
@@ -970,26 +970,26 @@ Func _CreateGui()
 	GUICtrlSetColor($Text, 0xFFFFFF)
 	GUICtrlSetBkColor($Text, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 10, 550)
-	GUICtrlSetTip(-1, "Cette valeur est utilisÃ© dans le nom du dossier de travail des candidats", "BaccalaurÃ©at", 1,1)
+	GUICtrlSetTip(-1, "Cette valeur est utilisé dans le nom du dossier de travail des candidats", "Baccalauréat", 1,1)
 
 	Global $cBac = GUICtrlCreateCombo($ANNEES_BAC[0], $TmpLeft + $TmpWidth + $GUI_MARGE, $TmpTop, $TmpWidth + $GUI_MARGE, $TmpHeight, BitOR($GUI_SS_DEFAULT_COMBO, $CBS_DROPDOWNLIST))
 	GUICtrlSetData(-1, _ArrayToString ($ANNEES_BAC, "|", 1))
 	GUICtrlSetFont(-1, 9, 500)
-	GUICtrlSetTip(-1, "Cette valeur est utilisÃ© dans le nom du dossier de travail des candidats", "BaccalaurÃ©at", 1,1)
-	;;; SÃ©ance:
+	GUICtrlSetTip(-1, "Cette valeur est utilisé dans le nom du dossier de travail des candidats", "Baccalauréat", 1,1)
+	;;; Séance:
 	$TmpLeft = $Left_Header + $GUI_MARGE
 	$TmpTop = $TmpTop + $TmpHeight + $GUI_MARGE ;2 * $GUI_MARGE
 	$TmpHeight = $GUI_HEADER_HAUTEUR
-	$Text = GUICtrlCreateLabel("SÃ©ance :", $TmpLeft, $TmpTop + 4, $TmpWidth, $TmpHeight, $SS_RIGHT) ; , BitOR($SS_CENTER, $SS_CENTERIMAGE))
+	$Text = GUICtrlCreateLabel("Séance :", $TmpLeft, $TmpTop + 4, $TmpWidth, $TmpHeight, $SS_RIGHT) ; , BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor($Text, 0xFFFFFF)
 	GUICtrlSetBkColor($Text, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 10, 550)
-	GUICtrlSetTip(-1, "Valeur utilisÃ© dans la grille d'Ã©valuation gÃ©nÃ©rÃ©e par BacCollector", "NumÃ©ro de la sÃ©ance", 1,1)
+	GUICtrlSetTip(-1, "Valeur utilisé dans la grille d'évaluation générée par BacCollector", "Numéro de la séance", 1,1)
 
-	Global $cSeance = GUICtrlCreateCombo("SÃ©ance-1", $TmpLeft + $TmpWidth + $GUI_MARGE, $TmpTop, $TmpWidth + $GUI_MARGE, $TmpHeight, BitOR($GUI_SS_DEFAULT_COMBO, $CBS_DROPDOWNLIST))
-	GUICtrlSetData(-1, "SÃ©ance-2|SÃ©ance-3|SÃ©ance-4|SÃ©ance-5|SÃ©ance-6")
+	Global $cSeance = GUICtrlCreateCombo("Séance-1", $TmpLeft + $TmpWidth + $GUI_MARGE, $TmpTop, $TmpWidth + $GUI_MARGE, $TmpHeight, BitOR($GUI_SS_DEFAULT_COMBO, $CBS_DROPDOWNLIST))
+	GUICtrlSetData(-1, "Séance-2|Séance-3|Séance-4|Séance-5|Séance-6")
 	GUICtrlSetFont(-1, 9, 500)
-	GUICtrlSetTip(-1, "Valeur utilisÃ© dans la grille d'Ã©valuation gÃ©nÃ©rÃ©e par BacCollector", "NumÃ©ro de la sÃ©ance", 1,1)
+	GUICtrlSetTip(-1, "Valeur utilisé dans la grille d'évaluation générée par BacCollector", "Numéro de la séance", 1,1)
 
 	;;; Labo:
 	$TmpLeft = $Left_Header + $GUI_MARGE
@@ -999,51 +999,51 @@ Func _CreateGui()
 	GUICtrlSetColor($Text, 0xFFFFFF)
 	GUICtrlSetBkColor($Text, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 10, 550)
-	GUICtrlSetTip(-1, "Valeur utilisÃ© comme noms de la ClÃ© USB," & @CRLF & "et elle est utilisÃ©e dans la grille d'Ã©valuation gÃ©nÃ©rÃ©e par BacCollector", "Laboratoire", 1,1)
+	GUICtrlSetTip(-1, "Valeur utilisé comme noms de la Clé USB," & @CRLF & "et elle est utilisée dans la grille d'évaluation générée par BacCollector", "Laboratoire", 1,1)
 
 	Global $cLabo = GUICtrlCreateCombo("Labo-1", $TmpLeft + $TmpWidth + $GUI_MARGE, $TmpTop, $TmpWidth + $GUI_MARGE, $TmpHeight, BitOR($GUI_SS_DEFAULT_COMBO, $CBS_DROPDOWNLIST))
 	GUICtrlSetData(-1, "Labo-2|Labo-3|Labo-4|Labo-5|Labo-6")
 	GUICtrlSetFont(-1, 9, 500)
-	GUICtrlSetTip(-1, "Valeur utilisÃ© comme noms de la ClÃ© USB," & @CRLF & "et elle est utilisÃ©e dans la grille d'Ã©valuation gÃ©nÃ©rÃ©e par BacCollector", "Laboratoire", 1,1)
+	GUICtrlSetTip(-1, "Valeur utilisé comme noms de la Clé USB," & @CRLF & "et elle est utilisée dans la grille d'évaluation générée par BacCollector", "Laboratoire", 1,1)
 
 	GUICtrlSetState($bRecuperer, $GUI_FOCUS)
 
-	;;;Partie Ã  Droite  - Fin=============================================================================================
+	;;;Partie à Droite  - Fin=============================================================================================
 	GUISetState(@SW_SHOW, $hMainGUI)
 EndFunc   ;==>_CreateGui
 #EndRegion Function "_CreateGui" -----------------------------------------------------------------------------
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func Recuperer()
 	Local $NumeroCandidat = GUICtrlRead($GUI_NumeroCandidat)
 	_ClearGuiLog()
 	_Logging("______", 2, 0)
-	_Logging("DÃ©but de la rÃ©cupÃ©ration...", 4, 1)
+	_Logging("Début de la récupération...", 4, 1)
 
 	;;;_Logging($sText, $iSuccess = 1, $iGuiLog = 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>Info&Blanc, 5>Info&Red
 
 	;===========================================================
-;~ //DÃ©but VÃ©rification de la validitÃ© du format du numÃ©ro d'inscription du candidat
+;~ //Début Vérification de la validité du format du numéro d'inscription du candidat
 	If StringRegExp($NumeroCandidat, "([0-9]{6})", 0) = 0 Or $NumeroCandidat = "000000" Then
-		_Logging("""" & $NumeroCandidat & """ n'est pas un numÃ©ro d'inscription valide", 5, 1)
-		_Logging("RÃ©cupÃ©ration annulÃ©e", 5, 1)
+		_Logging("""" & $NumeroCandidat & """ n'est pas un numéro d'inscription valide", 5, 1)
+		_Logging("Récupération annulée", 5, 1)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, """" & $NumeroCandidat & """ n'est pas un numÃ©ro d'inscription valide", 0)
+		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, """" & $NumeroCandidat & """ n'est pas un numéro d'inscription valide", 0)
 		Return 0
 	EndIf
-;~ //Fin VÃ©rification de la validitÃ© du format du numÃ©ro d'inscription du candidat
+;~ //Fin Vérification de la validité du format du numéro d'inscription du candidat
 
 
-	_Logging("NumÃ©ro d'inscription du candidat """ & $NumeroCandidat & """", 2, 0)
-	_Logging("MatiÃ¨re """ & $Matiere & """", 2, 0)
-	_Logging("Lecture et mise Ã  jour des paramÃ¨tres de " & $PROG_TITLE, 2, 0)
+	_Logging("Numéro d'inscription du candidat """ & $NumeroCandidat & """", 2, 0)
+	_Logging("Matière """ & $Matiere & """", 2, 0)
+	_Logging("Lecture et mise à jour des paramètres de " & $PROG_TITLE, 2, 0)
 	_SaveParams()
 	_InitialParams()
 
 	;===========================================================
-;~    DÃ©but-VÃ©rification des logiciels Ouverts
+;~    Début-Vérification des logiciels Ouverts
 	_Logging("Recherche d'applications ouvertes...", 2, 0)
 	Local $sApps = _ListeDApplicationsOuvertes()
 ;~ 	WinActivate ($hMainGUI)
@@ -1052,14 +1052,14 @@ Func Recuperer()
 		_Logging("Applications ouvertes: " & StringReplace($sApps, @CRLF, @CRLF & $TmpSpaces), 5, 1)
 ;~ 		_Logging("Applications ouvertes: " & StringReplace($sApps, @CRLF, " "), 2, 0)
 		;;;_Logging($sText, $iSuccess = 1, $iGuiLog = 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>Info&Blanc, 5>Info&Red
-		_Logging("RÃ©cupÃ©ration annulÃ©e", 5, 1)
+		_Logging("Récupération annulée", 5, 1)
 		_Logging("______", 2, 0)
 		GUICtrlSetState($TextApps_Header, BitOR($GUI_SHOW, $GUI_DISABLE))
 		GUICtrlSetState($TextApps_Text, $GUI_SHOW)
 		GUICtrlSetState($TextApps, $GUI_SHOW)
 		GUICtrlSetData($TextApps, $sApps)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Avant de ""RÃ©cupÃ©rer"" le travail du candidat, veuillez fermer ce(s) logiciel(s) : " & @CRLF & @CRLF & $sApps, 0)
+		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Avant de ""Récupérer"" le travail du candidat, veuillez fermer ce(s) logiciel(s) : " & @CRLF & @CRLF & $sApps, 0)
 		Return 1
 	Else
 ;~ 		_Logging("Aucune application ouverte", 2, 0)
@@ -1068,7 +1068,7 @@ Func Recuperer()
 		GUICtrlSetState($TextApps, $GUI_HIDE)
 		GUICtrlSetData($TextApps, "")
 	EndIf
-;~    Fin-VÃ©rification de logiciels Ouverts
+;~    Fin-Vérification de logiciels Ouverts
 
 	If $Matiere = "InfoProg" Then
 		RecupererInfo($NumeroCandidat)
@@ -1078,13 +1078,13 @@ Func Recuperer()
 	Return 2
 EndFunc   ;==>Recuperer
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func RecupererInfo($NumeroCandidat)
 
 	;===========================================================
-;~    DÃ©but-VÃ©rification de l'existence d'un Dossier Bac*20*
+;~    Début-Vérification de l'existence d'un Dossier Bac*20*
 	SplashTextOn("Sans Titre", "Recherche des dossiers ""Bac*20*"" sous la racine ""C:""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	_Logging("Recherche des dossiers ""Bac*20*"" sous la racine ""C:""", 2, 0)
 	Local $Bac = DossiersBac() ;
@@ -1092,20 +1092,20 @@ Func RecupererInfo($NumeroCandidat)
 
 	If $Bac[0] = 0 Then
 		SplashOff()
-		_Logging("Aucun dossier ""Bac*20*"" trouvÃ© sous la racine ""C:""", 5, 1)
-;~ 		_Logging("Aucun dossier ""Bac*20*"" trouvÃ© sous la racine ""C:""", 2, 0)
-		_Logging("RÃ©cupÃ©ration annulÃ©e", 5, 1)
+		_Logging("Aucun dossier ""Bac*20*"" trouvé sous la racine ""C:""", 5, 1)
+;~ 		_Logging("Aucun dossier ""Bac*20*"" trouvé sous la racine ""C:""", 2, 0)
+		_Logging("Récupération annulée", 5, 1)
 		_Logging("______", 2, 0)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
 		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Aucun dossier ""Bac20xx"" sous la racine ""C:"" !!!" & @CRLF & "", 0)
 		Return
 	EndIf
-;~    Fin-VÃ©rification de l'existence d'un Dossier Bac*20*
+;~    Fin-Vérification de l'existence d'un Dossier Bac*20*
 
 	;===========================================================
-;~    DÃ©but-VÃ©rification si au moins l'un des dossier Bac*20* n'est pas vide (Vide=aucun Fichier)
-	SplashTextOn("Sans Titre", "VÃ©rification des dossiers ""Bac*20*"" sous la racine ""C:""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
-	_Logging("VÃ©rification du contenue du(es) dossier(s) : " & _ArrayToString($Bac, ", ", 1), 2, 0) ;
+;~    Début-Vérification si au moins l'un des dossier Bac*20* n'est pas vide (Vide=aucun Fichier)
+	SplashTextOn("Sans Titre", "Vérification des dossiers ""Bac*20*"" sous la racine ""C:""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	_Logging("Vérification du contenue du(es) dossier(s) : " & _ArrayToString($Bac, ", ", 1), 2, 0) ;
 
 	Local $NbDossiersBacNonVides = 0
 	Local $NomsDossiers = ""
@@ -1118,33 +1118,33 @@ Func RecupererInfo($NumeroCandidat)
 	Next
 ;~ 	WinActivate ($hMainGUI)
 	If Not $NbDossiersBacNonVides Then
-		_Logging("Aucun fichier trouvÃ© dans le(s) dossier(s) : " & _ArrayToString($Bac, ",", 1), 5, 1) ;
-		_Logging("RÃ©cupÃ©ration annulÃ©e", 5, 1)
+		_Logging("Aucun fichier trouvé dans le(s) dossier(s) : " & _ArrayToString($Bac, ",", 1), 5, 1) ;
+		_Logging("Récupération annulée", 5, 1)
 		_Logging("______", 2, 0)
 		SplashOff()
 		If $Bac[0] = 1 Then
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Le dossier " & $NomsDossiers & " ne contient aucun fichier Ã  RÃ©cupÃ©rer !!!" & @CRLF _
-					 & "Si le candidat n'a rien fait, ou qu'il a enregistrÃ© sont travail en dÃ©hors de ce dossier," & @CRLF _
-					 & "veuillez y crÃ©er un fichier texte contenant la remarque suivante: " & @CRLF _
+			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Le dossier " & $NomsDossiers & " ne contient aucun fichier à Récupérer !!!" & @CRLF _
+					 & "Si le candidat n'a rien fait, ou qu'il a enregistré sont travail en déhors de ce dossier," & @CRLF _
+					 & "veuillez y créer un fichier texte contenant la remarque suivante: " & @CRLF _
 					 & @TAB & """Le dossier est vide""" & @CRLF _
-					 & "puis cliquez Ã  nouveau sur le bouton ""RÃ©cupÃ©rer""", 0)
+					 & "puis cliquez à nouveau sur le bouton ""Récupérer""", 0)
 		Else
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Les dossiers " & $NomsDossiers & " ne contiennent aucun fichier Ã  RÃ©cupÃ©rer !!!" & @CRLF _
-					 & "Si le candidat n'a rien fait,  ou qu'il a enregistrÃ© sont travail en dÃ©hors de ces dossiers," & @CRLF _
-					 & "veuillez lui crÃ©er un fichier texte, dans l'un des dossiers ""Bac*20*"", contenant la remarque suivante: " & @CRLF _
+			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Les dossiers " & $NomsDossiers & " ne contiennent aucun fichier à Récupérer !!!" & @CRLF _
+					 & "Si le candidat n'a rien fait,  ou qu'il a enregistré sont travail en déhors de ces dossiers," & @CRLF _
+					 & "veuillez lui créer un fichier texte, dans l'un des dossiers ""Bac*20*"", contenant la remarque suivante: " & @CRLF _
 					 & @TAB & """Le dossier est vide""" & @CRLF _
-					 & "puis cliquez Ã  nouveau sur le bouton ""RÃ©cupÃ©rer""", 0)
+					 & "puis cliquez à nouveau sur le bouton ""Récupérer""", 0)
 		EndIf
 		Return
 	EndIf
-;~    Fin-VÃ©rification si au moins l'un des dossier Bac*20* n'est pas vide
+;~    Fin-Vérification si au moins l'un des dossier Bac*20* n'est pas vide
 
 	;===========================================================
-;~ //DÃ©but  VÃ©rif l'existence du dossier dans le Flash
-	_Logging("VÃ©rification si un dossier de mÃªme nom """ & $NumeroCandidat & """ existe dÃ©jÃ  dans la ClÃ© Usb", 2, 0) ;
-	SplashTextOn("Sans Titre", "VÃ©rification si un dossier de mÃªme nom """ & $NumeroCandidat & """ existe dÃ©jÃ  dans la ClÃ© Usb. " & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ //Début  Vérif l'existence du dossier dans le Flash
+	_Logging("Vérification si un dossier de même nom """ & $NumeroCandidat & """ existe déjà dans la Clé Usb", 2, 0) ;
+	SplashTextOn("Sans Titre", "Vérification si un dossier de même nom """ & $NumeroCandidat & """ existe déjà dans la Clé Usb. " & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	$ScriptDir = @ScriptDir
 	If StringRight($ScriptDir, 1) <> "\" Then
 		$ScriptDir = $ScriptDir & "\"
@@ -1153,20 +1153,20 @@ Func RecupererInfo($NumeroCandidat)
 	Global $Dest1FlashUSB = $ScriptDir & $NumeroCandidat
 	Global $Dest2LocalFldr = $Lecteur & $DossierSauve & "\" & $DossierBacCollector & "\" & $NumeroCandidat
 	If FileExists($Dest1FlashUSB) Then
-		_Logging("Un dossier de mÃªme nom """ & $NumeroCandidat & """ existe dÃ©jÃ  sur la ClÃ© USB!!", 5, 1) ;
-		_Logging("RÃ©cupÃ©ration annulÃ©e", 5, 1)
+		_Logging("Un dossier de même nom """ & $NumeroCandidat & """ existe déjà sur la Clé USB!!", 5, 1) ;
+		_Logging("Récupération annulée", 5, 1)
 		_Logging("______", 2, 0)
 		SplashOff()
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Un dossier de mÃªme nom """ & $NumeroCandidat & """ existe dÃ©jÃ  sur la ClÃ© USB!!", 0)
+		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Un dossier de même nom """ & $NumeroCandidat & """ existe déjà sur la Clé USB!!", 0)
 		Return
 	EndIf
-;~ //Fin  VÃ©rif l'existence du dossier dans le Flash
+;~ //Fin  Vérif l'existence du dossier dans le Flash
 
-	SplashTextOn("Sans Titre", "CrÃ©ation des dossiers de Sauvegarde." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	SplashTextOn("Sans Titre", "Création des dossiers de Sauvegarde." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 
 	;===========================================================
-	Local $Error0_CreationDossier = 1 ;CrÃ©ation du dossier dans le flash 1:Success 0:Failure
+	Local $Error0_CreationDossier = 1 ;Création du dossier dans le flash 1:Success 0:Failure
 	Local $Error1_CopyBacFldr = 1 ;
 	Local $Error2_DirRemove = 1 ;
 	Local $Error3_DirCreate = 1 ;
@@ -1176,21 +1176,21 @@ Func RecupererInfo($NumeroCandidat)
 
 	If $Error0_CreationDossier = 0 Then ;1:Success 0:Failure
 		SplashOff()
-		_Logging("CrÃ©ation du Dossier: " & $Dest1FlashUSB, $Error0_CreationDossier)
-		_Logging("RÃ©cupÃ©ration annulÃ©e", 5, 1)
+		_Logging("Création du Dossier: " & $Dest1FlashUSB, $Error0_CreationDossier)
+		_Logging("Récupération annulée", 5, 1)
 		_Logging("______", 2, 0)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Ã‰chec lors de la crÃ©taion du dosier sur la ClÃ© USB" & @CRLF _
-				 & "L'opÃ©ration de rÃ©cupÃ©ration est annulÃ©e" & @CRLF _
-				 & "Veuillez vÃ©rifier si la ClÃ© USB n'est pas pleine ou protÃ©gÃ©e en Ã©criture," & @CRLF _
+		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Échec lors de la crétaion du dosier sur la Clé USB" & @CRLF _
+				 & "L'opération de récupération est annulée" & @CRLF _
+				 & "Veuillez vérifier si la Clé USB n'est pas pleine ou protégée en écriture," & @CRLF _
 				 & "ou si un Antivirus bloque " & $PROG_TITLE & $PROG_VERSION & @CRLF _
-				 & "puis relancer l'opÃ©ration.", 0)
+				 & "puis relancer l'opération.", 0)
 		Return
 	EndIf
 	Local $iNberreurs = 0
 	;;;Log+++++++
-	_Logging("CrÃ©ation du Dossier: " & $Dest1FlashUSB)
-	_Logging("CrÃ©ation du Dossier: " & $Dest2LocalFldr, $TmpError) ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
+	_Logging("Création du Dossier: " & $Dest1FlashUSB)
+	_Logging("Création du Dossier: " & $Dest2LocalFldr, $TmpError) ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
 	$iNberreurs = $iNberreurs - ($TmpError - 1)
 	;;;Log+++++++
 	SplashOff()
@@ -1199,7 +1199,7 @@ Func RecupererInfo($NumeroCandidat)
 	For $i = 1 To $Bac[0]
 
 ;~ 		SplashTextOn("Sans Titre", "Copie du dossier """ & $Bac[$i] & """." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
-		ProgressSet(Round($i / $Bac[0] * 100), "[" & Round($i / $Bac[0] * 100) & "%] " & "VÃ©rif. du dossier : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
+		ProgressSet(Round($i / $Bac[0] * 100), "[" & Round($i / $Bac[0] * 100) & "%] " & "Vérif. du dossier : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
 		$Error1_CopyBacFldr = DirCopy($Bac[$i], $Dest1FlashUSB & StringTrimLeft($Bac[$i], 2), $FC_OVERWRITE)
 		$TmpError = DirCopy($Bac[$i], $Dest2LocalFldr & StringTrimLeft($Bac[$i], 2), $FC_OVERWRITE)
 
@@ -1208,11 +1208,11 @@ Func RecupererInfo($NumeroCandidat)
 
 			ProgressOff()
 			_Logging("Copie de """ & $Bac[$i] & """ vers " & $Dest2LocalFldr, $Error1_CopyBacFldr)
-			_Logging("RÃ©cupÃ©ration annulÃ©e", 5, 1)
+			_Logging("Récupération annulée", 5, 1)
 			_Logging("______", 2, 0)
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Ã‰chec lors de la copie du dossier """ & $Bac[$i] & """" & @CRLF _
-					 & "L'opÃ©ration de sauvegarde est annulÃ©e", 0)
+			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Échec lors de la copie du dossier """ & $Bac[$i] & """" & @CRLF _
+					 & "L'opération de sauvegarde est annulée", 0)
 			Return
 		EndIf
 
@@ -1238,46 +1238,46 @@ Func RecupererInfo($NumeroCandidat)
 	ProgressOff()
 
 	Local $Bac20xx = 'C:\Bac' & GUICtrlRead($cBac)
-	SplashTextOn("Sans Titre", "CrÃ©ation du Dossier : """ & $Bac20xx & """" & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	SplashTextOn("Sans Titre", "Création du Dossier : """ & $Bac20xx & """" & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 
 	$Error3_DirCreate = DirCreate($Bac20xx) ;----------------
 	;;;Log+++++++
-	_Logging("CrÃ©ation du Dossier : """ & $Bac20xx & """", $Error3_DirCreate) ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
+	_Logging("Création du Dossier : """ & $Bac20xx & """", $Error3_DirCreate) ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
 	$iNberreurs = $iNberreurs - ($Error3_DirCreate - 1)
 	;;;Log+++++++
 	SplashTextOn("Sans Titre", "Recherche de BacBackup." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	If _NouvelleSessionBacBackup() Then
-		_Logging("CrÃ©ation d'un dossion pour une nouvelle session pour BacBackup") ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
+		_Logging("Création d'un dossion pour une nouvelle session pour BacBackup") ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
 	EndIf
 
 	SplashOff()
 	If $iNberreurs = 0 Then
 		;;;_Logging($sText, $iSuccess = 1, $iGuiLog = 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green
-		_Logging("RÃ©cupÃ©ration terminÃ©e  avec succÃ¨s", 3, 1)
+		_Logging("Récupération terminée  avec succès", 3, 1)
 		_Logging("______", 2, 0)
 		_ExtMsgBoxSet(1, 0, $GUI_COLOR_CENTER, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La rÃ©cupÃ©ration du travail du candidat a Ã©tÃ© effectuÃ©e avec succÃ¨s!", 0)
+		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La récupération du travail du candidat a été effectuée avec succès!", 0)
 
 	ElseIf $iNberreurs = 1 Then
-		_Logging("RÃ©cupÃ©ration terminÃ©e, avec une erreur non critique", 2, 1)
+		_Logging("Récupération terminée, avec une erreur non critique", 2, 1)
 		_Logging("______", 2, 0)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La rÃ©cupÃ©ration du travail du candidat est terminÃ©e." & @CRLF _
-				 & "Une erreur non critique est produite lors de cette opÃ©ration." & @CRLF _
-				 & "Veuillez lire le log et prendre les mesures nÃ©cessaires.", 0)
+		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La récupération du travail du candidat est terminée." & @CRLF _
+				 & "Une erreur non critique est produite lors de cette opération." & @CRLF _
+				 & "Veuillez lire le log et prendre les mesures nécessaires.", 0)
 	Else
-		_Logging("RÃ©cupÃ©ration terminÃ©e, avec " & $iNberreurs & " erreurs non critiques", 2, 1)
+		_Logging("Récupération terminée, avec " & $iNberreurs & " erreurs non critiques", 2, 1)
 		_Logging("______", 2, 0)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La rÃ©cupÃ©ration du travail du candidat est terminÃ©e." & @CRLF _
-				 & $iNberreurs & " erreurs non critiques sont produites lors de cette opÃ©ration." & @CRLF _
-				 & "Veuillez lire le log et prendre les mesures nÃ©cessaires.", 0)
+		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La récupération du travail du candidat est terminée." & @CRLF _
+				 & $iNberreurs & " erreurs non critiques sont produites lors de cette opération." & @CRLF _
+				 & "Veuillez lire le log et prendre les mesures nécessaires.", 0)
 	EndIf
 
 EndFunc   ;==>RecupererInfo
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func RecupererTic($NumeroCandidat)
 
@@ -1285,10 +1285,10 @@ Func RecupererTic($NumeroCandidat)
 ;~ ;===========================================================
 ;~ ;=================== WWW ===================================
 ;~ ;===========================================================
-;~    DÃ©but-VÃ©rification de l'existence d'un Dossier WWW
+;~    Début-Vérification de l'existence d'un Dossier WWW
 	Local $YaSiteWeb = 1
-	SplashTextOn("Sans Titre", "Recherche des dossiers d'hÃ©bergement locaux d'Apache." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
-	_Logging("Recherche des dossiers d'hÃ©bergement locaux d'Apache.", 2, 0)
+	SplashTextOn("Sans Titre", "Recherche des dossiers d'hébergement locaux d'Apache." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	_Logging("Recherche des dossiers d'hébergement locaux d'Apache.", 2, 0)
 	Local $Www = DossiersEasyPHPwww() ;
 
 	Local $NbWebsiteNonVide = 0
@@ -1298,31 +1298,31 @@ Func RecupererTic($NumeroCandidat)
 		$YaSiteWeb = 0
 
 		SplashOff()
-		_Logging($PROG_TITLE & " ne trouve aucun dossier d'hÃ©bergement (www)", 5, 1)
-		_Logging("MsgBox: Poursuivre Ã  la recherche des BD (Oui/Non)?", 2, 0)
+		_Logging($PROG_TITLE & " ne trouve aucun dossier d'hébergement (www)", 5, 1)
+		_Logging("MsgBox: Poursuivre à la recherche des BD (Oui/Non)?", 2, 0)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "~Non|Oui", $PROG_TITLE & $PROG_VERSION, $PROG_TITLE & " ne trouve aucun dossier d'hÃ©bergement (www)" & @CRLF & @CRLF _
-				 & "Voulez-vous poursuivre Ã  la recherche et rÃ©cupÃ©ration de la base de donnÃ©es?" & @CRLF & @CRLF, 0)
+		Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "~Non|Oui", $PROG_TITLE & $PROG_VERSION, $PROG_TITLE & " ne trouve aucun dossier d'hébergement (www)" & @CRLF & @CRLF _
+				 & "Voulez-vous poursuivre à la recherche et récupération de la base de données?" & @CRLF & @CRLF, 0)
 		If $Rep = 1 Then
 			_Logging("Non", 2, 0)
-			_Logging("RÃ©cupÃ©ration annulÃ©e.", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+			_Logging("Récupération annulée.", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 			_Logging("______", 2, 0)
 			Return
 		EndIf
 		_Logging("Oui", 2, 0)
 	Else
-;~    Fin-VÃ©rification de l'existence d'un Dossier WWW
+;~    Fin-Vérification de l'existence d'un Dossier WWW
 
 		;===========================================================
-;~    DÃ©but-VÃ©rification si au moins l'un des dossier WWW n'est pas vide (Vide=aucun Fichier)
-;~ 		SplashTextOn("Sans Titre", "Scan des sites web dans les dossiers d'hÃ©bergement locaux d'Apache." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~    Début-Vérification si au moins l'un des dossier WWW n'est pas vide (Vide=aucun Fichier)
+;~ 		SplashTextOn("Sans Titre", "Scan des sites web dans les dossiers d'hébergement locaux d'Apache." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 		_Logging("Scan des sites web dans : " & _ArrayToString($Www, ", ", 1), 2, 0) ;
 		SplashOff()
 		ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des sites web...", "", Default, Default, 1)
 
 		For $i = 1 To $Www[0]
 			ProgressSet(Round($i / $Www[0] * 100), "[" & Round($i / $Www[0] * 100) & "%] ")
-			$TmpSites = _FileListToArrayRec($Www[$i], "*||", 2, 0, 2, 2) ;Dossiers, Non RÃ©c, 0, FullPath
+			$TmpSites = _FileListToArrayRec($Www[$i], "*||", 2, 0, 2, 2) ;Dossiers, Non Réc, 0, FullPath
 			If IsArray($TmpSites) Then
 				_ArrayDelete($TmpSites, _ArraySearch($TmpSites, $Www[$i] & "\" & "wampthemes"))
 				_ArrayDelete($TmpSites, _ArraySearch($TmpSites, $Www[$i] & "\" & "wamplangues"))
@@ -1352,17 +1352,17 @@ Func RecupererTic($NumeroCandidat)
 		If Not $NbWebsiteNonVide Then
 			$YaSiteWeb = 0
 
-			_Logging("Aucun site web valide trouvÃ© dans le(s) dossier(s) : " & _ArrayToString($Www, ",", 1), 5, 1) ;
-			_Logging("MsgBox: Poursuivre Ã  la recherche des BD (Oui/Non)?", 2, 0)
+			_Logging("Aucun site web valide trouvé dans le(s) dossier(s) : " & _ArrayToString($Www, ",", 1), 5, 1) ;
+			_Logging("MsgBox: Poursuivre à la recherche des BD (Oui/Non)?", 2, 0)
 ;~ 			SplashOff()
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-			Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "~Non|Oui", $PROG_TITLE & $PROG_VERSION, "Aucun site web valide trouvÃ© dans le(s) dossier(s) : " & _ArrayToString($Www, ",", 1) & @CRLF & @CRLF _
-					 & "Il se peut que le candidat a mis ses fichiers directement sous le dossier d'hÃ©bergement ('www' ou 'htdocs')," &  @CRLF
-					 & "si c'est le cas, veuillez lui crÃ©er un dossier et y mettre ses fichiers de travail, puis rÃ©essayer la rÃ©cupÃ©ration." &  @CRLF&  @CRLF
-					 & "Poursuivre la recherche et rÃ©cupÃ©ration de la base de donnÃ©es?" & @CRLF & @CRLF, 0)
+			Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "~Non|Oui", $PROG_TITLE & $PROG_VERSION, "Aucun site web valide trouvé dans le(s) dossier(s) : " & _ArrayToString($Www, ",", 1) & @CRLF & @CRLF _
+					 & "Il se peut que le candidat a mis ses fichiers directement sous le dossier d'hébergement ('www' ou 'htdocs')," &  @CRLF
+					 & "si c'est le cas, veuillez lui créer un dossier et y mettre ses fichiers de travail, puis réessayer la récupération." &  @CRLF&  @CRLF
+					 & "Poursuivre la recherche et récupération de la base de données?" & @CRLF & @CRLF, 0)
 			If $Rep = 1 Then
 				_Logging("Non", 2, 0)
-				_Logging("RÃ©cupÃ©ration annulÃ©e.", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+				_Logging("Récupération annulée.", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 				_Logging("______", 2, 0)
 				Return
 			EndIf
@@ -1370,13 +1370,13 @@ Func RecupererTic($NumeroCandidat)
 
 		EndIf
 	EndIf
-;~    Fin-VÃ©rification si au moins l'un des dossier WWW n'est pas vide (Vide=aucun Fichier)
+;~    Fin-Vérification si au moins l'un des dossier WWW n'est pas vide (Vide=aucun Fichier)
 
 
 ;~ ;===========================================================
 ;~ ;=================== DATA  =================================
 ;~ ;===========================================================
-;~    DÃ©but-VÃ©rification de l'existence d'un Dossier **DATA**
+;~    Début-Vérification de l'existence d'un Dossier **DATA**
 	Local $YaDatabase = 1
 	SplashTextOn("Sans Titre", "Recherche des dossiers de stockage de BD MySql." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	_Logging("Recherche des dossiers de stockage de BD MySql.", 2, 0)
@@ -1385,43 +1385,43 @@ Func RecupererTic($NumeroCandidat)
 
 	If IsArray($Data) = 0 Then
 		$YaDatabase = 0
-		_Logging($PROG_TITLE & " ne trouve pas le dossier de stockage des Bases de donnÃ©es MySql.", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
-		_Logging("MsgBox: Poursuivre la rÃ©cupÃ©ration (Oui/Non)?", 2, 0)
+		_Logging($PROG_TITLE & " ne trouve pas le dossier de stockage des Bases de données MySql.", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+		_Logging("MsgBox: Poursuivre la récupération (Oui/Non)?", 2, 0)
 		If $YaSiteWeb Then
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-			Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "~Non|Oui", $PROG_TITLE & $PROG_VERSION, $PROG_TITLE & " ne trouve pas le dossier de stockage des Bases de donnÃ©es MySql." & @CRLF & @CRLF _
-					 & "Voulez-vous poursuivre la rÃ©cupÃ©ration des sites web trouvÃ©s?" & @CRLF & @CRLF, 0)
+			Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "~Non|Oui", $PROG_TITLE & $PROG_VERSION, $PROG_TITLE & " ne trouve pas le dossier de stockage des Bases de données MySql." & @CRLF & @CRLF _
+					 & "Voulez-vous poursuivre la récupération des sites web trouvés?" & @CRLF & @CRLF, 0)
 			If $Rep = 1 Then
 				_Logging("Non", 2, 0)
-				_Logging("RÃ©cupÃ©ration annulÃ©e.", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+				_Logging("Récupération annulée.", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 				_Logging("______", 2, 0)
 				Return
 			EndIf
 			_Logging("Oui", 2, 0)
 		Else
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, $PROG_TITLE & " ne trouve pas le dossier de stockage des Bases de donnÃ©es MySql." & @CRLF & @CRLF _
-					 & "RÃ©cupÃ©ration annulÃ©e.", 0)
-			_Logging("RÃ©cupÃ©ration annulÃ©e.", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, $PROG_TITLE & " ne trouve pas le dossier de stockage des Bases de données MySql." & @CRLF & @CRLF _
+					 & "Récupération annulée.", 0)
+			_Logging("Récupération annulée.", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 			_Logging("______", 2, 0)
 			Return
 		EndIf
 
 	Else
-;~    Fin-VÃ©rification de l'existence d'un Dossier DATA
+;~    Fin-Vérification de l'existence d'un Dossier DATA
 
 		;===========================================================
-;~    DÃ©but-VÃ©rification si au moins l'un des dossier DATA n'est pas vide (Vide=aucun Fichier)
-;~ 		SplashTextOn("Sans Titre", "Scan des Bases de donnÃ©es dans les dossiers MySql." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~    Début-Vérification si au moins l'un des dossier DATA n'est pas vide (Vide=aucun Fichier)
+;~ 		SplashTextOn("Sans Titre", "Scan des Bases de données dans les dossiers MySql." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 		SplashOff()
-		_Logging("Scan des Bases de donnÃ©es dans les dossiers MySql dans : " & _ArrayToString($Data, ", ", 1), 2, 0) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+		_Logging("Scan des Bases de données dans les dossiers MySql dans : " & _ArrayToString($Data, ", ", 1), 2, 0) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 
 		ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des dossiers de BD MySql", "", Default, Default, 1)
 		Local $ListeBD[1] = [0]
 
 		For $i = 1 To $Data[0]
 			ProgressSet(Round($i / $Data[0] * 100), "[" & Round($i / $Data[0] * 100) & "%] ")
-			$TmpBD = _FileListToArrayRec($Data[$i], "*||phpmyadmin;mysql;performance_schema;sys;cdcol;webauth", 2, 0, 2, 2) ;Dossiers, Non RÃ©c, 0, FullPath
+			$TmpBD = _FileListToArrayRec($Data[$i], "*||phpmyadmin;mysql;performance_schema;sys;cdcol;webauth", 2, 0, 2, 2) ;Dossiers, Non Réc, 0, FullPath
 
 			If IsArray($TmpBD) Then
 				_ArrayDelete($TmpBD, _ArraySearch($TmpBD, $Data[$i] & "\" & "phpmyadmin"))
@@ -1436,7 +1436,7 @@ Func RecupererTic($NumeroCandidat)
 				_ArrayDelete($TmpBD, 0)
 				_ArrayAdd($ListeBD, $TmpBD) ;
 				;Ajout de ib0...
-				$TmpBD = _FileListToArrayRec($Data[$i], "ibdata*||", 1, 0, 0, 2) ;Fichier, Non RÃ©c, 0, FullPath
+				$TmpBD = _FileListToArrayRec($Data[$i], "ibdata*||", 1, 0, 0, 2) ;Fichier, Non Réc, 0, FullPath
 				If IsArray($TmpBD) Then
 					;Ajout des BD
 					$ListeBD[0] += $TmpBD[0]
@@ -1451,37 +1451,37 @@ Func RecupererTic($NumeroCandidat)
 		If IsArray($ListeBD) = 0 Then
 			$YaDatabase = 0
 			$iNberreurs &= 1
-			_Logging("Aucune base de donnÃ©es trouvÃ©e dans : " & _ArrayToString($Data, ", ", 1), 5, 1) ;
+			_Logging("Aucune base de données trouvée dans : " & _ArrayToString($Data, ", ", 1), 5, 1) ;
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
 			If $YaSiteWeb Then
-				_Logging("MsgBox: Poursuivre la rÃ©cupÃ©ration (Oui/Non)?", 2, 0)
-				Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "~Non|Oui", $PROG_TITLE & $PROG_VERSION, "Aucune base de donnÃ©es trouvÃ©e." & @CRLF & @CRLF _
-						 & "Voulez-vous poursuivre la rÃ©cupÃ©ration?" & @CRLF & @CRLF, 0)
+				_Logging("MsgBox: Poursuivre la récupération (Oui/Non)?", 2, 0)
+				Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "~Non|Oui", $PROG_TITLE & $PROG_VERSION, "Aucune base de données trouvée." & @CRLF & @CRLF _
+						 & "Voulez-vous poursuivre la récupération?" & @CRLF & @CRLF, 0)
 				If $Rep = 1 Then
 					_Logging("Non", 2, 0)
-					_Logging("RÃ©cupÃ©ration annulÃ©e.", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+					_Logging("Récupération annulée.", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 					_Logging("______", 2, 0)
 					Return
 				EndIf
 				_Logging("Oui", 2, 0)
 			Else
 				_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-				_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, $PROG_TITLE & " ne trouve pas le dossier de stockage des Bases de donnÃ©es MySql." & @CRLF & @CRLF _
-						 & "RÃ©cupÃ©ration annulÃ©e.", 0)
-				_Logging("RÃ©cupÃ©ration annulÃ©e.", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+				_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, $PROG_TITLE & " ne trouve pas le dossier de stockage des Bases de données MySql." & @CRLF & @CRLF _
+						 & "Récupération annulée.", 0)
+				_Logging("Récupération annulée.", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 				_Logging("______", 2, 0)
 				Return
 			EndIf
 		EndIf
-;~    Fin-VÃ©rification si au moins l'un des dossier ***DATA*** n'est pas vide (Vide=aucun Fichier)
+;~    Fin-Vérification si au moins l'un des dossier ***DATA*** n'est pas vide (Vide=aucun Fichier)
 	EndIf
 ;~ ;===========================================================
-;~ ;============VÃ©rif Dossier dans l'USB Drive ================
+;~ ;============Vérif Dossier dans l'USB Drive ================
 ;~ ;===========================================================
 
-;~ //DÃ©but  VÃ©rif l'existence du dossier dans le Flash
-	_Logging("VÃ©rification si un dossier de mÃªme nom """ & $NumeroCandidat & """ existe dÃ©jÃ  dans la ClÃ© Usb", 2, 0) ;
-	SplashTextOn("Sans Titre", "VÃ©rification si un dossier de mÃªme nom """ & $NumeroCandidat & """ existe dÃ©jÃ  dans la ClÃ© Usb. " & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ //Début  Vérif l'existence du dossier dans le Flash
+	_Logging("Vérification si un dossier de même nom """ & $NumeroCandidat & """ existe déjà dans la Clé Usb", 2, 0) ;
+	SplashTextOn("Sans Titre", "Vérification si un dossier de même nom """ & $NumeroCandidat & """ existe déjà dans la Clé Usb. " & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	$ScriptDir = @ScriptDir
 	If StringRight($ScriptDir, 1) <> "\" Then
 		$ScriptDir = $ScriptDir & "\"
@@ -1490,20 +1490,20 @@ Func RecupererTic($NumeroCandidat)
 	Global $Dest1FlashUSB = $ScriptDir & $NumeroCandidat
 	Global $Dest2LocalFldr = $Lecteur & $DossierSauve & "\" & $DossierBacCollector & "\" & $NumeroCandidat
 	If FileExists($Dest1FlashUSB) Then
-		_Logging("Un dossier de mÃªme nom """ & $NumeroCandidat & """ existe dÃ©jÃ  sur la ClÃ© USB!!", 5, 1) ;
-		_Logging("RÃ©cupÃ©ration annulÃ©e", 5, 1)
+		_Logging("Un dossier de même nom """ & $NumeroCandidat & """ existe déjà sur la Clé USB!!", 5, 1) ;
+		_Logging("Récupération annulée", 5, 1)
 		_Logging("______", 2, 0)
 		SplashOff()
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Un dossier de mÃªme nom """ & $NumeroCandidat & """ existe dÃ©jÃ  sur la ClÃ© USB!!", 0)
+		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Un dossier de même nom """ & $NumeroCandidat & """ existe déjà sur la Clé USB!!", 0)
 		Return
 	EndIf
-;~ //Fin  VÃ©rif l'existence du dossier dans le Flash
+;~ //Fin  Vérif l'existence du dossier dans le Flash
 
-	SplashTextOn("Sans Titre", "CrÃ©ation des dossiers de Sauvegarde." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	SplashTextOn("Sans Titre", "Création des dossiers de Sauvegarde." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 
 	;===========================================================
-	Local $Error0_CreationDossier = 1 ;CrÃ©ation du dossier dans le flash 1:Success 0:Failure
+	Local $Error0_CreationDossier = 1 ;Création du dossier dans le flash 1:Success 0:Failure
 	Local $Error1_CopyBacFldr = 1 ;
 	Local $Error2_DirRemove = 1 ;
 	Local $Error3_DirCreate = 1 ;
@@ -1513,20 +1513,20 @@ Func RecupererTic($NumeroCandidat)
 
 	If $Error0_CreationDossier = 0 Then ;1:Success 0:Failure
 		SplashOff()
-		_Logging("CrÃ©ation du Dossier: " & $Dest1FlashUSB, $Error0_CreationDossier)
-		_Logging("RÃ©cupÃ©ration annulÃ©e", 5, 1)
+		_Logging("Création du Dossier: " & $Dest1FlashUSB, $Error0_CreationDossier)
+		_Logging("Récupération annulée", 5, 1)
 		_Logging("______", 2, 0)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Ã‰chec lors de la crÃ©taion du dossier sur la ClÃ© USB" & @CRLF _
-				 & "L'opÃ©ration de rÃ©cupÃ©ration est annulÃ©e" & @CRLF _
-				 & "Veuillez vÃ©rifier si la ClÃ© USB n'est pas pleine ou protÃ©gÃ©e en Ã©criture," & @CRLF _
+		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Échec lors de la crétaion du dossier sur la Clé USB" & @CRLF _
+				 & "L'opération de récupération est annulée" & @CRLF _
+				 & "Veuillez vérifier si la Clé USB n'est pas pleine ou protégée en écriture," & @CRLF _
 				 & "ou si un Antivirus bloque " & $PROG_TITLE & $PROG_VERSION & @CRLF _
-				 & "puis relancer l'opÃ©ration.", 0)
+				 & "puis relancer l'opération.", 0)
 		Return
 	EndIf
 	;;;Log+++++++
-	_Logging("CrÃ©ation du Dossier: " & $Dest1FlashUSB)
-	_Logging("CrÃ©ation du Dossier: " & $Dest2LocalFldr, $TmpError) ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
+	_Logging("Création du Dossier: " & $Dest1FlashUSB)
+	_Logging("Création du Dossier: " & $Dest2LocalFldr, $TmpError) ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
 	$iNberreurs = $iNberreurs - ($TmpError - 1)
 	;;;Log+++++++
 	Local $KesPos, $KesFldr
@@ -1535,7 +1535,7 @@ Func RecupererTic($NumeroCandidat)
 ;~ ;===========================================================
 	SplashOff()
 ;~ 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des dossiers: [Bac*20*]", "", Default, Default, 1)
-;~ 	ProgressSet(Round($n/$Liste[0]*100), "[" & Round($n/$Liste[0]*100) & "%] " & "VÃ©rif. de : " & StringRegExpReplace($File_Name, "^.*\\", ""))
+;~ 	ProgressSet(Round($n/$Liste[0]*100), "[" & Round($n/$Liste[0]*100) & "%] " & "Vérif. de : " & StringRegExpReplace($File_Name, "^.*\\", ""))
 
 	If $YaSiteWeb Then
 		ProgressOn($PROG_TITLE & $PROG_VERSION, "Copie des sites web...", "", Default, Default, 1)
@@ -1557,11 +1557,11 @@ Func RecupererTic($NumeroCandidat)
 				ProgressOff()
 ;~ 				SplashOff()
 				_Logging("Copie du site """ & StringUpper(StringRegExpReplace($ListeSites[$i], "^.*\\", "")) & """ vers " & $Dest2LocalFldr & "\" & $KesFldr, $Error1_CopyBacFldr)
-				_Logging("RÃ©cupÃ©ration annulÃ©e", 5, 1)
+				_Logging("Récupération annulée", 5, 1)
 				_Logging("______", 2, 0)
 				_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-				_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Ã‰chec lors de la copie du dossier """ & $ListeSites[$i] & """" & @CRLF _
-						 & "L'opÃ©ration de sauvegarde est annulÃ©e", 0)
+				_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Échec lors de la copie du dossier """ & $ListeSites[$i] & """" & @CRLF _
+						 & "L'opération de sauvegarde est annulée", 0)
 				Return
 			EndIf
 			;;;Log+++++++
@@ -1573,10 +1573,10 @@ Func RecupererTic($NumeroCandidat)
 	EndIf
 
 ;~ ;===========================================================
-;~ ;============Copie des Bases de donnÃ©es     ================
+;~ ;============Copie des Bases de données     ================
 ;~ ;===========================================================
 	If $YaDatabase Then
-		ProgressOn($PROG_TITLE & $PROG_VERSION, "Copie des bases de donnÃ©es...", "", Default, Default, 1)
+		ProgressOn($PROG_TITLE & $PROG_VERSION, "Copie des bases de données...", "", Default, Default, 1)
 		For $i = 1 To $ListeBD[0]
 			$KesPos = StringInStr($ListeBD[$i], "\", 0, -1)
 			$KesFldr = StringTrimRight($ListeBD[$i], StringLen($ListeBD[$i]) - $KesPos + 1)
@@ -1586,7 +1586,7 @@ Func RecupererTic($NumeroCandidat)
 			$TmpError = DirCopy($ListeBD[$i], $Dest2LocalFldr & "\" & $KesFldr, $FC_OVERWRITE)
 
 			If FileGetAttrib($ListeBD[$i]) = 'D' Then
-				ProgressSet(Round($i / $ListeBD[0] * 100), "[" & Round($i / $ListeBD[0] * 100) & "%] " & "Base de donnÃ©es """ & StringUpper(StringRegExpReplace($ListeBD[$i], "^.*\\", "")) & """")
+				ProgressSet(Round($i / $ListeBD[0] * 100), "[" & Round($i / $ListeBD[0] * 100) & "%] " & "Base de données """ & StringUpper(StringRegExpReplace($ListeBD[$i], "^.*\\", "")) & """")
 ;~ 				SplashTextOn("Sans Titre", "Copie de la BD """ & StringUpper(StringRegExpReplace($ListeBD[$i], "^.*\\", "")) & """." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 				$Error1_CopyBacFldr = DirCopy($ListeBD[$i], $Dest1FlashUSB & "\" & $KesFldr, $FC_OVERWRITE)
 				$TmpError = DirCopy($ListeBD[$i], $Dest2LocalFldr & "\" & $KesFldr, $FC_OVERWRITE)
@@ -1601,11 +1601,11 @@ Func RecupererTic($NumeroCandidat)
 				ProgressOff()
 ;~ 				SplashOff()
 				_Logging("Copie de la BD """ & StringUpper(StringRegExpReplace($ListeBD[$i], "^.*\\", "")) & """ vers " & $Dest2LocalFldr, $Error1_CopyBacFldr)
-				_Logging("RÃ©cupÃ©ration annulÃ©e", 5, 1)
+				_Logging("Récupération annulée", 5, 1)
 				_Logging("______", 2, 0)
 				_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-				_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Ã‰chec lors de la copie du dossier """ & $ListeBD[$i] & """" & @CRLF _
-						 & "L'opÃ©ration de sauvegarde est annulÃ©e", 0)
+				_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Échec lors de la copie du dossier """ & $ListeBD[$i] & """" & @CRLF _
+						 & "L'opération de sauvegarde est annulée", 0)
 				Return
 			EndIf
 			;;;Log+++++++
@@ -1623,36 +1623,36 @@ Func RecupererTic($NumeroCandidat)
 
 	SplashTextOn("Sans Titre", "Recherche de BacBackup." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	If _NouvelleSessionBacBackup() Then
-		_Logging("CrÃ©ation d'un dossion pour une nouvelle session pour BacBackup") ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
+		_Logging("Création d'un dossion pour une nouvelle session pour BacBackup") ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
 	EndIf
 
 	SplashOff()
 	If $iNberreurs = 0 And $YaDatabase And $YaSiteWeb Then
 		;;;_Logging($sText, $iSuccess = 1, $iGuiLog = 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green
-		_Logging("RÃ©cupÃ©ration terminÃ©e  avec succÃ¨s", 3, 1)
+		_Logging("Récupération terminée  avec succès", 3, 1)
 		_Logging("______", 2, 0)
 		_ExtMsgBoxSet(1, 0, $GUI_COLOR_CENTER, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La rÃ©cupÃ©ration du travail du candidat a Ã©tÃ© effectuÃ©e avec succÃ¨s!" & @CRLF, 0)
+		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La récupération du travail du candidat a été effectuée avec succès!" & @CRLF, 0)
 
 	Else
-		_Logging("RÃ©cupÃ©ration terminÃ©e, avec " & $iNberreurs - ($YaDatabase - 1) - ($YaSiteWeb - 1) & " erreurs.", 2, 1)
+		_Logging("Récupération terminée, avec " & $iNberreurs - ($YaDatabase - 1) - ($YaSiteWeb - 1) & " erreurs.", 2, 1)
 		_Logging("______", 2, 0)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La rÃ©cupÃ©ration du travail du candidat est terminÃ©e." & @CRLF _
-				 & $iNberreurs - ($YaDatabase - 1) - ($YaSiteWeb - 1) & " erreurs sont produites lors de cette opÃ©ration." & @CRLF _
-				 & "Veuillez lire attentivement le log et prendre les mesures nÃ©cessaires." & @CRLF, 0)
+		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La récupération du travail du candidat est terminée." & @CRLF _
+				 & $iNberreurs - ($YaDatabase - 1) - ($YaSiteWeb - 1) & " erreurs sont produites lors de cette opération." & @CRLF _
+				 & "Veuillez lire attentivement le log et prendre les mesures nécessaires." & @CRLF, 0)
 	EndIf
 
 EndFunc   ;==>RecupererTic
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _AfficherLeContenuDesDossiersBac()
 ;~ 	SplashTextOn("Sans Titre", "Recherche des dossiers ""Bac*20*"" sous la racine ""C:""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des dossiers: [Bac*20*]", "", Default, Default, 1)
 	_GUICtrlListView_DeleteAllItems($GUI_AfficherLeContenuDesDossiersBac)
-	GUICtrlSetTip($GUI_AfficherLeContenuDesDossiersBac, "Double-clic pour afficher l'Ã©lÃ©ment dans l'Explorateur.", "Contenu des dossiers â—–Bac*2*â——", 1,1)
+	GUICtrlSetTip($GUI_AfficherLeContenuDesDossiersBac, "Double-clic pour afficher l'élément dans l'Explorateur.", "Contenu des dossiers ?Bac*2*?", 1,1)
 	Local $NombreDeFichiers = 0
 	Local $Bac = DossiersBac() ;
 	Local $Liste[1] = [0] ;
@@ -1668,12 +1668,12 @@ Func _AfficherLeContenuDesDossiersBac()
 			EndIf
 		Next
 	EndIf
-;~ _ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 	Local $TmpMsgForLogging = ""
 	If IsArray($Liste) Then
 		For $N = 1 To $Liste[0]
 			$File_Name = $Liste[$N]
-			ProgressSet(Round($N / ($Liste[0]) * 100), "[" & Round($N / ($Liste[0]) * 100) & "%] " & "VÃ©rif. de : " & StringRegExpReplace($File_Name, "^.*\\", ""))
+			ProgressSet(Round($N / ($Liste[0]) * 100), "[" & Round($N / ($Liste[0]) * 100) & "%] " & "Vérif. de : " & StringRegExpReplace($File_Name, "^.*\\", ""))
 			If FileGetAttrib($File_Name) = 'D' Then
 				If StringInStr(StringTrimLeft($File_Name, 3), "\") = 0 Then
 					$KesTmp = DirGetSize($File_Name, 1)
@@ -1703,28 +1703,28 @@ Func _AfficherLeContenuDesDossiersBac()
 ;~ 	SplashOff()
 EndFunc   ;==>_AfficherLeContenuDesDossiersBac
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _AfficherLeContenuDesDossiersTic()
 
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des dossiers ""www"", ""htdocs""...", "", Default, Default, 1)
-;~ 	SplashTextOn("Sans Titre", "Scan des dossiers d'hÃ©bergement locaux d'Apache." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 	SplashTextOn("Sans Titre", "Scan des dossiers d'hébergement locaux d'Apache." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 
 	;===================================================================
 	;======= Sites Web =================================================
 	;===================================================================
 	_GUICtrlListView_DeleteAllItems($GUI_AfficherLeContenuDesDossiersBac)
-	GUICtrlSetTip($GUI_AfficherLeContenuDesDossiersBac, "Double-clic pour afficher l'Ã©lÃ©ment dans l'Explorateur.", "Contenu des Dossiers d'hÃ©bergement des serveurs Web (www & htdocs...)", 1,1)
+	GUICtrlSetTip($GUI_AfficherLeContenuDesDossiersBac, "Double-clic pour afficher l'élément dans l'Explorateur.", "Contenu des Dossiers d'hébergement des serveurs Web (www & htdocs...)", 1,1)
 	Local $NombreDeFichiers = 0
 	Local $Www = DossiersEasyPHPwww() ;
 	Local $Liste[1] = [0] ;
 	Local $WebSiteName, $FileName, $WebSite_Full_Path
-;~ _ArrayDisplay($Bac, '$Bac 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($Bac, '$Bac 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 	If $Www[0] <> 0 Then
 		For $i = 1 To $Www[0]
 			ProgressSet(Round($i / $Www[0] * 100), "[" & Round($i / $Www[0] * 100) & "%]")
-			$Kes = _FileListToArrayRec($Www[$i], "*||", 2, 0, 2, 2) ;Dossiers, Non RÃ©c, 0, FullPath
+			$Kes = _FileListToArrayRec($Www[$i], "*||", 2, 0, 2, 2) ;Dossiers, Non Réc, 0, FullPath
 
 			If IsArray($Kes) Then
 				_ArrayDelete($Kes, _ArraySearch($Kes, $Www[$i] & "\" & "wampthemes"))
@@ -1743,18 +1743,19 @@ Func _AfficherLeContenuDesDossiersTic()
 			EndIf
 		Next
 	EndIf
-;~ _ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 	Local $TmpMsgForLogging = ""
 	If IsArray($Liste) Then
 		For $N = 1 To $Liste[0]
 			$WebSite_Full_Path = $Liste[$N]
 			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%]" & "Analyse du site web : " & StringRegExpReplace($WebSite_Full_Path, "^.*\\", ""))
-			$Kes = _FileListToArrayRec($WebSite_Full_Path, "*", 1, 1, 2, 1) ;Fichiers, RÃ©c, 2, Relative Path
+			$Kes = _FileListToArrayRec($WebSite_Full_Path, "*", 1, 1, 2, 1) ;Fichiers, Réc, 2, Relative Path
 
-			$File_t = FileGetTime($WebSite_Full_Path, 1) ; Creation Time
+			$File_t =
+			($WebSite_Full_Path, 1) ; Creation Time
 			$File_time = "[" & $File_t[3] & ":" & $File_t[4] & "] "
 			$WebSiteName = StringUpper(StringRegExpReplace($WebSite_Full_Path, "^.*\\", ""))
-;~ _ArrayDisplay($Kes, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($Kes, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 
 			If Not IsArray($Kes) Then
 				$item = GUICtrlCreateListViewItem("[" & $WebSiteName & "]" & "|" & "Site Web" & "|" & $File_time & " Site Web vide" & "|" & $WebSite_Full_Path, $GUI_AfficherLeContenuDesDossiersBac)
@@ -1765,7 +1766,7 @@ Func _AfficherLeContenuDesDossiersTic()
 				$TmpMsgForLogging &= @CRLF & """" & $WebSite_Full_Path & """" & "    (" & "Site Web" & "-" & $File_time & $Kes[0] & " fichier(s) )"
 				GUICtrlSetColor(-1, 0x0000FF)
 				For $i = 1 To $Kes[0]
-					ProgressSet(Round($i / $Kes[0] * 100), "[" & Round($i / $Kes[0] * 100) & "%] " & "VÃ©rif. de : " & StringRegExpReplace($Kes[$i], "^.*\\", ""))
+					ProgressSet(Round($i / $Kes[0] * 100), "[" & Round($i / $Kes[0] * 100) & "%] " & "Vérif. de : " & StringRegExpReplace($Kes[$i], "^.*\\", ""))
 					$File_t = FileGetTime($WebSite_Full_Path & "\" & $Kes[$i], 1) ; Creation Time
 					$File_time = "[" & $File_t[3] & ":" & $File_t[4] & "] "
 					$File_t = FileGetTime($WebSite_Full_Path & "\" & $Kes[$i], 0) ; Modif Time
@@ -1783,18 +1784,18 @@ Func _AfficherLeContenuDesDossiersTic()
 	If $TmpMsgForLogging <> "" Then _Logging("Liste des sites/fichiers web : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
 
 	;===================================================================
-	;======= Bases de DonnÃ©es ==========================================
+	;======= Bases de Données ==========================================
 	;===================================================================
-;~ 	SplashTextOn("Sans Titre", "Recherche des Bases de DonnÃ©es MySql." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
-	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des bases de donnÃ©es", "[0%] Veuillez patienter un moment, initialisation...", Default, Default, 1)
+;~ 	SplashTextOn("Sans Titre", "Recherche des Bases de Données MySql." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des bases de données", "[0%] Veuillez patienter un moment, initialisation...", Default, Default, 1)
 	_GUICtrlListView_DeleteAllItems($GUI_AfficherLeContenuDesAutresDossiers)
-	GUICtrlSetTip($GUI_AfficherLeContenuDesAutresDossiers, "Double-clic pour afficher l'Ã©lÃ©ment dans l'Explorateur.", "Bases de donnÃ©es & Tables", 1,1)
+	GUICtrlSetTip($GUI_AfficherLeContenuDesAutresDossiers, "Double-clic pour afficher l'élément dans l'Explorateur.", "Bases de données & Tables", 1,1)
 
 	Local $NombreDeFichiers = 0
 	Local $Data = DossiersEasyPHPdata() ;
 	Local $Liste[1] = [0] ;
 	Local $DB_Name, $Table_Name, $DB_FullPath
-;~ _ArrayDisplay($Bac, '$Bac 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($Bac, '$Bac 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 	If $Data[0] <> 0 Then
 		For $i = 1 To $Data[0]
 			ProgressSet(Round($i / $Data[0] * 100), "[" & Round($i / $Data[0] * 100) & "%] ")
@@ -1812,14 +1813,14 @@ Func _AfficherLeContenuDesDossiersTic()
 
 				$Kes[0] = UBound($Kes) - 1
 
-;~         _ArrayDisplay($Kes, $Data[$i],"",32,Default ,"AprÃ¨s Suppression")
+;~         _ArrayDisplay($Kes, $Data[$i],"",32,Default ,"Après Suppression")
 				$Liste[0] += $Kes[0]
 				_ArrayDelete($Kes, 0)
 				_ArrayAdd($Liste, $Kes) ;
 			EndIf
 		Next
 	EndIf
-;~ _ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 	$TmpMsgForLogging = ""
 	If IsArray($Liste) Then
 		For $N = 1 To $Liste[0]
@@ -1830,7 +1831,7 @@ Func _AfficherLeContenuDesDossiersTic()
 			$File_t = FileGetTime($DB_FullPath, 1) ; Creation Time
 			$File_time = "[" & $File_t[3] & ":" & $File_t[4] & "] "
 			$DB_Name = StringUpper(StringRegExpReplace($DB_FullPath, "^.*\\", ""))
-;~ _ArrayDisplay($Kes, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($Kes, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 
 			If Not IsArray($Kes) Then
 				$item = GUICtrlCreateListViewItem("[" & $DB_Name & "]" & "|" & "BD" & "|" & $File_time & "BD vide" & "|" & $DB_FullPath, $GUI_AfficherLeContenuDesAutresDossiers)
@@ -1853,15 +1854,15 @@ Func _AfficherLeContenuDesDossiersTic()
 			EndIf
 		Next
 	EndIf
-	If $TmpMsgForLogging <> "" Then _Logging("Liste de bases de donnÃ©es / tables : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
+	If $TmpMsgForLogging <> "" Then _Logging("Liste de bases de données / tables : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
 
 	ProgressOff()
 
 ;~ 	SplashOff()
 EndFunc   ;==>_AfficherLeContenuDesDossiersTic
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _SubCopierLeContenuDesAutresDossiers($Liste, $Dossier, $SubFldr, $RealPath = 0)
 	Local $OtherFilesDestFlashUSB = ""
@@ -1872,11 +1873,11 @@ Func _SubCopierLeContenuDesAutresDossiers($Liste, $Dossier, $SubFldr, $RealPath 
 	Local $TmpError
 	Local $ListeFiltered[1] = [0]
 
-;~ 	_ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de fichiers rÃ©cents sur le bureau")
+;~ 	_ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de fichiers récents sur le bureau")
 	For $N = 1 To $Liste[0]
 		$File_Name = $Liste[$N]
-;~ 		ProgressSet(Round($i/$Bac[0]*100), "[" & Round($i/$Bac[0]*100) & "%] " & "VÃ©rif. de : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
-		ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "VÃ©rif. de : " & StringTrimRight($Liste[$N], 1))
+;~ 		ProgressSet(Round($i/$Bac[0]*100), "[" & Round($i/$Bac[0]*100) & "%] " & "Vérif. de : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
+		ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "Vérif. de : " & StringTrimRight($Liste[$N], 1))
 		If AgeDuFichierEnMinutesModification($Dossier & $File_Name) < $AGE_DU_FICHIER_EN_MINUTES Then
 			$ListeFiltered[0] += 1
 			_ArrayAdd($ListeFiltered, $File_Name)
@@ -1884,18 +1885,18 @@ Func _SubCopierLeContenuDesAutresDossiers($Liste, $Dossier, $SubFldr, $RealPath 
 	Next
 
 	If $ListeFiltered[0] > 0 Then
-;~ 		_ArrayDisplay($ListeFiltered, 'BacBackup 1.0.0',"",32,Default ,"Liste de fichiers rÃ©cents sur le bureau")
+;~ 		_ArrayDisplay($ListeFiltered, 'BacBackup 1.0.0',"",32,Default ,"Liste de fichiers récents sur le bureau")
 		$OtherFilesDestFlashUSB = $Dest1FlashUSB & $SubFldr
 		$OtherFilesDestLocalFldr = $Dest2LocalFldr & $SubFldr
 		$TmpError = DirCreate($OtherFilesDestFlashUSB)
 		;;;Log+++++++
-		_Logging("CrÃ©ation du Dossier: " & $OtherFilesDestFlashUSB, $TmpError) ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
+		_Logging("Création du Dossier: " & $OtherFilesDestFlashUSB, $TmpError) ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
 		$iNberreurs = $iNberreurs - ($TmpError - 1)
 		;;;Log+++++++
 
 		$TmpError = DirCreate($OtherFilesDestLocalFldr)
 		;;;Log+++++++
-		_Logging("CrÃ©ation du Dossier: " & $OtherFilesDestLocalFldr, $TmpError) ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
+		_Logging("Création du Dossier: " & $OtherFilesDestLocalFldr, $TmpError) ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
 		$iNberreurs = $iNberreurs - ($TmpError - 1)
 		;;;Log+++++++
 		Local $Kes = ""
@@ -1930,8 +1931,8 @@ Func _SubCopierLeContenuDesAutresDossiers($Liste, $Dossier, $SubFldr, $RealPath 
 	Return $iNberreurs
 EndFunc   ;==>_SubCopierLeContenuDesAutresDossiers
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _SubCopierLeContenuDesAutresDossiersNoRemove($Liste, $Dossier, $SubFldr, $RealPath = 0)
 	Local $OtherFilesDestFlashUSB = ""
@@ -1942,10 +1943,10 @@ Func _SubCopierLeContenuDesAutresDossiersNoRemove($Liste, $Dossier, $SubFldr, $R
 	Local $TmpError
 	Local $ListeFiltered[1] = [0]
 
-;~ 	_ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de fichiers rÃ©cents sur le bureau")
+;~ 	_ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de fichiers récents sur le bureau")
 	For $N = 1 To $Liste[0]
 		$File_Name = $Liste[$N]
-		ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "VÃ©rif. de : " & StringTrimRight($Liste[$N], 1))
+		ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "Vérif. de : " & StringTrimRight($Liste[$N], 1))
 		If AgeDuFichierEnMinutesModification($Dossier & $File_Name) < $AGE_DU_FICHIER_EN_MINUTES Then
 			$ListeFiltered[0] += 1
 			_ArrayAdd($ListeFiltered, $File_Name)
@@ -1953,18 +1954,18 @@ Func _SubCopierLeContenuDesAutresDossiersNoRemove($Liste, $Dossier, $SubFldr, $R
 	Next
 
 	If $ListeFiltered[0] > 0 Then
-;~ 		_ArrayDisplay($ListeFiltered, 'BacBackup 1.0.0',"",32,Default ,"Liste de fichiers rÃ©cents sur le bureau")
+;~ 		_ArrayDisplay($ListeFiltered, 'BacBackup 1.0.0',"",32,Default ,"Liste de fichiers récents sur le bureau")
 		$OtherFilesDestFlashUSB = $Dest1FlashUSB & $SubFldr
 		$OtherFilesDestLocalFldr = $Dest2LocalFldr & $SubFldr
 		$TmpError = DirCreate($OtherFilesDestFlashUSB)
 		;;;Log+++++++
-		_Logging("CrÃ©ation du Dossier: " & $OtherFilesDestFlashUSB, $TmpError) ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
+		_Logging("Création du Dossier: " & $OtherFilesDestFlashUSB, $TmpError) ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
 		$iNberreurs = $iNberreurs - ($TmpError - 1)
 		;;;Log+++++++
 
 		$TmpError = DirCreate($OtherFilesDestLocalFldr)
 		;;;Log+++++++
-		_Logging("CrÃ©ation du Dossier: " & $OtherFilesDestLocalFldr, $TmpError) ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
+		_Logging("Création du Dossier: " & $OtherFilesDestLocalFldr, $TmpError) ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
 		$iNberreurs = $iNberreurs - ($TmpError - 1)
 		;;;Log+++++++
 		Local $Kes = ""
@@ -1993,8 +1994,8 @@ Func _SubCopierLeContenuDesAutresDossiersNoRemove($Liste, $Dossier, $SubFldr, $R
 	Return $iNberreurs
 EndFunc   ;==>_SubCopierLeContenuDesAutresDossiersNoRemove
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _SubCopyFoldersUserFolders($sSrc, $sDest_RelativePath)
 	Local $iNberreurs = 0
@@ -2004,8 +2005,8 @@ Func _SubCopyFoldersUserFolders($sSrc, $sDest_RelativePath)
 
 	If IsArray($Liste) Then
 		For $N = 1 To $Liste[0]
-;~ 			ProgressSet(Round($n/$Liste[0]*100), "[" & Round($n/$Liste[0]*100) & "%] " & "VÃ©rif. de : " & StringRegExpReplace($Liste[$n], "^.*\\", ""))
-			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "VÃ©rif. de : " & StringTrimRight($Liste[$N], 1))
+;~ 			ProgressSet(Round($n/$Liste[0]*100), "[" & Round($n/$Liste[0]*100) & "%] " & "Vérif. de : " & StringRegExpReplace($Liste[$n], "^.*\\", ""))
+			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "Vérif. de : " & StringTrimRight($Liste[$N], 1))
 			$Fldr_Name = $Dossier & StringTrimRight($Liste[$N], 1)
 			$Fldr_Name_Relative_Path = $sDest_RelativePath & $Liste[$N]
 			If AgeDuFichierEnMinutesCreation($Fldr_Name) < $AGE_DU_FICHIER_EN_MINUTES Then
@@ -2048,8 +2049,8 @@ Func _SubCopyFoldersUserFolders($sSrc, $sDest_RelativePath)
 
 EndFunc   ;==>_SubCopyFoldersUserFolders
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 Func _SubCopyFoldersUserFoldersNoRemove($sSrc, $sDest_RelativePath)
 	Local $iNberreurs = 0
 	Local $Dossier = $sSrc
@@ -2058,7 +2059,7 @@ Func _SubCopyFoldersUserFoldersNoRemove($sSrc, $sDest_RelativePath)
 
 	If IsArray($Liste) Then
 		For $N = 1 To $Liste[0]
-			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "VÃ©rif. de : " & StringTrimRight($Liste[$N], 1))
+			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "Vérif. de : " & StringTrimRight($Liste[$N], 1))
 			$Fldr_Name = $Dossier & StringTrimRight($Liste[$N], 1)
 			$Fldr_Name_Relative_Path = $sDest_RelativePath & $Liste[$N]
 			If AgeDuFichierEnMinutesCreation($Fldr_Name) < $AGE_DU_FICHIER_EN_MINUTES Then
@@ -2092,26 +2093,26 @@ Func _SubCopyFoldersUserFoldersNoRemove($sSrc, $sDest_RelativePath)
 
 EndFunc   ;==>_SubCopyFoldersUserFoldersNoRemove
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 
 Func _CopierLeContenuDesAutresDossiers($Mask)
 	Local $iNberreurs = 0
 
 ;~ ///////**********************************************************************
-;~ ///////**********      Copy - Dossiers crÃ©Ã©s sur le Bureau           ********
+;~ ///////**********      Copy - Dossiers créés sur le Bureau           ********
 ;~ ///////**********************************************************************
-;~ 	SplashTextOn("Sans Titre", "Recherche et Copie des dossiers rÃ©cents sur le" & @CRLF & """Bureau""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 	SplashTextOn("Sans Titre", "Recherche et Copie des dossiers récents sur le" & @CRLF & """Bureau""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	SplashOff()
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des dossiers >> Bureau...", "", Default, Default, 1)
-;~ 	ProgressSet(Round($i/$Bac[0]*100), "[" & Round($i/$Bac[0]*100) & "%] " & "VÃ©rif. de : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
+;~ 	ProgressSet(Round($i/$Bac[0]*100), "[" & Round($i/$Bac[0]*100) & "%] " & "Vérif. de : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
 	$iNberreurs += _SubCopyFoldersUserFolders(@DesktopDir & "\", "Bureau\")
 
 ;~ ///////**********************************************************************
-;~ ///////**********      Copy - Fichiers ModifiÃ©s sur le Bureau        ********
+;~ ///////**********      Copy - Fichiers Modifiés sur le Bureau        ********
 ;~ ///////**********************************************************************
-;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des fichiers rÃ©cents sur le" & @CRLF & """Bureau""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des fichiers récents sur le" & @CRLF & """Bureau""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des fichiers >> Bureau...", "", Default, Default, 1)
 	Local $Liste[1] = [0] ;
 	Local $Dossier = @DesktopDir & '\' ;
@@ -2121,36 +2122,37 @@ Func _CopierLeContenuDesAutresDossiers($Mask)
 	EndIf
 
 ;~ ///////**********************************************************************
-;~ ///////**********      Copy - Dossiers crÃ©Ã©s dans Mes documents      ********
+;~ ///////***** Copy - Dossiers créés dans le dossier de profil utilisateur ****
 ;~ ///////**********************************************************************
-;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des dossiers rÃ©cents dans" & @CRLF & """Mes documents""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
-	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des dossiers >> Profil Utilisateur...", "", Default, Default, 1)
-	$iNberreurs += _SubCopyFoldersUserFolders(@UserProfileDir & "\", "ProfilU\")
+;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des dossiers récents dans" & @CRLF & """Mes documents""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+
+;~ 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des dossiers >> Profil Utilisateur...", "", Default, Default, 1)
+;~ 	$iNberreurs += _SubCopyFoldersUserFolders(@UserProfileDir & "\", "ProfilU\")
 
 ;~ ///////**********************************************************************
-;~ ///////*** Copy - Fichiers ModifiÃ©s dans le dossier de profil utilisateur ***
+;~ ///////*** Copy - Fichiers Modifiés dans le dossier de profil utilisateur ***
 ;~ ///////**********************************************************************
-;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des fichiers rÃ©cents sur le" & @CRLF & """Bureau""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des fichiers récents sur le" & @CRLF & """Bureau""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des fichiers >> Profil Utilisateur...", "", Default, Default, 1)
 	Local $Liste[1] = [0] ;
 	Local $Dossier = @UserProfileDir & '\' ;
-	$Liste = _FileListToArrayRec($Dossier, "*.py;*.ipynb;*.accdb;*.xlsx;*.csv;*.docx||", 1, 0, 0, 1)
+	$Liste = _FileListToArrayRec($Dossier, "*.py;*.ipynb;*.ui;*.accdb;*.xlsx;*.csv;*.docx||", 1, 0, 0, 1)
 	If IsArray($Liste) Then
 		$iNberreurs = $iNberreurs + _SubCopierLeContenuDesAutresDossiers($Liste, $Dossier, '\ProfilU\')
 	EndIf
 
 ;~ ///////**********************************************************************
-;~ ///////**********      Copy - Dossiers crÃ©Ã©s dans Mes documents      ********
+;~ ///////**********      Copy - Dossiers créés dans Mes documents      ********
 ;~ ///////**********************************************************************
-;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des dossiers rÃ©cents dans" & @CRLF & """Mes documents""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des dossiers récents dans" & @CRLF & """Mes documents""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des dossiers >> Mes documents...", "", Default, Default, 1)
 	$iNberreurs += _SubCopyFoldersUserFolders(@MyDocumentsDir & "\", "Mes documents\")
 
 ;~ ///////**********************************************************************
-;~ ///////**********      Copy - Fichiers ModifiÃ©s dans Mes documents   ********
+;~ ///////**********      Copy - Fichiers Modifiés dans Mes documents   ********
 ;~ ///////**********************************************************************
 
-;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des fichiers rÃ©cents dans" & @CRLF & """Mes documents""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des fichiers récents dans" & @CRLF & """Mes documents""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des fichiers >> Mes documents...", "", Default, Default, 1)
 	;;; Files in MyDocuments Recursive
 	Local $Liste[1] = [0] ;
@@ -2162,7 +2164,7 @@ Func _CopierLeContenuDesAutresDossiers($Mask)
 
 
 ;~ ///////**********************************************************************
-;~ ///////**********      Copy Dossiers rÃ©cemment crÃ©Ã©s sous les lecteurs    ********
+;~ ///////**********      Copy Dossiers récemment créés sous les lecteurs    ********
 ;~ ///////**********************************************************************
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des dossiers>> disques locaux...", "", Default, Default, 1)
 	Local $aDrive = DriveGetDrive('FIXED')
@@ -2179,14 +2181,14 @@ Func _CopierLeContenuDesAutresDossiers($Mask)
 				Then
 			$Dossier = StringUpper($aDrive[$i]) & "\"
 ;~ 			$Fldr_Name_Relative_Path = StringLeft($Dossier, 1) & "_2pts"
-;~ 			SplashTextOn("Sans Titre", "Recherche/Copie des dossiers rÃ©cents sous la racine " & $Dossier & "." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 			SplashTextOn("Sans Titre", "Recherche/Copie des dossiers récents sous la racine " & $Dossier & "." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 
 			$Liste = _FileListToArrayRec($Dossier, "*|" & $MaskExclude & "|", 30, 0, 2, 1)
 ;~ 			_ArrayDisplay($Liste, $PROG_TITLE,"",32,Default ,"Liste de Dossiers")
 			If IsArray($Liste) Then
 				For $N = 1 To $Liste[0]
 					$Fldr_Name = StringTrimRight($Liste[$N], 1)
-					ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "VÃ©rif. de : " & $Fldr_Name)
+					ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "Vérif. de : " & $Fldr_Name)
 					If StringRegExp($Fldr_Name, "^(?i)bac\s*\d*2\d*\s*$", $STR_REGEXPMATCH, 1) or AgeDuFichierEnMinutesCreation($Dossier & $Fldr_Name) < $AGE_DU_FICHIER_EN_MINUTES Then
 						$Fldr_info = DirGetSize($Dossier & $Fldr_Name, 1)
 						$Fldr_size = $Fldr_info[0]
@@ -2229,7 +2231,7 @@ Func _CopierLeContenuDesAutresDossiers($Mask)
 	Next
 
 ;~ ///////**********************************************************************
-;~ ///////*******      Copy - Fichiers crÃ©Ã©s sur les Lecteurs du hdd     *******
+;~ ///////*******      Copy - Fichiers créés sur les Lecteurs du hdd     *******
 ;~ ///////**********************************************************************
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des disques locaux [dossiers]...", "", Default, Default, 1)
 	Local $aDrive = DriveGetDrive('FIXED')
@@ -2239,7 +2241,7 @@ Func _CopierLeContenuDesAutresDossiers($Mask)
 				And _WinAPI_IsWritable($aDrive[$i]) _
 				Then
 			$Dossier = StringUpper($aDrive[$i]) & "\"
-;~ 			SplashTextOn("Sans Titre", "Recherche/Copie des fichiers rÃ©cents sous la racine " & $Dossier & "." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 			SplashTextOn("Sans Titre", "Recherche/Copie des fichiers récents sous la racine " & $Dossier & "." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 
 			$Liste = _FileListToArrayRec($Dossier, $Mask & "|" & $MaskExclude & "|", 29, 0, 0, 1)
 			If IsArray($Liste) Then
@@ -2257,7 +2259,7 @@ Func _CopierLeContenuDesAutresDossiers($Mask)
 	Local $TPW = DossiersTPW() ;
 	If $TPW[0] <> 0 Then
 		For $i = 1 To $TPW[0]
-;~ 			SplashTextOn("Sans Titre", "Recherche/Copie des fichiers .pas rÃ©cents dans """ & $TPW[$i] & """." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 			SplashTextOn("Sans Titre", "Recherche/Copie des fichiers .pas récents dans """ & $TPW[$i] & """." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 			$Liste = _FileListToArray($TPW[$i], "*.pas", 1, False) ;True: full path
 			If IsArray($Liste) Then
 				If IsArray($Liste) Then
@@ -2267,7 +2269,7 @@ Func _CopierLeContenuDesAutresDossiers($Mask)
 			EndIf
 		Next
 	EndIf
-;~ _ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 
 
 
@@ -2276,28 +2278,28 @@ Func _CopierLeContenuDesAutresDossiers($Mask)
 
 	Return $iNberreurs
 ;~ MsgBox(0,"",$Dossier & "__"&$Mask&"__"&$Liste[0])
-;~ _ArrayDisplay($Liste, $PROG_TITLE,"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($Liste, $PROG_TITLE,"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 EndFunc   ;==>_CopierLeContenuDesAutresDossiers
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _CopierLeContenuDesAutresDossiersNoRemove($Mask)
 	Local $iNberreurs = 0
 	SplashOff()
 
 ;~ ///////**********************************************************************
-;~ ///////**********      Copy - Dossiers crÃ©Ã©s sur le Bureau           ********
+;~ ///////**********      Copy - Dossiers créés sur le Bureau           ********
 ;~ ///////**********************************************************************
-;~ 	SplashTextOn("Sans Titre", "Recherche et Copie des dossiers rÃ©cents sur le" & @CRLF & """Bureau""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 	SplashTextOn("Sans Titre", "Recherche et Copie des dossiers récents sur le" & @CRLF & """Bureau""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	SplashOff()
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des dossiers >> Bureau...", "", Default, Default, 1)
 	$iNberreurs += _SubCopyFoldersUserFoldersNoRemove(@DesktopDir & "\", "Bureau\")
 
 ;~ ///////**********************************************************************
-;~ ///////**********      Copy - Fichiers ModifiÃ©s sur le Bureau        ********
+;~ ///////**********      Copy - Fichiers Modifiés sur le Bureau        ********
 ;~ ///////**********************************************************************
-;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des fichiers rÃ©cents sur le" & @CRLF & """Bureau""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des fichiers récents sur le" & @CRLF & """Bureau""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des fichiers >> Bureau...", "", Default, Default, 1)
 	Local $Liste[1] = [0] ;
 	Local $Dossier = @DesktopDir & '\' ;
@@ -2307,17 +2309,17 @@ Func _CopierLeContenuDesAutresDossiersNoRemove($Mask)
 	EndIf
 
 ;~ ///////**********************************************************************
-;~ ///////**********      Copy - Dossiers crÃ©Ã©s dans Mes documents      ********
+;~ ///////**********      Copy - Dossiers créés dans Mes documents      ********
 ;~ ///////**********************************************************************
-;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des dossiers rÃ©cents dans" & @CRLF & """Mes documents""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des dossiers récents dans" & @CRLF & """Mes documents""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des dossiers >> Mes documents...", "", Default, Default, 1)
 	$iNberreurs += _SubCopyFoldersUserFoldersNoRemove(@MyDocumentsDir & "\", "Mes documents\")
 
 ;~ ///////**********************************************************************
-;~ ///////**********      Copy - Fichiers ModifiÃ©s dans Mes documents   ********
+;~ ///////**********      Copy - Fichiers Modifiés dans Mes documents   ********
 ;~ ///////**********************************************************************
 
-;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des fichiers rÃ©cents dans" & @CRLF & """Mes documents""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des fichiers récents dans" & @CRLF & """Mes documents""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des fichiers >> Mes documents...", "", Default, Default, 1)
 	;;; Files in MyDocuments Recursive
 	Local $Liste[1] = [0] ;
@@ -2329,7 +2331,7 @@ Func _CopierLeContenuDesAutresDossiersNoRemove($Mask)
 
 
 ;~ ///////**********************************************************************
-;~ ///////**********      Copy Dossiers rÃ©cemment crÃ©Ã©s sous les lecteurs    ********
+;~ ///////**********      Copy Dossiers récemment créés sous les lecteurs    ********
 ;~ ///////**********************************************************************
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des dossiers >> disques locaux...", "", Default, Default, 1)
 	Local $aDrive = DriveGetDrive('FIXED')
@@ -2346,14 +2348,14 @@ Func _CopierLeContenuDesAutresDossiersNoRemove($Mask)
 				Then
 			$Dossier = StringUpper($aDrive[$i]) & "\"
 ;~ 			$Fldr_Name_Relative_Path = StringLeft($Dossier, 1) & "_2pts"
-;~ 			SplashTextOn("Sans Titre", "Recherche/Copie des dossiers rÃ©cents sous la racine " & $Dossier & "." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 			SplashTextOn("Sans Titre", "Recherche/Copie des dossiers récents sous la racine " & $Dossier & "." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 
 			$Liste = _FileListToArrayRec($Dossier, "*|" & $MaskExclude & "|", 30, 0, 2, 1)
 ;~ 			_ArrayDisplay($Liste, $PROG_TITLE,"",32,Default ,"Liste de Dossiers")
 			If IsArray($Liste) Then
 				For $N = 1 To $Liste[0]
 					$Fldr_Name = StringTrimRight($Liste[$N], 1)
-					ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "VÃ©rif. de : " & $Fldr_Name)
+					ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "Vérif. de : " & $Fldr_Name)
 					If StringRegExp($Fldr_Name, "^(?i)bac\s*\d*2\d*\s*$", $STR_REGEXPMATCH, 1) or AgeDuFichierEnMinutesCreation($Dossier & $Fldr_Name) < $AGE_DU_FICHIER_EN_MINUTES Then
 						$Fldr_info = DirGetSize($Dossier & $Fldr_Name, 1)
 						$Fldr_size = $Fldr_info[0]
@@ -2388,7 +2390,7 @@ Func _CopierLeContenuDesAutresDossiersNoRemove($Mask)
 	Next
 
 ;~ ///////**********************************************************************
-;~ ///////**********      Copy - Fichiers crÃ©Ã©s sur les Lecteurs du hdd     ********
+;~ ///////**********      Copy - Fichiers créés sur les Lecteurs du hdd     ********
 ;~ ///////**********************************************************************
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des disques locaux [dossiers]...", "", Default, Default, 1)
 	Local $aDrive = DriveGetDrive('FIXED')
@@ -2398,7 +2400,7 @@ Func _CopierLeContenuDesAutresDossiersNoRemove($Mask)
 				And _WinAPI_IsWritable($aDrive[$i]) _
 				Then
 			$Dossier = StringUpper($aDrive[$i]) & "\"
-;~ 			SplashTextOn("Sans Titre", "Recherche/Copie des fichiers rÃ©cents sous la racine " & $Dossier & "." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 			SplashTextOn("Sans Titre", "Recherche/Copie des fichiers récents sous la racine " & $Dossier & "." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 
 			$Liste = _FileListToArrayRec($Dossier, $Mask & "|" & $MaskExclude & "|", 29, 0, 0, 1)
 			If IsArray($Liste) Then
@@ -2416,7 +2418,7 @@ Func _CopierLeContenuDesAutresDossiersNoRemove($Mask)
 	Local $TPW = DossiersTPW() ;
 	If $TPW[0] <> 0 Then
 		For $i = 1 To $TPW[0]
-;~ 			SplashTextOn("Sans Titre", "Recherche/Copie des fichiers .pas rÃ©cents dans """ & $TPW[$i] & """." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 			SplashTextOn("Sans Titre", "Recherche/Copie des fichiers .pas récents dans """ & $TPW[$i] & """." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 			$Liste = _FileListToArray($TPW[$i], "*.pas", 1, False) ;True: full path
 			If IsArray($Liste) Then
 				If IsArray($Liste) Then
@@ -2426,11 +2428,11 @@ Func _CopierLeContenuDesAutresDossiersNoRemove($Mask)
 			EndIf
 		Next
 	EndIf
-;~ _ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 
 ;~ ///////**********************************************************************
 ;~ ///////**********      Copy Dossiers Bac*2* *********************************
-;~ ///////***********  Pour la matiÃ¨re TIC         *****************************
+;~ ///////***********  Pour la matière TIC         *****************************
 ;~ ///////**********************************************************************
 
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Copie des dossiers Bac*20*...", "", Default, Default, 1)
@@ -2462,20 +2464,20 @@ Func _CopierLeContenuDesAutresDossiersNoRemove($Mask)
 
 	Return $iNberreurs
 ;~ MsgBox(0,"",$Dossier & "__"&$Mask&"__"&$Liste[0])
-;~ _ArrayDisplay($Liste, $PROG_TITLE,"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($Liste, $PROG_TITLE,"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 EndFunc   ;==>_CopierLeContenuDesAutresDossiersNoRemove
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 	_GUICtrlListView_DeleteAllItems($GUI_AfficherLeContenuDesAutresDossiers)
-	GUICtrlSetTip($GUI_AfficherLeContenuDesAutresDossiers, "- Bureau" & @CRLF & "- Mes documents" & @CRLF & "- Dossier du profil de l'utilisateur" & @CRLF & "- Racines des lecteurs C:, D: ..." & @CRLF & @CRLF &  "(Double-clic sur un Ã©lÃ©ment pour l'afficher dans l'Explorateur.)", "Ã‰lÃ©ments rÃ©cemment crÃ©Ã©s/modifiÃ©s dans :", 1,1)
+	GUICtrlSetTip($GUI_AfficherLeContenuDesAutresDossiers, "- Bureau" & @CRLF & "- Mes documents" & @CRLF & "- Dossier du profil de l'utilisateur" & @CRLF & "- Racines des lecteurs C:, D: ..." & @CRLF & @CRLF &  "(Double-clic sur un élément pour l'afficher dans l'Explorateur.)", "Éléments récemment créés/modifiés dans :", 1,1)
 
 ;~ ///////**********************************************************************
-;~ ///////**********      Dossiers crÃ©Ã©s sur le Bureau        ********
+;~ ///////**********      Dossiers créés sur le Bureau        ********
 ;~ ///////**********************************************************************
-;~ 	SplashTextOn("Sans Titre", "Recherche des dossiers rÃ©cents sur le bureau." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 	SplashTextOn("Sans Titre", "Recherche des dossiers récents sur le bureau." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des dossiers >> Bureau...", "", Default, Default, 1)
 	Local $Dossier = @DesktopDir & '\' ;
 	Local $TmpMsgForLogging = ""
@@ -2485,8 +2487,8 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 		_Logging("Scan des dossiers sur le bureau : " & $Liste[0] & " dossier(s)", 2, 0)
 		For $N = 1 To $Liste[0]
 			$Fldr_Name = @DesktopDir & '\' & StringTrimRight($Liste[$N], 1)
-;~ 			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "VÃ©rif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
-			ProgressSet(Round($N / $Liste[0] * 100), "[" & $N & "/" & $Liste[0] & "] " & "VÃ©rif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
+;~ 			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "Vérif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
+			ProgressSet(Round($N / $Liste[0] * 100), "[" & $N & "/" & $Liste[0] & "] " & "Vérif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
 			$Fldr_Name_Relative_Path = "Bureau\" & $Liste[$N]
 ;~ 			$Fldr_Name = StringTrimRight($Liste[$n],1)
 			If AgeDuFichierEnMinutesCreation($Fldr_Name) < $AGE_DU_FICHIER_EN_MINUTES Then
@@ -2511,15 +2513,15 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 
 		Next
 		If $TmpMsgForLogging <> "" Then
-			_Logging("  -->  Liste de dossiers rÃ©cents sur le bureau : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
+			_Logging("  -->  Liste de dossiers récents sur le bureau : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
 		Else
-			_Logging("  -->  Aucun dossie rÃ©cent.", 2, 0)
+			_Logging("  -->  Aucun dossie récent.", 2, 0)
 		EndIf
 	EndIf
 ;~ ///////**********************************************************************
-;~ ///////**********      Fichiers ModifiÃ©s sur le bureau     ********
+;~ ///////**********      Fichiers Modifiés sur le bureau     ********
 ;~ ///////**********************************************************************
-;~ 	SplashTextOn("Sans Titre", "Recherche des fichiers rÃ©cents sur le ""Bureau""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 	SplashTextOn("Sans Titre", "Recherche des fichiers récents sur le ""Bureau""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	ProgressSet(0, "[0%] Veuillez patienter un moment, initialisation...", "Scan des fichiers >> Bureau...")
 	Local $Dossier = @DesktopDir & '\' ;
 	$TmpMsgForLogging = ""
@@ -2529,8 +2531,8 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 	If IsArray($Liste) Then
 		_Logging("Scan des fichiers sur le bureau : " & $Liste[0] & " fichiers(s)", 2, 0)
 		For $N = 1 To $Liste[0]
-;~ 			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "VÃ©rif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
-			ProgressSet(Round($N / $Liste[0] * 100), "[" & $N & "/" & $Liste[0] & "] " & "VÃ©rif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
+;~ 			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "Vérif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
+			ProgressSet(Round($N / $Liste[0] * 100), "[" & $N & "/" & $Liste[0] & "] " & "Vérif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
 			$File_Name = @DesktopDir & '\' & $Liste[$N]
 			$File_Name_Relative_Path = "Bureau\" & $Liste[$N]
 			If AgeDuFichierEnMinutesModification($File_Name) < $AGE_DU_FICHIER_EN_MINUTES Then
@@ -2550,74 +2552,72 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 		Next
 
 		If $TmpMsgForLogging <> "" Then
-			_Logging("  -->  Liste de fichiers rÃ©cents sur le bureau : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
+			_Logging("  -->  Liste de fichiers récents sur le bureau : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
 		Else
-			_Logging("  -->  Aucun fichier rÃ©cent.", 2, 0)
+			_Logging("  -->  Aucun fichier récent.", 2, 0)
 		EndIf
 	EndIf
 
 
 
 ;~ ///////**********************************************************************
-;~ ///////**********      Dossiers crÃ©Ã©s dans profil utilisateur        ********
+;~ ///////**********      Dossiers créés dans profil utilisateur        ********
 ;~ ///////**********************************************************************
-;~ 	SplashTextOn("Sans Titre", "Recherche des dossiers rÃ©cents dans Mes documents." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
-	ProgressSet(0, "[0%] Veuillez patienter un moment, initialisation...", "Scan des dossiers >> profil utilisateur...")
-	Local $Dossier = @UserProfileDir & '\' ;
-	$TmpMsgForLogging = ""
-	$Liste = _FileListToArrayRec($Dossier, "*||", 30, 0, 2, 1)
-	If IsArray($Liste) Then
-		_Logging("Scan des dossiers dans profil utilisateur : " & $Liste[0] & " dossier(s)", 2, 0)
-		For $N = 1 To $Liste[0]
-;~ 			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "VÃ©rif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
-			ProgressSet(Round($N / $Liste[0] * 100), "[" & $N & "/" & $Liste[0] & "] " & "VÃ©rif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
-			$Fldr_Name = @UserProfileDir & '\' & StringTrimRight($Liste[$N], 1)
-			$Fldr_Name_Relative_Path = "ProfilU\" & $Liste[$N]
-;~ 			$Fldr_Name = StringTrimRight($Liste[$n],1)
-			If AgeDuFichierEnMinutesCreation($Fldr_Name) < $AGE_DU_FICHIER_EN_MINUTES Then
-				$Fldr_Name_Relative_Path = "ProfilU\" & $Liste[$N]
-				$Fldr_info = DirGetSize($Fldr_Name, 1)
-				$Fldr_size = $Fldr_info[0]
-				If $Fldr_info[1] = 0 Then
-					$Fldr_filesCount = "  [dossier vide]"
-				ElseIf $Fldr_info[1] = 1 Then
-					$Fldr_filesCount = "  [1 fichier]"
-				Else
-					$Fldr_filesCount = "  [" & $Fldr_info[1] & " fichiers]"
-				EndIf
-				$Fldr_t = FileGetTime($Fldr_Name, 1) ; creation Time
-				$Fldr_time = "[" & $Fldr_t[3] & ":" & $Fldr_t[4] & "]" ; detailed
-				$item = GUICtrlCreateListViewItem($Fldr_Name_Relative_Path & "|" & _FineSize($Fldr_size) & "|" & $Fldr_time & " " & $Fldr_filesCount & "|" & @MyDocumentsDir & '\' & $Liste[$N], $GUI_AfficherLeContenuDesAutresDossiers)
-				$TmpMsgForLogging &= @CRLF & """" & $Fldr_Name_Relative_Path & """    (" & _FineSize($Fldr_size) & "-" & $Fldr_time & " " & $Fldr_filesCount & ")"
-				If $Fldr_size > 10 * 1024 * 1024 Then
-					GUICtrlSetColor(-1, 0xFF0000)
-				EndIf
-			EndIf
+;~ 	SplashTextOn("Sans Titre", "Recherche des dossiers récents dans Mes documents." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 	ProgressSet(0, "[0%] Veuillez patienter un moment, initialisation...", "Scan des dossiers >> profil utilisateur...")
+;~ 	Local $Dossier = @UserProfileDir & '\' ;
+;~ 	$TmpMsgForLogging = ""
+;~ 	$Liste = _FileListToArrayRec($Dossier, "*||", 30, 0, 2, 1)
+;~ 	If IsArray($Liste) Then
+;~ 		_Logging("Scan des dossiers dans profil utilisateur : " & $Liste[0] & " dossier(s)", 2, 0)
+;~ 		For $N = 1 To $Liste[0]
+;~ 			ProgressSet(Round($N / $Liste[0] * 100), "[" & $N & "/" & $Liste[0] & "] " & "Vérif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
+;~ 			$Fldr_Name = @UserProfileDir & '\' & StringTrimRight($Liste[$N], 1)
+;~ 			$Fldr_Name_Relative_Path = "ProfilU\" & $Liste[$N]
+;~ 			If AgeDuFichierEnMinutesCreation($Fldr_Name) < $AGE_DU_FICHIER_EN_MINUTES Then
+;~ 				$Fldr_Name_Relative_Path = "ProfilU\" & $Liste[$N]
+;~ 				$Fldr_info = DirGetSize($Fldr_Name, 1)
+;~ 				$Fldr_size = $Fldr_info[0]
+;~ 				If $Fldr_info[1] = 0 Then
+;~ 					$Fldr_filesCount = "  [dossier vide]"
+;~ 				ElseIf $Fldr_info[1] = 1 Then
+;~ 					$Fldr_filesCount = "  [1 fichier]"
+;~ 				Else
+;~ 					$Fldr_filesCount = "  [" & $Fldr_info[1] & " fichiers]"
+;~ 				EndIf
+;~ 				$Fldr_t = FileGetTime($Fldr_Name, 1) ; creation Time
+;~ 				$Fldr_time = "[" & $Fldr_t[3] & ":" & $Fldr_t[4] & "]" ; detailed
+;~ 				$item = GUICtrlCreateListViewItem($Fldr_Name_Relative_Path & "|" & _FineSize($Fldr_size) & "|" & $Fldr_time & " " & $Fldr_filesCount & "|" & @MyDocumentsDir & '\' & $Liste[$N], $GUI_AfficherLeContenuDesAutresDossiers)
+;~ 				$TmpMsgForLogging &= @CRLF & """" & $Fldr_Name_Relative_Path & """    (" & _FineSize($Fldr_size) & "-" & $Fldr_time & " " & $Fldr_filesCount & ")"
+;~ 				If $Fldr_size > 10 * 1024 * 1024 Then
+;~ 					GUICtrlSetColor(-1, 0xFF0000)
+;~ 				EndIf
+;~ 			EndIf
 
-		Next
-		If $TmpMsgForLogging <> "" Then
-			_Logging("  -->  Liste de dossiers rÃ©cents dans profil utilisateur : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
-		Else
-			_Logging("  -->  Aucun dossier rÃ©cent.", 2, 0)
-		EndIf
-	EndIf
+;~ 		Next
+;~ 		If $TmpMsgForLogging <> "" Then
+;~ 			_Logging("  -->  Liste de dossiers récents dans profil utilisateur : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
+;~ 		Else
+;~ 			_Logging("  -->  Aucun dossier récent.", 2, 0)
+;~ 		EndIf
+;~ 	EndIf
 
 ;~ ///////**********************************************************************
-;~ ///////***   Fichiers ModifiÃ©s dans le dossier de profil utilisateur   ******
+;~ ///////***   Fichiers Modifiés dans le dossier de profil utilisateur   ******
 ;~ ///////**********************************************************************
 
-;~ 	SplashTextOn("Sans Titre", "Recherche des fichiers rÃ©cents dans ""Mes documents""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 	SplashTextOn("Sans Titre", "Recherche des fichiers récents dans ""Mes documents""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	ProgressSet(0, "[0%] Veuillez patienter un moment, initialisation...", "Scan des fichiers >> profil utilisateur...")
 	Local $Dossier = @UserProfileDir & '\' ;
 	$TmpMsgForLogging = ""
 	Local $Liste[1] = [0] ;
-	$Liste = _FileListToArrayRec($Dossier, "*.py;*.ipynb;*.accdb;*.xlsx;*.csv;*.docx||", 1, 0, 2, 1)  ; Non rÃ©cursif..
+	$Liste = _FileListToArrayRec($Dossier, "*.py;*.ipynb;*.ui;*.accdb;*.xlsx;*.csv;*.docx||", 1, 0, 2, 1)  ; Non récursif..
 
 	If IsArray($Liste) Then
 		_Logging("Scan des fichiers dans Profil Utilisateur : " & $Liste[0] & " fichier(s)", 2, 0)
 		For $N = 1 To $Liste[0]
-;~ 			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "VÃ©rif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
-			ProgressSet(Round($N / $Liste[0] * 100), "[" & $N & "/" & $Liste[0] & "] " & "VÃ©rif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
+;~ 			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "Vérif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
+			ProgressSet(Round($N / $Liste[0] * 100), "[" & $N & "/" & $Liste[0] & "] " & "Vérif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
 			$File_Name = @UserProfileDir & '\' & $Liste[$N]
 			$File_Name_Relative_Path = "ProfilU\" & $Liste[$N]
 			If AgeDuFichierEnMinutesModification($File_Name) < $AGE_DU_FICHIER_EN_MINUTES Then
@@ -2635,18 +2635,18 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 		Next
 
 		If $TmpMsgForLogging <> "" Then
-			_Logging("  -->  Liste de fichiers rÃ©cents dans Profil Utilisateur : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
+			_Logging("  -->  Liste de fichiers récents dans Profil Utilisateur : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
 		Else
-			_Logging("  -->  Aucun fichier rÃ©cent.", 2, 0)
+			_Logging("  -->  Aucun fichier récent.", 2, 0)
 		EndIf
 	EndIf
 
 
 
 ;~ ///////**********************************************************************
-;~ ///////**********      Dossiers crÃ©Ã©s dans Mes documents   ********
+;~ ///////**********      Dossiers créés dans Mes documents   ********
 ;~ ///////**********************************************************************
-;~ 	SplashTextOn("Sans Titre", "Recherche des dossiers rÃ©cents dans Mes documents." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 	SplashTextOn("Sans Titre", "Recherche des dossiers récents dans Mes documents." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	ProgressSet(0, "[0%] Veuillez patienter un moment, initialisation...", "Scan des dossiers >> Mes documents...")
 	Local $Dossier = @MyDocumentsDir & '\' ;
 	$TmpMsgForLogging = ""
@@ -2654,8 +2654,8 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 	If IsArray($Liste) Then
 		_Logging("Scan des dossiers dans Mes documents : " & $Liste[0] & " dossier(s)", 2, 0)
 		For $N = 1 To $Liste[0]
-;~ 			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "VÃ©rif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
-			ProgressSet(Round($N / $Liste[0] * 100), "[" & $N & "/" & $Liste[0] & "] " & "VÃ©rif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
+;~ 			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "Vérif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
+			ProgressSet(Round($N / $Liste[0] * 100), "[" & $N & "/" & $Liste[0] & "] " & "Vérif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
 			$Fldr_Name = @MyDocumentsDir & '\' & StringTrimRight($Liste[$N], 1)
 			$Fldr_Name_Relative_Path = "Mes documents\" & $Liste[$N]
 ;~ 			$Fldr_Name = StringTrimRight($Liste[$n],1)
@@ -2681,17 +2681,17 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 
 		Next
 		If $TmpMsgForLogging <> "" Then
-			_Logging("  -->  Liste de dossiers rÃ©cents dans Mes documents : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
+			_Logging("  -->  Liste de dossiers récents dans Mes documents : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
 		Else
-			_Logging("  -->  Aucun dossier rÃ©cent.", 2, 0)
+			_Logging("  -->  Aucun dossier récent.", 2, 0)
 		EndIf
 	EndIf
 
 ;~ ///////**********************************************************************
-;~ ///////**********      Fichiers ModifiÃ©s dans Mes documents   ********
+;~ ///////**********      Fichiers Modifiés dans Mes documents   ********
 ;~ ///////**********************************************************************
 
-;~ 	SplashTextOn("Sans Titre", "Recherche des fichiers rÃ©cents dans ""Mes documents""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 	SplashTextOn("Sans Titre", "Recherche des fichiers récents dans ""Mes documents""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	ProgressSet(0, "[0%] Veuillez patienter un moment, initialisation...", "Scan des fichiers >> Mes documents...")
 	Local $Dossier = @MyDocumentsDir & '\' ;
 	$TmpMsgForLogging = ""
@@ -2701,8 +2701,8 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 	If IsArray($Liste) Then
 		_Logging("Scan des fichiers dans Mes documents : " & $Liste[0] & " fichier(s)", 2, 0)
 		For $N = 1 To $Liste[0]
-;~ 			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "VÃ©rif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
-			ProgressSet(Round($N / $Liste[0] * 100), "[" & $N & "/" & $Liste[0] & "] " & "VÃ©rif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
+;~ 			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "Vérif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
+			ProgressSet(Round($N / $Liste[0] * 100), "[" & $N & "/" & $Liste[0] & "] " & "Vérif. de : " & StringRegExpReplace($Liste[$N], "^.*\\", ""))
 			$File_Name = @MyDocumentsDir & '\' & $Liste[$N]
 			$File_Name_Relative_Path = "Mes documents\" & $Liste[$N]
 			If AgeDuFichierEnMinutesModification($File_Name) < $AGE_DU_FICHIER_EN_MINUTES Then
@@ -2720,13 +2720,13 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 		Next
 
 		If $TmpMsgForLogging <> "" Then
-			_Logging("  -->  Liste de fichiers rÃ©cents dans Mes documents : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
+			_Logging("  -->  Liste de fichiers récents dans Mes documents : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
 		Else
-			_Logging("  -->  Aucun fichier rÃ©cent.", 2, 0)
+			_Logging("  -->  Aucun fichier récent.", 2, 0)
 		EndIf
 	EndIf
 ;~ ///////**********************************************************************
-;~ ///////**********      Dossiers rÃ©cemment crÃ©Ã©s sous les lecteurs    ********
+;~ ///////**********      Dossiers récemment créés sous les lecteurs    ********
 ;~ ///////**********************************************************************
 	Local $aDrive = DriveGetDrive('FIXED')
 
@@ -2742,7 +2742,7 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 				And _WinAPI_IsWritable($aDrive[$i]) _
 				Then
 			$Dossier = StringUpper($aDrive[$i]) & "\"
-;~ 			SplashTextOn("Sans Titre", "Recherche des dossiers rÃ©cents sous la racine " & $Dossier & "." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 			SplashTextOn("Sans Titre", "Recherche des dossiers récents sous la racine " & $Dossier & "." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 			ProgressSet(0, "[0%] Veuillez patienter un moment, initialisation...", "Scan des dossiers >> lecteur " & $Dossier)
 
 			$Liste = _FileListToArrayRec($Dossier, "*|" & $MaskExclude & "|", 30, 0, 2, 2)
@@ -2752,7 +2752,7 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 				_Logging("Scan des dossiers sous le lecteur """ & $Dossier & """ : " & $Liste[0] & " dossier(s)", 2, 0)
 				For $N = 1 To $Liste[0]
 					$Fldr_Name = StringTrimRight($Liste[$N], 1)
-					ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "VÃ©rif. de : " & StringRegExpReplace($Fldr_Name, "^.*\\", ""))
+					ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "Vérif. de : " & StringRegExpReplace($Fldr_Name, "^.*\\", ""))
 					If StringRegExp($Fldr_Name, "^(?i)bac\s*\d*2\d*\s*$", $STR_REGEXPMATCH, 1) or AgeDuFichierEnMinutesCreation($Fldr_Name) < $AGE_DU_FICHIER_EN_MINUTES Then
 						$Fldr_info = DirGetSize($Fldr_Name, 1)
 						$Fldr_size = $Fldr_info[0]
@@ -2775,16 +2775,16 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 				Next
 			EndIf
 			If $TmpMsgForLogging <> "" Then
-				_Logging("  -->  Liste de dossiers rÃ©cents sous le lecteur """ & $Dossier & """ : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
+				_Logging("  -->  Liste de dossiers récents sous le lecteur """ & $Dossier & """ : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
 			Else
-				_Logging("  -->  Aucun dossier rÃ©cent.", 2, 0)
+				_Logging("  -->  Aucun dossier récent.", 2, 0)
 			EndIf
 		EndIf
 	Next
 
 
 ;~ ///////**********************************************************************
-;~ ///////**********      Fichiers rÃ©cemment ModifiÃ©s sous les lecteurs    ********
+;~ ///////**********      Fichiers récemment Modifiés sous les lecteurs    ********
 ;~ ///////**********************************************************************
 
 	Local $aDrive = DriveGetDrive('FIXED')
@@ -2795,7 +2795,7 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 				And _WinAPI_IsWritable($aDrive[$i]) _
 				Then
 			$Dossier = StringUpper($aDrive[$i]) & "\"
-;~ 			SplashTextOn("Sans Titre", "Recherche des fichiers rÃ©cents sous la racine " & $Dossier & "." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+;~ 			SplashTextOn("Sans Titre", "Recherche des fichiers récents sous la racine " & $Dossier & "." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 			ProgressSet(0, "[0%] Veuillez patienter un moment, initialisation...", "Scan des dossiers >> lecteur " & $Dossier)
 
 			$Liste = _FileListToArrayRec($Dossier, $Mask & "|" & $MaskExclude & "|", 29, 0, 2, 2)
@@ -2804,7 +2804,7 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 				_Logging("Scan des fichiers sous le lecteur """ & $Dossier & """ : " & $Liste[0] & " fichier(s)", 2, 0)
 				For $N = 1 To $Liste[0]
 					$File_Name = $Liste[$N]
-					ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "VÃ©rif. de : " & StringRegExpReplace($File_Name, "^.*\\", ""))
+					ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "Vérif. de : " & StringRegExpReplace($File_Name, "^.*\\", ""))
 					If AgeDuFichierEnMinutesModification($File_Name) < $AGE_DU_FICHIER_EN_MINUTES Then
 						$File_size = _FineSize(FileGetSize($File_Name))
 						$File_t = FileGetTime($File_Name, 1) ; creation Time
@@ -2818,9 +2818,9 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 
 				Next
 				If $TmpMsgForLogging <> "" Then
-					_Logging("  -->  Liste de fichiers rÃ©cents sous le lecteur """ & $Dossier & """ : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
+					_Logging("  -->  Liste de fichiers récents sous le lecteur """ & $Dossier & """ : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
 				Else
-					_Logging("  -->  Aucun fichier rÃ©cent.", 2, 0)
+					_Logging("  -->  Aucun fichier récent.", 2, 0)
 				EndIf
 			EndIf
 		EndIf
@@ -2842,7 +2842,7 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 			EndIf
 		Next
 	EndIf
-;~ _ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 	$TmpMsgForLogging = ""
 	If IsArray($Liste) Then
 		_Logging("Scan des fichiers Pascal dans ""C:\Tpw*\"" : " & $Liste[0] & " fichier(s) Pascal", 2, 0)
@@ -2860,28 +2860,28 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 			EndIf
 		Next
 		If $TmpMsgForLogging <> "" Then
-			_Logging("  -->  Liste de fichiers Pascal modifiÃ©s rÃ©cemment dans les dossiers ""C:\Tpw*"" : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
+			_Logging("  -->  Liste de fichiers Pascal modifiés récemment dans les dossiers ""C:\Tpw*"" : " & StringReplace($TmpMsgForLogging, @CRLF, @CRLF & $TmpSpaces), 2, 0)
 		Else
-			_Logging("  -->  Aucun fichier Pascal modifiÃ© rÃ©cemment dans les dossiers ""C:\Tpw*"".", 2, 0)
+			_Logging("  -->  Aucun fichier Pascal modifié récemment dans les dossiers ""C:\Tpw*"".", 2, 0)
 		EndIf
 	EndIf
 	;//*---------------------------------------------------------------------------------------
 
 
-;~ _ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($Liste, 'BacBackup 1.0.0',"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 	ProgressOff()
 	SplashOff()
 EndFunc   ;==>_AfficherLeContenuDesAutresDossiers
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func Sauvegarder()
 	_ClearGuiLog()
 	_Logging("______", 2, 0)
-	_Logging("DÃ©but de la sauvegarde des dossiers collectÃ©s vers le disque dur...", 4, 1)
+	_Logging("Début de la sauvegarde des dossiers collectés vers le disque dur...", 4, 1)
 
-	_Logging("Lecture et mise Ã  jour des paramÃ¨tres de " & $PROG_TITLE, 2, 0)
+	_Logging("Lecture et mise à jour des paramètres de " & $PROG_TITLE, 2, 0)
 	_SaveParams()
 	_InitialParams()
 
@@ -2902,21 +2902,21 @@ Func Sauvegarder()
 	Local $Liste[1][4] = [["Candidat", "NbFichiers", "Taille", "Remarque"]] ;
 
 ;~ _Logging($sText, $iSuccess = 1, $iGuiLog = 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
-	_Logging("PrÃ©paration de la liste de dossiers", 4, 0)
+	_Logging("Préparation de la liste de dossiers", 4, 0)
 	$TmpListe = _FileListToArray($sCheminScripDir, "??????", $FLTA_FOLDERS)
 
 	If Not (IsArray($TmpListe)) Or ($TmpListe[0] = 0) Then
-		_Logging("Aucun dossier de travail trouvÃ© dans """ & @ScriptDir & """", 5, 1) ;
-		_Logging("Sauvegarde annulÃ©e", 5, 1)
+		_Logging("Aucun dossier de travail trouvé dans """ & @ScriptDir & """", 5, 1) ;
+		_Logging("Sauvegarde annulée", 5, 1)
 		_Logging("______", 2, 0)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Aucun dossier Ã  sauvegarder !" & @CRLF _
-				 & "Veuillez vÃ©rifier que " & $PROG_TITLE & " et les dossiers de travail des candidats" & @CRLF _
-				 & "se trouvent dans le mÃªme chemin." & @CRLF, 0)
+		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Aucun dossier à sauvegarder !" & @CRLF _
+				 & "Veuillez vérifier que " & $PROG_TITLE & " et les dossiers de travail des candidats" & @CRLF _
+				 & "se trouvent dans le même chemin." & @CRLF, 0)
 		Return
 	EndIf
 
-	SplashTextOn("Sans Titre", "PrÃ©paration de la liste de dossiers." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	SplashTextOn("Sans Titre", "Préparation de la liste de dossiers." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 
 	_ArrayDelete($TmpListe, 0)
 	_ArraySort($TmpListe)
@@ -2940,7 +2940,7 @@ Func Sauvegarder()
 			If ($aFolderInfo[1] = 0) And ($aFolderInfo[0] = 0) Then ;Nb Fichiers =0 & Taille =0
 				Local $KesList = _FileListToArray($sCheminScripDir & $TmpListe[$N] & "\", "Abs*", $FLTA_FOLDERS)
 				If IsArray($KesList) = 0 Or $KesList[0] = 0 Then
-					$DossiersNonConformesPourCandidatsAbsents &= @TAB & "Â» " & $TmpListe[$N] & @CRLF
+					$DossiersNonConformesPourCandidatsAbsents &= @TAB & "» " & $TmpListe[$N] & @CRLF
 					$TmpUneLigneMatrice &= " (Manque ..\" & $sDir & "\Absent\)"
 				EndIf
 			EndIf
@@ -2949,14 +2949,14 @@ Func Sauvegarder()
 		EndIf
 	Next
 	If UBound($Liste, 1)-1 = 0 Then
-		_Logging("Aucun dossier de travail trouvÃ© dans """ & @ScriptDir & """", 5, 1) ;
-		_Logging("Sauvegarde annulÃ©e", 5, 1)
+		_Logging("Aucun dossier de travail trouvé dans """ & @ScriptDir & """", 5, 1) ;
+		_Logging("Sauvegarde annulée", 5, 1)
 		_Logging("______", 2, 0)
 		SplashOff()
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Aucun dossier Ã  sauvegarder !" & @CRLF _
-				 & "Veuillez vÃ©rifier que " & $PROG_TITLE & " et les dossiers de travail des candidats" & @CRLF _
-				 & "sont dans le mÃªme chemin." & @CRLF, 0)
+		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Aucun dossier à sauvegarder !" & @CRLF _
+				 & "Veuillez vérifier que " & $PROG_TITLE & " et les dossiers de travail des candidats" & @CRLF _
+				 & "sont dans le même chemin." & @CRLF, 0)
 		Return
 	EndIf
 
@@ -2966,9 +2966,9 @@ Func Sauvegarder()
 		_Logging("MsgBox: Continuer avec  : " & $Bac20xx_lbl & " --> " & $Bac20xx_combo & ". (Oui/Non)?", 2, 0)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
 		Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "Non|~Oui", $PROG_TITLE & $PROG_VERSION, "Le Nombre de dossiers de travail > 15 : " & UBound($Liste, 1) - 1 & " dossiers"  & @CRLF _
-				 & "Veuillez vÃ©rifier la liste de candidats dans ce Labo pour cette sÃ©ance." & @CRLF _
-				 & "Si vous dÃ©cider de poursuivre cette opÃ©ration, la grille d'Ã©valuation, comprendrait uniquement les 15 premiers dossiers!" & @CRLF & @CRLF _
-				 & "voulez-vous continuer quand mÃªme?" & @CRLF, 0)
+				 & "Veuillez vérifier la liste de candidats dans ce Labo pour cette séance." & @CRLF _
+				 & "Si vous décider de poursuivre cette opération, la grille d'évaluation, comprendrait uniquement les 15 premiers dossiers!" & @CRLF & @CRLF _
+				 & "voulez-vous continuer quand même?" & @CRLF, 0)
 
 		If $Rep = 2 Then
 			_Logging("Oui. Continuer avec  " & UBound($Liste, 1) - 1 & " dossiers.", 5, 0)
@@ -2980,16 +2980,16 @@ Func Sauvegarder()
 
 
 	Local $TmpSpaces = "                            "
-	_Logging("Liste prÃªte Ã  sauvegarder : " & UBound($Liste, 1) - 1 & " dossier(s)", 4) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+	_Logging("Liste prête à sauvegarder : " & UBound($Liste, 1) - 1 & " dossier(s)", 4) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 	_Logging("Liste : " & _ArrayToString($Liste, "", 1, -1, @CRLF & $TmpSpaces, 0, 0), 2, 0) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
-	;ici - Au moins un dossier sauvegardÃ©
+	;ici - Au moins un dossier sauvegardé
 
-	SplashTextOn("Sans Titre", "CrÃ©ation du dossier de sauvegarde." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	SplashTextOn("Sans Titre", "Création du dossier de sauvegarde." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 
 
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;~ CrÃ©ation du Sous-dossier de sauvegarde
+;~ Création du Sous-dossier de sauvegarde
 	Local $DestLocalFldr = IniRead($Lecteur & $DossierSauve & "\0-BacCollector\BacCollector.ini", "Params", "SousDossierSauve", "-1")
 	If $DestLocalFldr = -1 Or StringRegExp(StringLeft($DestLocalFldr, 2), "([0-9]{2})", 0) = 0 Then
 		$Tmp = "01"
@@ -3004,9 +3004,9 @@ Func Sauvegarder()
 	EndIf
 
 	$DestLocalFldr = $Tmp
-;~ 	$DestLocalFldr &= '-' & "L" & StringRight(GUICtrlRead($cLabo), 1) & "S" & StringRight(GUICtrlRead($cSeance), 1) ;L1S3: Labo-1 SÃ©ance-3
+;~ 	$DestLocalFldr &= '-' & "L" & StringRight(GUICtrlRead($cLabo), 1) & "S" & StringRight(GUICtrlRead($cSeance), 1) ;L1S3: Labo-1 Séance-3
 ;~ 	$DestLocalFldr &= '-' & @MDAY & _MonthName(@MON) & @YEAR
-	$DestLocalFldr &= '__' & "Labo" & StringRight(GUICtrlRead($cLabo), 1) & "_SÃ©ance" & StringRight(GUICtrlRead($cSeance), 1) ;L1S3: Labo-1 SÃ©ance-3
+	$DestLocalFldr &= '__' & "Labo" & StringRight(GUICtrlRead($cLabo), 1) & "_Séance" & StringRight(GUICtrlRead($cSeance), 1) ;L1S3: Labo-1 Séance-3
 ;~ 	$DestLocalFldr &= '__' &GUICtrlRead($cLabo) & "_" & GUICtrlRead($cSeance)
 	$DestLocalFldr &= '__' & @MDAY & "-" & @MON & "-" & @YEAR
 	$DestLocalFldr &= '__' & @HOUR & "h" & @MIN
@@ -3017,15 +3017,15 @@ Func Sauvegarder()
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;;;Log+++++++
-	_Logging("CrÃ©ation du dossier de sauvegarde: " & @CRLF & "         """ & $DestLocalFldr & """", $TmpError) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+	_Logging("Création du dossier de sauvegarde: " & @CRLF & "         """ & $DestLocalFldr & """", $TmpError) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 	If $TmpError = 0 Then ;1:Success 0:Failure
-		_Logging("Sauvegarde annulÃ©e", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+		_Logging("Sauvegarde annulée", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 		_Logging("______", 2, 0)
 		SplashOff()
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Ã‰chec lors de la crÃ©ation du dossier de sauvegarde: " & @CRLF _
-				 & "   Â» " & $DestLocalFldr & @CRLF _
-				 & "L'opÃ©ration de sauvegarde est annulÃ©e" & @CRLF, 0)
+		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Échec lors de la création du dossier de sauvegarde: " & @CRLF _
+				 & "   » " & $DestLocalFldr & @CRLF _
+				 & "L'opération de sauvegarde est annulée" & @CRLF, 0)
 		Return
 	EndIf
 	;;;Log+++++++
@@ -3034,7 +3034,7 @@ Func Sauvegarder()
 	If $Matiere = "InfoProg" Then
 		$KesMat = "Informatique / Algorithmique et Programmation"
 	Else
-		$KesMat = "STI - SystÃ¨mes & Technologies Informatiques (ou TIC)"
+		$KesMat = "STI - Systèmes & Technologies Informatiques (ou TIC)"
 	EndIf
 
 ;~ 	Local $DossierCapture = ""
@@ -3046,10 +3046,10 @@ Func Sauvegarder()
 	$sRapport &= $LIGNE
 	$sRapport &= @CRLF
 	$sRapport &= "Date         : " & @MDAY & "/" & @MON & "/" & @YEAR & " - " & @HOUR & ":" & @MIN & @CRLF
-	$sRapport &= "Examen       : " & "BaccalaurÃ©at " & GUICtrlRead($cBac) & @CRLF
-	$sRapport &= "Ã‰preuve      : " & $KesMat & @CRLF
+	$sRapport &= "Examen       : " & "Baccalauréat " & GUICtrlRead($cBac) & @CRLF
+	$sRapport &= "Épreuve      : " & $KesMat & @CRLF
 	$sRapport &= "Laboratoire  : " & GUICtrlRead($cLabo) & @CRLF
-	$sRapport &= "SÃ©ance       : " & GUICtrlRead($cSeance) & @CRLF
+	$sRapport &= "Séance       : " & GUICtrlRead($cSeance) & @CRLF
 	$sRapport &= @CRLF
 	$sRapport &= "Computer ID  : " & _GetUUID() & @CRLF
 	$sRapport &= "Dossier Sauve: " & $DestLocalFldr & @CRLF
@@ -3060,12 +3060,12 @@ Func Sauvegarder()
 ;~ 	$sRapport &= "Nombre de candidats : " & UBound($Liste, 1)-1 & @CRLF
 	$sRapport &= @CRLF
 	$sRapport &= $LIGNE
-	$sRapport &= _FormatCol("#", 8) & _FormatCol("NÂ°Inscri.", 16) & _FormatCol("Files", 8) & _FormatCol("Taille", 16) & "Note/Remarque" & @CRLF
+	$sRapport &= _FormatCol("#", 8) & _FormatCol("N°Inscri.", 16) & _FormatCol("Files", 8) & _FormatCol("Taille", 16) & "Note/Remarque" & @CRLF
 	$sRapport &= $LIGNE
 
 	SplashOff()
 	Local $N = UBound($Liste, 1) - 1
-	ProgressOn($PROG_TITLE & $PROG_VERSION, "OpÃ©ration de sauvegarde [" & $N & " dossiers]", "", Default, Default, 1)
+	ProgressOn($PROG_TITLE & $PROG_VERSION, "Opération de sauvegarde [" & $N & " dossiers]", "", Default, Default, 1)
 
 	Local $iTotNotes = 0
 	For $i = 1 To $N
@@ -3080,26 +3080,26 @@ Func Sauvegarder()
 			$sRapport &= @CRLF
 		Else
 			$iNberreurs += 1
-			$sRapport &= "ProblÃ¨me lors de la copie" & @CRLF
+			$sRapport &= "Problème lors de la copie" & @CRLF
 		EndIf
 		;;;Log+++++++
 	Next
-	ProgressSet(Round(($i-1) / $N * 100), "[" & Round(($i-1) / $N * 100) & "%] " & "CrÃ©ation du Rapport et de la Grille d'Ã‰valuation.")
+	ProgressSet(Round(($i-1) / $N * 100), "[" & Round(($i-1) / $N * 100) & "%] " & "Création du Rapport et de la Grille d'Évaluation.")
 	;;;;;;;;;;;;;;;------------------
 	Local $TmpListeCaniats =  $Liste
-;~ 	_ArrayDisplay($Liste, $PROG_TITLE ,"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ 	_ArrayDisplay($Liste, $PROG_TITLE ,"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 	_ArrayColDelete($TmpListeCaniats, 1)
 	_ArrayColDelete($TmpListeCaniats, 1)
 ;~ 	_ArrayColDelete($TmpListeCaniats, 1, True)
 	_ArrayDelete($TmpListeCaniats , 0)
 	$KesNomGrilleEval = _GenererGrilleEvaluation($TmpListeCaniats)
 	If $KesNomGrilleEval Then
-		_Logging("CrÃ©ation de la grille d'Ã©valuation: " & @CRLF & "         """ & $KesNomGrilleEval & """", 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+		_Logging("Création de la grille d'évaluation: " & @CRLF & "         """ & $KesNomGrilleEval & """", 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 	Else
-		_Logging("CrÃ©ation de la grille d'Ã©valuation.", 0) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+		_Logging("Création de la grille d'évaluation.", 0) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 	EndIf
 	;;;;;;;;;;;;;;;------------------
-	ProgressSet(Round(($i-1) / $N * 100), "[" & Round(($i-1) / $N * 100) & "%] " & "GÃ©nÃ©ration du Rapport.")
+	ProgressSet(Round(($i-1) / $N * 100), "[" & Round(($i-1) / $N * 100) & "%] " & "Génération du Rapport.")
 	$sRapport &= $LIGNE
 	$sRapport &= _FormatCol("Totaux:", 8) & _FormatCol(UBound($Liste, 1) - 1, 16) _
 			 & _FormatCol($iTotFiles_DossiersRecup, 8) & _FormatCol(_FineSize($iTotSize_DossiersRecup), 16) & $iTotNotes & " Note(s)" & @CRLF
@@ -3111,7 +3111,7 @@ Func Sauvegarder()
 		$TmpError = FileWrite($FileRapportUSB, $sRapport)
 		FileClose($FileRapportUSB)
 	EndIf
-	_Logging("CrÃ©ation du Rapport : " & @CRLF & "         """ & $sCheminScripDir & "Rapport.txt""", $TmpError) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+	_Logging("Création du Rapport : " & @CRLF & "         """ & $sCheminScripDir & "Rapport.txt""", $TmpError) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 
 
 	Local $FileRapportHDD = FileOpen($DestLocalFldr & "Rapport.txt", 2)
@@ -3120,37 +3120,37 @@ Func Sauvegarder()
 		$TmpError = FileWrite($FileRapportHDD, $sRapport)
 		FileClose($FileRapportHDD)
 	EndIf
-	_Logging("CrÃ©ation du Rapport : " & @CRLF & "         """ & $DestLocalFldr & "Rapport.txt""", $TmpError) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+	_Logging("Création du Rapport : " & @CRLF & "         """ & $DestLocalFldr & "Rapport.txt""", $TmpError) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 	ProgressOff()
 ;~ 	SplashOff()
 	If $iNberreurs = 0 Then
-		_Logging("Sauvegarde terminÃ©e avec succÃ¨s", 3, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+		_Logging("Sauvegarde terminée avec succès", 3, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 		_Logging("______", 2, 0)
 		_CopierLog($DestLocalFldr)
 		_ExtMsgBoxSet(1, 0, $GUI_COLOR_CENTER, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		Local $Rep = _ExtMsgBox(64, "Non|~Oui", $PROG_TITLE & $PROG_VERSION, "La Sauvegarde est terminÃ©e avec succÃ¨s." & @CRLF & @CRLF _
-				 & "Deux copies du rapport de l'opÃ©ration sont enregistrÃ©es sous: " & @CRLF _
+		Local $Rep = _ExtMsgBox(64, "Non|~Oui", $PROG_TITLE & $PROG_VERSION, "La Sauvegarde est terminée avec succès." & @CRLF & @CRLF _
+				 & "Deux copies du rapport de l'opération sont enregistrées sous: " & @CRLF _
 				 & "1. " & $sCheminScripDir & "Rapport.txt" & @CRLF _
 				 & "2. " & $DestLocalFldr & "Rapport.txt" & @CRLF & @CRLF _
 				 & "Voulez-vous ouvrir le rapport maintenant?" & @CRLF, 0)
 
 	ElseIf $iNberreurs = 1 Then
-		_Logging("Sauvegarde terminÃ©e avec une seule erreur", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+		_Logging("Sauvegarde terminée avec une seule erreur", 5, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 		_Logging("______", 2, 0)
 		_CopierLog($DestLocalFldr)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "Non|~Oui", $PROG_TITLE & $PROG_VERSION, "La sauvegarde est terminÃ©e, mais il y a eu une erreur." & @CRLF & @CRLF _
-				 & "Deux copies du rapport de l'opÃ©ration sont enregistrÃ©es sous: " & @CRLF _
+		Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "Non|~Oui", $PROG_TITLE & $PROG_VERSION, "La sauvegarde est terminée, mais il y a eu une erreur." & @CRLF & @CRLF _
+				 & "Deux copies du rapport de l'opération sont enregistrées sous: " & @CRLF _
 				 & "1. " & $sCheminScripDir & "Rapport.txt" & @CRLF _
 				 & "2. " & $DestLocalFldr & "Rapport.txt" & @CRLF & @CRLF _
 				 & "Voulez-vous ouvrir le rapport maintenant?" & @CRLF, 0)
 	Else
-		_Logging("RÃ©cupÃ©ration terminÃ©e, avec " & $iNberreurs & " erreurs", 5, 1)
+		_Logging("Récupération terminée, avec " & $iNberreurs & " erreurs", 5, 1)
 		_Logging("______", 2, 0)
 		_CopierLog($DestLocalFldr)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "Non|~Oui", $PROG_TITLE & $PROG_VERSION, "La sauvegarde est terminÃ©e, mais il y a eu " & $iNberreurs & " erreurs." & @CRLF & @CRLF _
-				 & "Deux copies du rapport de l'opÃ©ration sont enregistrÃ©es sous: " & @CRLF _
+		Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "Non|~Oui", $PROG_TITLE & $PROG_VERSION, "La sauvegarde est terminée, mais il y a eu " & $iNberreurs & " erreurs." & @CRLF & @CRLF _
+				 & "Deux copies du rapport de l'opération sont enregistrées sous: " & @CRLF _
 				 & "1. " & $sCheminScripDir & "Rapport.txt" & @CRLF _
 				 & "2. " & $DestLocalFldr & "Rapport.txt" & @CRLF & @CRLF _
 				 & "Voulez-vous ouvrir le rapport maintenant?" & @CRLF, 0)
@@ -3168,7 +3168,7 @@ Func Sauvegarder()
 			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Les deux copie du rapport: "& @CRLF _
 				 & "1. " & $sCheminScripDir & "Rapport.txt" & @CRLF _
 				 & "2. " & $DestLocalFldr & "Rapport.txt" & @CRLF & @CRLF _
-				 & "ont Ã©tÃ© dÃ©placÃ©s ou supprimÃ©s!!" & @CRLF, 0)
+				 & "ont été déplacés ou supprimés!!" & @CRLF, 0)
 		EndIf
 	Else
 		_Logging("Non.", 2, 0)
@@ -3176,26 +3176,26 @@ Func Sauvegarder()
 	EndIf
 EndFunc   ;==>Sauvegarder
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _FormatCol($sString, $iReservedSpace)
 	$sString &= "                                    "
 	Return StringLeft($sString, $iReservedSpace)
 EndFunc   ;==>_FormatCol
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _ListeDeDossiersRecuperes($SearchMask = "??????", $RegEx = "([0-9]{6})")
-;~ 	SplashTextOn("Sans Titre", "PrÃ©paration de la liste des dossiers rÃ©cupÃ©rÃ©s." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
-	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des dossiers rÃ©cupÃ©rÃ©s:", "", Default, Default, 1)
+;~ 	SplashTextOn("Sans Titre", "Préparation de la liste des dossiers récupérés." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des dossiers récupérés:", "", Default, Default, 1)
 	Local $sListeDossiersRecuperes = ""
 	Local $iNombreDossiersRecuperes = 0
 	Local $iTailleTotaleDossiersRecuperes = 0
 	Local $sDir, $aFolderInfo, $FolderSize, $FilesCount
 
-	Global $DossiersNonConformesPourCandidatsAbsents = "" ;Sans aucun fichier mais ne contient pas un dossier nommÃ© "Absent"
+	Global $DossiersNonConformesPourCandidatsAbsents = "" ;Sans aucun fichier mais ne contient pas un dossier nommé "Absent"
 	Local $TmpList
 
 	Local $sChemin = @ScriptDir ;
@@ -3213,7 +3213,7 @@ Func _ListeDeDossiersRecuperes($SearchMask = "??????", $RegEx = "([0-9]{6})")
 		For $N = 1 To $Liste[0]
 			$sDir = $Liste[$N]
 ;~ 			ProgressSet(Round($n/$Liste[0]*100), StringRegExpReplace($sDir, "^.*\\", ""))
-			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "VÃ©rif. de : [" & StringRegExpReplace($sDir, "^.*\\", "") & "]")
+			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "Vérif. de : [" & StringRegExpReplace($sDir, "^.*\\", "") & "]")
 			$Fldr_Name_Relative_Path = "Bureau\"
 			If StringRegExp($sDir, $RegEx, 0) = 1 Then
 				$aFolderInfo = DirGetSize($sChemin & $sDir, 1)
@@ -3224,23 +3224,23 @@ Func _ListeDeDossiersRecuperes($SearchMask = "??????", $RegEx = "([0-9]{6})")
 					$FilesCount = $aFolderInfo[1]
 					$sDir = StringLeft($sDir, 3) & " " & StringRight($sDir, 3)
 					If ($FilesCount = 0) And ($aFolderInfo[0] = 0) Then ;Nb Fichiers =0 & Taille =0
-						$sListeDossiersRecuperes = $sListeDossiersRecuperes & "   Â» " & $sDir & "  ____Abs.____" & @CRLF
+						$sListeDossiersRecuperes = $sListeDossiersRecuperes & "   » " & $sDir & "  ____Abs.____" & @CRLF
 					Else
-						$sListeDossiersRecuperes = $sListeDossiersRecuperes & "   Â» " & $sDir & "  [" & $FolderSize & "]" & @CRLF
+						$sListeDossiersRecuperes = $sListeDossiersRecuperes & "   » " & $sDir & "  [" & $FolderSize & "]" & @CRLF
 					EndIf
 				EndIf
 				;----
 				If ($aFolderInfo[1] = 0) And ($aFolderInfo[0] = 0) Then ;Nb Fichiers =0 & Taille =0
 					$TmpList = _FileListToArray($sChemin & $Liste[$N] & "\", "Abs*", $FLTA_FOLDERS)
 					If IsArray($TmpList) = 0 Or $TmpList[0] = 0 Then
-						$DossiersNonConformesPourCandidatsAbsents &= @TAB & "Â» " & $Liste[$N] & @CRLF
+						$DossiersNonConformesPourCandidatsAbsents &= @TAB & "» " & $Liste[$N] & @CRLF
 					EndIf
 				EndIf
 				;----
 			EndIf
 		Next
 		ProgressOff() ;Set(Round($n/$Liste[0])*100, StringRegExpReplace($sDir, "^.*\\", ""))
-		SplashTextOn("Sans Titre", "Affichage de la liste des dossiers rÃ©cupÃ©rÃ©s." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+		SplashTextOn("Sans Titre", "Affichage de la liste des dossiers récupérés." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 		If $iNombreDossiersRecuperes > 1 Then
 			$sListeDossiersRecuperes = $iNombreDossiersRecuperes & " Dossiers  [" & _FineSize($iTailleTotaleDossiersRecuperes) & "] :" _
 					 & @CRLF & @CRLF & $sListeDossiersRecuperes
@@ -3254,16 +3254,16 @@ Func _ListeDeDossiersRecuperes($SearchMask = "??????", $RegEx = "([0-9]{6})")
 	Return $sListeDossiersRecuperes
 EndFunc   ;==>_ListeDeDossiersRecuperes
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _ListeDApplicationsOuvertes()
 ;~ 	SplashTextOn("Sans Titre", "Recherche de logiciels ouverts." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
-	ProgressOn("", "VÃ©rif. des logiciels ouverts:", "", Default, Default, 1)
+	ProgressOn("", "Vérif. des logiciels ouverts:", "", Default, Default, 1)
 
 	Local $App = "" ;
 
-;~ //////////////////////////TPW 1.5-DÃ©but
+;~ //////////////////////////TPW 1.5-Début
 	Local $wintitle, $winmatchmode, $reswin
 	$wintitle = "Turbo Pascal" ; 16 bits app window title, case sensitive
 
@@ -3272,7 +3272,7 @@ Func _ListeDApplicationsOuvertes()
 	;$winmatchmode = 2  ; Match any substring in the title  for the 16 bits app window title, case sensitive
 	$winmatchmode = 3 ; Exact title match                 for the 16 bits app window title, case sensitive
 	If WOWAPPEXISTS($wintitle, $winmatchmode) = 1 Then
-		$App = $App & "Â» TPW 1.5" & @CRLF
+		$App = $App & "» TPW 1.5" & @CRLF
 	EndIf
 ;~ //////////////////////////TPW 1.5-Fin
 
@@ -3316,28 +3316,28 @@ Func _ListeDApplicationsOuvertes()
 
 	$N = UBound($SoftsToClose, 1) - 1
 	For $i = 0 To $N
-		ProgressSet(Round($i / $N * 100), "[" & Round($i / $N * 100) & "%] " & "VÃ©rif. de : " & $SoftsToClose[$i][0])
+		ProgressSet(Round($i / $N * 100), "[" & Round($i / $N * 100) & "%] " & "Vérif. de : " & $SoftsToClose[$i][0])
 		If $SoftsToClose[$i][2] = 1 Then
-			If ProcessExists($SoftsToClose[$i][1]) Then $App = $App & "Â» " & $SoftsToClose[$i][0] & @CRLF
+			If ProcessExists($SoftsToClose[$i][1]) Then $App = $App & "» " & $SoftsToClose[$i][0] & @CRLF
 		ElseIf $SoftsToClose[$i][2] = 0 Then
-			If _MyProcessByPartName($SoftsToClose[$i][1]) Then $App = $App & "Â» " & $SoftsToClose[$i][0] & @CRLF
+			If _MyProcessByPartName($SoftsToClose[$i][1]) Then $App = $App & "» " & $SoftsToClose[$i][0] & @CRLF
 		ElseIf $SoftsToClose[$i][2] = 2 Then ;Openoffice /LibreOffice Process = soffice.bin
 			If ProcessExists($SoftsToClose[$i][1]) Then
 				Local $aWinList = WinList("[REGEXPTITLE:(?i)Office]")
 				_ArrayDelete($aWinList, 0)
 ;~ 				_ArraySort($aWinList)
-				If _ArraySearch($aWinList, ".*LibreOffice Base", 0, 0, 0, 3) <> -1 Then $App = $App & "Â» " & "LibreOffice Base" & @CRLF
-				If _ArraySearch($aWinList, ".*LibreOffice Calc", 0, 0, 0, 3) <> -1 Then $App = $App & "Â» " & "LibreOffice Calc" & @CRLF
-				If _ArraySearch($aWinList, ".*LibreOffice Draw", 0, 0, 0, 3) <> -1 Then $App = $App & "Â» " & "LibreOffice Draw" & @CRLF
-				If _ArraySearch($aWinList, ".*LibreOffice Impress", 0, 0, 0, 3) <> -1 Then $App = $App & "Â» " & "LibreOffice Impress" & @CRLF
-				If _ArraySearch($aWinList, ".*LibreOffice Math", 0, 0, 0, 3) <> -1 Then $App = $App & "Â» " & "LibreOffice Math" & @CRLF
-				If _ArraySearch($aWinList, ".*LibreOffice Writer", 0, 0, 0, 3) <> -1 Then $App = $App & "Â» " & "LibreOffice Writer" & @CRLF
-				If _ArraySearch($aWinList, ".*OpenOffice Base", 0, 0, 0, 3) <> -1 Then $App = $App & "Â» " & "OpenOffice Base" & @CRLF
-				If _ArraySearch($aWinList, ".*OpenOffice Calc", 0, 0, 0, 3) <> -1 Then $App = $App & "Â» " & "OpenOffice Calc" & @CRLF
-				If _ArraySearch($aWinList, ".*OpenOffice Draw", 0, 0, 0, 3) <> -1 Then $App = $App & "Â» " & "OpenOffice Draw" & @CRLF
-				If _ArraySearch($aWinList, ".*OpenOffice Impress", 0, 0, 0, 3) <> -1 Then $App = $App & "Â» " & "OpenOffice Impress" & @CRLF
-				If _ArraySearch($aWinList, ".*OpenOffice Math", 0, 0, 0, 3) <> -1 Then $App = $App & "Â» " & "OpenOffice Math" & @CRLF
-				If _ArraySearch($aWinList, ".*OpenOffice Writer", 0, 0, 0, 3) <> -1 Then $App = $App & "Â» " & "OpenOffice Writer" & @CRLF
+				If _ArraySearch($aWinList, ".*LibreOffice Base", 0, 0, 0, 3) <> -1 Then $App = $App & "» " & "LibreOffice Base" & @CRLF
+				If _ArraySearch($aWinList, ".*LibreOffice Calc", 0, 0, 0, 3) <> -1 Then $App = $App & "» " & "LibreOffice Calc" & @CRLF
+				If _ArraySearch($aWinList, ".*LibreOffice Draw", 0, 0, 0, 3) <> -1 Then $App = $App & "» " & "LibreOffice Draw" & @CRLF
+				If _ArraySearch($aWinList, ".*LibreOffice Impress", 0, 0, 0, 3) <> -1 Then $App = $App & "» " & "LibreOffice Impress" & @CRLF
+				If _ArraySearch($aWinList, ".*LibreOffice Math", 0, 0, 0, 3) <> -1 Then $App = $App & "» " & "LibreOffice Math" & @CRLF
+				If _ArraySearch($aWinList, ".*LibreOffice Writer", 0, 0, 0, 3) <> -1 Then $App = $App & "» " & "LibreOffice Writer" & @CRLF
+				If _ArraySearch($aWinList, ".*OpenOffice Base", 0, 0, 0, 3) <> -1 Then $App = $App & "» " & "OpenOffice Base" & @CRLF
+				If _ArraySearch($aWinList, ".*OpenOffice Calc", 0, 0, 0, 3) <> -1 Then $App = $App & "» " & "OpenOffice Calc" & @CRLF
+				If _ArraySearch($aWinList, ".*OpenOffice Draw", 0, 0, 0, 3) <> -1 Then $App = $App & "» " & "OpenOffice Draw" & @CRLF
+				If _ArraySearch($aWinList, ".*OpenOffice Impress", 0, 0, 0, 3) <> -1 Then $App = $App & "» " & "OpenOffice Impress" & @CRLF
+				If _ArraySearch($aWinList, ".*OpenOffice Math", 0, 0, 0, 3) <> -1 Then $App = $App & "» " & "OpenOffice Math" & @CRLF
+				If _ArraySearch($aWinList, ".*OpenOffice Writer", 0, 0, 0, 3) <> -1 Then $App = $App & "» " & "OpenOffice Writer" & @CRLF
 
 			EndIf
 		EndIf
@@ -3350,7 +3350,7 @@ Func _ListeDApplicationsOuvertes()
 		$temp = _WinGetByPID($aPythonwProcess[$i][1])
 		$sTitle = WinGetTitle($temp)
 		if $sTitle <> "" Then
-			$App = $App & "Â» " & $sTitle & @CRLF
+			$App = $App & "» " & $sTitle & @CRLF
 		EndIf
 	Next
 
@@ -3361,7 +3361,7 @@ Func _ListeDApplicationsOuvertes()
 		$temp = _WinGetByPID($aPythonwProcess[$i][1])
 		$sTitle = WinGetTitle($temp)
 		if $sTitle <> "" Then
-			$App = $App & "Â» " & $sTitle & @CRLF
+			$App = $App & "» " & $sTitle & @CRLF
 		EndIf
 	Next
 
@@ -3371,17 +3371,17 @@ Func _ListeDApplicationsOuvertes()
 
 EndFunc   ;==>_ListeDApplicationsOuvertes
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _NumeroCandidat()
-	SplashTextOn("Sans Titre", "DÃ©termination du numÃ©ro d'inscription du candidat." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	SplashTextOn("Sans Titre", "Détermination du numéro d'inscription du candidat." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	Local $Bac = DossiersBac() ;
 	Local $Liste[1] = [0] ;
 	Local $ReturnPath = False
 	Local $Flag = 0 ; 0:All, 1:Files only , 2:Fldrs only
 	Local $NomFrom = "Bac"
-	_Logging("Recherche du numÃ©ro d'inscription du candidat dans les dossiers ""Bac20xx"".", 2, 0)
+	_Logging("Recherche du numéro d'inscription du candidat dans les dossiers ""Bac20xx"".", 2, 0)
 	If $Bac[0] <> 0 Then
 		For $i = 1 To $Bac[0]
 			$Kes = _FileListToArray($Bac[$i], "*", $Flag, $ReturnPath)
@@ -3395,14 +3395,14 @@ Func _NumeroCandidat()
 	Local $sDrive = "", $sDir = "", $FileName = "", $sExtension = ""
 	Local $sNumCandidat = '000000'
 	Local $Trouve = False
-;~ _ArrayDisplay($Liste, '',"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($Liste, '',"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 ;~ 	If IsArray($Liste) Then
 ;~ 		For $N = 1 To $Liste[0]
 ;~ 			$aPathSplit = _PathSplit($Liste[$N], $sDrive, $sDir, $FileName, $sExtension)
 ;~ 			If StringRegExp($FileName, "([0-9]{6})", 0) = 1 Then
 ;~ 				$sNumCandidat = $FileName
 ;~ 				$Trouve = True
-;~ 				_Logging("NumÃ©ro trouvÃ©: """ & $Liste[$N] & """.", 2, 0)
+;~ 				_Logging("Numéro trouvé: """ & $Liste[$N] & """.", 2, 0)
 ;~ 				ExitLoop
 ;~ 			EndIf
 ;~ 		Next
@@ -3415,30 +3415,30 @@ Func _NumeroCandidat()
 			If @error = 0 Then
 				$sNumCandidat = $aTmp[0]
 				$Trouve = True
-				_Logging("NumÃ©ro trouvÃ©: """ & $Liste[$N] & """.", 2, 0)
+				_Logging("Numéro trouvé: """ & $Liste[$N] & """.", 2, 0)
 				ExitLoop
 			EndIf
 		Next
 	EndIf
 
-	If Not $Trouve Then _Logging("Aucun numÃ©ro trouvÃ©.", 2, 0)
+	If Not $Trouve Then _Logging("Aucun numéro trouvé.", 2, 0)
 	SplashOff()
 ;~ 	WinActivate ($hMainGUI)
 	Return $sNumCandidat
 EndFunc   ;==>_NumeroCandidat
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _NumeroCandidatTic()
-	SplashTextOn("Sans Titre", "DÃ©termination du numÃ©ro d'inscription du candidat." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
-	_Logging("Recherche du numÃ©ro d'inscription du candidat Ã  partir des noms des sites web.", 2, 0)
+	SplashTextOn("Sans Titre", "Détermination du numéro d'inscription du candidat." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	_Logging("Recherche du numéro d'inscription du candidat à partir des noms des sites web.", 2, 0)
 
 	Local $Www = DossiersEasyPHPwww() ;
 	Local $Liste[1] = [0] ;
 	Local $ReturnPath = False
 	Local $Flag = 2 ; 0:All, 1:Files only , 2:Fldrs only
-;~ _ArrayDisplay($www, '',"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($www, '',"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 	If $Www[0] <> 0 Then
 		For $i = 1 To $Www[0]
 			$Kes = _FileListToArray($Www[$i], "*", $Flag, $ReturnPath)
@@ -3452,26 +3452,26 @@ Func _NumeroCandidatTic()
 	Local $FldrName
 	Local $sNumCandidat = '000000'
 	Local $Trouve = False
-;~ _ArrayDisplay($Liste, '',"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($Liste, '',"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 	If IsArray($Liste) Then
 		For $N = 1 To $Liste[0]
 			$FldrName = $Liste[$N]
 			If StringRegExp($FldrName, "(.)*([0-9]{6}$)", 0) = 1 Then
 				$sNumCandidat = StringRight($FldrName, 6)
 				$Trouve = True
-				_Logging("NumÃ©ro trouvÃ©: """ & $Liste[$N] & """.", 2, 0)
+				_Logging("Numéro trouvé: """ & $Liste[$N] & """.", 2, 0)
 				ExitLoop
 			EndIf
 		Next
 	EndIf
 
 	If Not $Trouve Then
-		_Logging("Recherche du numÃ©ro d'inscription du candidat Ã  partir des noms des bases de donnÃ©es.", 2, 0)
+		_Logging("Recherche du numéro d'inscription du candidat à partir des noms des bases de données.", 2, 0)
 		Local $Data = DossiersEasyPHPdata() ;
 		Local $Liste[1] = [0] ;
 		Local $ReturnPath = False
 		Local $Flag = 2 ; 0:All, 1:Files only , 2:Fldrs only
-;~ _ArrayDisplay($Data, '',"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($Data, '',"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 		If $Data[0] <> 0 Then
 			For $i = 1 To $Data[0]
 				$Kes = _FileListToArray($Data[$i], "*", $Flag, $ReturnPath)
@@ -3484,14 +3484,14 @@ Func _NumeroCandidatTic()
 		EndIf
 		Local $FldrName
 		Local $sNumCandidat = '000000'
-;~ _ArrayDisplay($Liste, '',"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
+;~ _ArrayDisplay($Liste, '',"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
 		If IsArray($Liste) Then
 			For $N = 1 To $Liste[0]
 				$FldrName = $Liste[$N]
 				If StringRegExp($FldrName, "(.)*([0-9]{6}$)", 0) = 1 Then
 					$sNumCandidat = StringRight($FldrName, 6)
 					$Trouve = True
-					_Logging("NumÃ©ro trouvÃ©: """ & $Liste[$N] & """.", 2, 0)
+					_Logging("Numéro trouvé: """ & $Liste[$N] & """.", 2, 0)
 					ExitLoop
 				EndIf
 			Next
@@ -3499,15 +3499,15 @@ Func _NumeroCandidatTic()
 
 	EndIf
 
-	If Not $Trouve Then _Logging("Aucun numÃ©ro trouvÃ©.", 2, 0)
+	If Not $Trouve Then _Logging("Aucun numéro trouvé.", 2, 0)
 
 	SplashOff()
 ;~ 	WinActivate ($hMainGUI)
 	Return $sNumCandidat
 EndFunc   ;==>_NumeroCandidatTic
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _GUICtrlRichEdit_WriteLine($hWnd, $sText, $iColor = -1, $iIncrement = 0, $sAttrib = "")
 
@@ -3537,15 +3537,15 @@ Func _GUICtrlRichEdit_WriteLine($hWnd, $sText, $iColor = -1, $iIncrement = 0, $s
 
 EndFunc   ;==>_GUICtrlRichEdit_WriteLine
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _InitLogging()
 	Global $hLogFile = FileOpen(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".log", 1)
 	Local $sDateTime = "[" & _Now() & "]"
 	FileWriteLine($hLogFile, '')
 	FileWriteLine($hLogFile, '==============================================================================')
-	FileWriteLine($hLogFile, "______" & $sDateTime & "______DÃ©marrage de " & $PROG_TITLE & $PROG_VERSION)
+	FileWriteLine($hLogFile, "______" & $sDateTime & "______Démarrage de " & $PROG_TITLE & $PROG_VERSION)
 	FileWriteLine($hLogFile, '')
 	FileWriteLine($hLogFile, _SystemInfo())
 
@@ -3553,7 +3553,7 @@ Func _InitLogging()
 	Local $aDrive = DriveGetDrive('FIXED')
 
 ;~ 		_ArraySort($aDrive, 0, 1)
-	$Lecteur = @HomeDrive ; "C:" ; $aDrive[1] ; $aDrive[1] peut Ãªtre A: !!
+	$Lecteur = @HomeDrive ; "C:" ; $aDrive[1] ; $aDrive[1] peut être A: !!
 	For $i = 1 To $aDrive[0]
 		If $aDrive[$i] = @HomeDrive Then ContinueLoop
 		If (DriveGetType($aDrive[$i], $DT_BUSTYPE) <> "USB") _ ; to Exclude external Hdd(s)
@@ -3579,16 +3579,16 @@ Func _InitLogging()
 	FileWriteLine($hLogFile, '')
 EndFunc   ;==>_InitLogging
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _CopierLog($DestLocalFldr)
 	FileFlush($hLogFile)
 	FileCopy(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".log", $DestLocalFldr)
 EndFunc   ;==>_CopierLog
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _FinLogging()
 	Local $sDateTime = "[" & _Now() & "]"
@@ -3596,8 +3596,8 @@ Func _FinLogging()
 	FileClose($hLogFile)
 EndFunc   ;==>_FinLogging
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _Logging($sText, $iSuccess = 1, $iGuiLog = 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 	If Not FileExists(@ScriptDir & "\" & StringTrimRight(@ScriptName, 4) & ".log") Then
@@ -3606,15 +3606,15 @@ Func _Logging($sText, $iSuccess = 1, $iGuiLog = 1) ;$iSuccess: 0>Fail&Red , 1>Su
 
 	Local $sPreLogFile = ""
 	If $iSuccess = 0 Then
-		$sPreLogFile = "_Ã‰chec - "
+		$sPreLogFile = "_Échec - "
 	ElseIf $iSuccess = 1 Then
-		$sPreLogFile = "SuccÃ¨s - "
+		$sPreLogFile = "Succès - "
 	ElseIf $iSuccess = 2 Or $iSuccess = 3 Or $iSuccess = 4 Or $iSuccess = 5 Then
 		$sPreLogFile = "______ - " ;info
 	EndIf
 
 	If $iGuiLog = 1 Then
-		Local $sPreLogGui = "Â»Â»Â» "
+		Local $sPreLogGui = "»»» "
 		Local $Color = -1
 		If $iSuccess = 1 Then
 			$sPreLogGui = "- "
@@ -3635,15 +3635,15 @@ Func _Logging($sText, $iSuccess = 1, $iGuiLog = 1) ;$iSuccess: 0>Fail&Red , 1>Su
 	FileWriteLine($hLogFile, $sTime & " " & $sPreLogFile & $sText)
 EndFunc   ;==>_Logging
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _ClearGuiLog()
 	_GUICtrlRichEdit_SetText($GUI_Log, "")
 EndFunc   ;==>_ClearGuiLog
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _UnLockFoldersBC()
 ;~ 	_UnLockFolder($Lecteur & $DossierSauve)
@@ -3651,8 +3651,8 @@ Func _UnLockFoldersBC()
 ;~ 	_LockFolder($Lecteur & $DossierSauve)
 EndFunc   ;==>_UnLockFoldersBC
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _LockFoldersBC()
 ;~ 	_UnLockFolder($Lecteur & $DossierSauve)
@@ -3660,8 +3660,8 @@ Func _LockFoldersBC()
 	_LockFolder($Lecteur & $DossierSauve)
 EndFunc   ;==>_LockFoldersBC
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func WM_NOTIFY($hWnd, $iMsg, $wParam, $lParam)
 	#forceref $iMsg, $wParam
@@ -3706,12 +3706,12 @@ Func WM_NOTIFY($hWnd, $iMsg, $wParam, $lParam)
 	Return $GUI_RUNDEFMSG
 EndFunc   ;==>WM_NOTIFY
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _ShowInExplorer($sFileFolder)
 	If Not FileExists($sFileFolder) Then
-		MsgBox(16 + 262144, $PROG_TITLE & $PROG_VERSION, "Cet Ã©lÃ©ment a Ã©tÃ© dÃ©placÃ© ou supprimÃ©:" & @CRLF & @CRLF & """" & $sFileFolder & """", 0, $hMainGUI)
+		MsgBox(16 + 262144, $PROG_TITLE & $PROG_VERSION, "Cet élément a été déplacé ou supprimé:" & @CRLF & @CRLF & """" & $sFileFolder & """", 0, $hMainGUI)
 		Return
 	EndIf
 
@@ -3722,8 +3722,8 @@ Func _ShowInExplorer($sFileFolder)
 	EndIf
 EndFunc   ;==>_ShowInExplorer
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _OpenTempLog()
 	Local $Text = _GUICtrlRichEdit_GetText($GUI_Log)
@@ -3749,18 +3749,18 @@ Func _CheckRunningFromUsbDrive()
 ;~ _ExtMsgBox ($vIcon, $vButton, $sTitle, $sText, [$iTimeout, [$hWin, [$iVPos, [$bMain = True]]]])
 	If (DriveGetType($Drive, $DT_BUSTYPE) <> "USB") Then
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, $PROG_TITLE & " est exÃ©cutÃ© Ã  partir du disque local." & @CRLF & @CRLF _
-				 & "Le bouton ""RÃ©cupÃ©rer"" sera dÃ©sactivÃ©." & @CRLF, 8)
+		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, $PROG_TITLE & " est exécuté à partir du disque local." & @CRLF & @CRLF _
+				 & "Le bouton ""Récupérer"" sera désactivé." & @CRLF, 8)
 		GUICtrlSetState($bRecuperer, $GUI_DISABLE)
 	ElseIf Not _WinAPI_IsWritable($Drive) Then
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "Le lecteur """ & $Drive & "\"" n'est pas enregistrable, veuillez exÃ©cutr " & $PROG_TITLE & " Ã  partir d'une ClÃ© USB." & @CRLF & @CRLF _
-				 & "Le bouton ""RÃ©cupÃ©rer"" sera dÃ©sactivÃ©." & @CRLF, 4)
+		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "Le lecteur """ & $Drive & "\"" n'est pas enregistrable, veuillez exécutr " & $PROG_TITLE & " à partir d'une Clé USB." & @CRLF & @CRLF _
+				 & "Le bouton ""Récupérer"" sera désactivé." & @CRLF, 4)
 		GUICtrlSetState($bRecuperer, $GUI_DISABLE)
 	ElseIf DriveSpaceFree($Drive & "\") < 100 Then ;100 Mo
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "L'espace disque dans la ClÃ© USB est insuffisant pour la rÃ©cupÃ©ration des dossiers de travail des candidats.." & @CRLF & @CRLF _
-				 & "Le bouton ""RÃ©cupÃ©rer"" sera dÃ©sactivÃ©." & @CRLF, 4)
+		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "L'espace disque dans la Clé USB est insuffisant pour la récupération des dossiers de travail des candidats.." & @CRLF & @CRLF _
+				 & "Le bouton ""Récupérer"" sera désactivé." & @CRLF, 4)
 		GUICtrlSetState($bRecuperer, $GUI_DISABLE)
 	EndIf
 EndFunc   ;==>_CheckRunningFromUsbDrive
@@ -3771,7 +3771,7 @@ Func _UnLockAll()
 	Local $DossierSauve = "Sauvegardes"
 	Local $Lecteur = ""
 
-	;ContrÃ´le ajoutÃ© aprÃ¨s la Demo au Crefoc de Tunis 1
+	;Contrôle ajouté après la Demo au Crefoc de Tunis 1
 	Local $aDrive = DriveGetDrive('FIXED')
 	Local $TmpMsg = ""
 
@@ -3781,14 +3781,14 @@ Func _UnLockAll()
 				Then
 			$Lecteur = StringUpper($aDrive[$i] & "\")
 			If FileExists($Lecteur & $DossierSauve) Then
-				$TmpMsg &= "DÃ©verrouillage du dossier [" & $Lecteur & $DossierSauve & "]" & @CRLF
+				$TmpMsg &= "Déverrouillage du dossier [" & $Lecteur & $DossierSauve & "]" & @CRLF
 				_UnLockFolder($Lecteur & $DossierSauve)
 				FileSetAttrib($Lecteur & $DossierSauve, "-RASH")
 			EndIf
 		EndIf
 	Next
-	If RegDelete("HKCU\SOFTWARE\BacBackup") = 1 Then $TmpMsg &= @CRLF & "Suppression de l'entrÃ©e de BacCollector dans la base de registre (UUID)."
-	$TmpMsg &= @CRLF & "ExÃ©cution terminÃ©e."
+	If RegDelete("HKCU\SOFTWARE\BacBackup") = 1 Then $TmpMsg &= @CRLF & "Suppression de l'entrée de BacCollector dans la base de registre (UUID)."
+	$TmpMsg &= @CRLF & "Exécution terminée."
 	MsgBox(262144, $PROG_TITLE & $PROG_VERSION, $TmpMsg)
 EndFunc   ;==>_UnLockAll
 
@@ -3797,22 +3797,22 @@ Func _CheckBacCollectorExists()
 		Local $sScriptDrive = StringLeft(@ScriptFullPath, StringLen(@ScriptFullPath) - StringLen(@ScriptName))
 		If StringLen($sScriptDrive) = 3 And StringRegExp($sScriptDrive, "^([a-zA-Z]{1,1}:)?(\\|\/)$", 0) = 1 And Not FileExists($sScriptDrive) Then
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Le lecteur """ & $sScriptDrive & """ oÃ¹ se trouve l'exÃ©cutable """ & @ScriptName & """ n'existe plus." & @CRLF _
-					 & "Il est trÃ¨s important de ne pas retirer la ClÃ© USB avant de quitter " & $PROG_TITLE & ", car cela pourrait endommager les dossiers dÃ©jÃ  rÃ©cupÃ©rÃ©s." & @CRLF  & @CRLF _
-					 & $PROG_TITLE & " va se fermer immÃ©diatement.", 0)
+			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Le lecteur """ & $sScriptDrive & """ où se trouve l'exécutable """ & @ScriptName & """ n'existe plus." & @CRLF _
+					 & "Il est très important de ne pas retirer la Clé USB avant de quitter " & $PROG_TITLE & ", car cela pourrait endommager les dossiers déjà récupérés." & @CRLF  & @CRLF _
+					 & $PROG_TITLE & " va se fermer immédiatement.", 0)
 		Else
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "L'exÃ©cutable """ & @ScriptName & """ n'existe plus dans son emplacement d'origine." & @CRLF _
-					 & $PROG_TITLE & " va se fermer immÃ©diatement.", 0)
+			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "L'exécutable """ & @ScriptName & """ n'existe plus dans son emplacement d'origine." & @CRLF _
+					 & $PROG_TITLE & " va se fermer immédiatement.", 0)
 		EndIf
 		Exit
 	EndIf
 EndFunc
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
-#Region "GÃ©nÃ©rer Grille d'Ã©valuation" -----------------------------------------------------------------------------------
+#Region "Générer Grille d'évaluation" -----------------------------------------------------------------------------------
 Func _GenererGrilleEvaluation($aNumCandiats)
 	If Not IsArray($aNumCandiats) Then Return "La liste des Candidats n'est pas conforme."
 	Local $sSheet = ''
@@ -3832,13 +3832,13 @@ Func _GenererGrilleEvaluation($aNumCandiats)
 	$sSheet = $sSheet &  @CRLF & '<row r="6" spans="1:14" ht="91.5" customHeight="1" x14ac:dyDescent="0.2"><c r="B6" s="36" t="s"><v>2</v></c><c r="C6" s="33"/><c r="D6" s="33"/><c r="E6" s="33"/><c r="F6" s="33"/><c r="G6" s="33"/><c r="H6" s="33"/><c r="I6" s="33"/><c r="J6" s="33"/><c r="K6" s="33"/><c r="L6" s="33"/><c r="M6" s="32" t="s"><v>0</v></c><c r="N6" s="4"/></row>'
 	$sSheet = $sSheet &  @CRLF & '<row r="7" spans="1:14" s="30" customFormat="1" ht="23.1" customHeight="1" x14ac:dyDescent="0.2"><c r="A7" s="27"/><c r="B7" s="28" t="s"><v>3</v></c><c r="C7" s="28"/><c r="D7" s="28"/><c r="E7" s="28"/><c r="F7" s="28"/><c r="G7" s="28"/><c r="H7" s="28"/><c r="I7" s="28"/><c r="J7" s="28"/><c r="K7" s="28"/><c r="L7" s="28"/><c r="M7" s="28" t="str"><f>IF(SUM(C7:L7)=0,"",SUM(C7:L7))</f><v/></c><c r="N7" s="29"/></row>'
 	$sSheet = $sSheet &  @CRLF & '<row r="8" spans="1:14" ht="14.25" x14ac:dyDescent="0.2"><c r="A8" s="1"/><c r="B8" s="6"/><c r="C8" s="5"/><c r="D8" s="5"/><c r="E8" s="5"/><c r="F8" s="5"/><c r="G8" s="5"/><c r="H8" s="5"/><c r="I8" s="5"/><c r="J8" s="5"/><c r="K8" s="5"/><c r="L8" s="5"/><c r="M8" s="6"/><c r="N8" s="4"/></row>'
-	$sSheet = $sSheet &  @CRLF & '<row r="9" spans="1:14" ht="14.25" x14ac:dyDescent="0.2"><c r="B9" s="11" t="s"><v>4</v></c><c r="C9" s="6"/><c r="D9" s="6"/><c r="E9" s="6"/><c r="F9" s="6"/><c r="G9" s="6"/><c r="H9" s="6"/><c r="I9" s="6"/><c r="J9" s="6"/><c r="K9" s="6"/><c r="L9" s="6"/><c r="M9" s="12" t="s"><v>1</v></c><c r="N9" s="11" t="str"><f t="shared" ref="N9:N24" si="0">B9</f><v>NÂ° Inscri</v></c></row>'
+	$sSheet = $sSheet &  @CRLF & '<row r="9" spans="1:14" ht="14.25" x14ac:dyDescent="0.2"><c r="B9" s="11" t="s"><v>4</v></c><c r="C9" s="6"/><c r="D9" s="6"/><c r="E9" s="6"/><c r="F9" s="6"/><c r="G9" s="6"/><c r="H9" s="6"/><c r="I9" s="6"/><c r="J9" s="6"/><c r="K9" s="6"/><c r="L9" s="6"/><c r="M9" s="12" t="s"><v>1</v></c><c r="N9" s="11" t="str"><f t="shared" ref="N9:N24" si="0">B9</f><v>N° Inscri</v></c></row>'
 
 
 	Local $Ligne, $CandidNum, $ExcelLineNumber, $NumAutoCandid, $StyleCells
 	Local $CellsErrorXL_Range =''
 	Local $CellsErrorXL_AsText =''
-	$ExcelLineNumber = 9 ;Le numÃ©ro de la premiÃ¨re
+	$ExcelLineNumber = 9 ;Le numéro de la première
 
 	For $i = 0 To UBound($aNumCandiats)-1
 		$CandidNum = $aNumCandiats[$i][0]
@@ -3868,7 +3868,7 @@ Func _GenererGrilleEvaluation($aNumCandiats)
 	$sSheet = $sSheet &  @CRLF & '<printOptions horizontalCentered="1"/>'
 	$sSheet = $sSheet &  @CRLF & '<pageMargins left="0.19685039370078741" right="0.19685039370078741" top="0.19685039370078741" bottom="0.19685039370078741" header="3.937007874015748E-2" footer="0.19685039370078741"/>'
 	$sSheet = $sSheet &  @CRLF & '<pageSetup paperSize="9" orientation="landscape" r:id="rId1"/>'
-	$sSheet = $sSheet &  @CRLF & '<headerFooter><oddFooter>&amp;R&amp;"Cambria,Normal"&amp;8Grille d''Ã©valuation gÃ©nÃ©rÃ©e par &amp;"Cambria,Gras"' & $PROG_TITLE & '&amp;"Cambria,Normal"' & $PROG_VERSION & '</oddFooter></headerFooter>'
+	$sSheet = $sSheet &  @CRLF & '<headerFooter><oddFooter>&amp;R&amp;"Cambria,Normal"&amp;8Grille d''évaluation générée par &amp;"Cambria,Gras"' & $PROG_TITLE & '&amp;"Cambria,Normal"' & $PROG_VERSION & '</oddFooter></headerFooter>'
 	$sSheet = $sSheet &  @CRLF & '<ignoredErrors><ignoredError sqref="' & $CellsErrorXL_Range & '" formulaRange="1"/><ignoredError sqref="' & $CellsErrorXL_AsText & '" numberStoredAsText="1" formulaRange="1"/></ignoredErrors>'
 	$sSheet = $sSheet &  @CRLF & '</worksheet>'
 
@@ -3887,7 +3887,7 @@ Func _GenererGrilleEvaluation($aNumCandiats)
 
 	Local $sApp = ''
 	$sApp = $sApp &  '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-	$sApp = $sApp &  @CRLF & '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><Application>Microsoft Excel</Application><DocSecurity>0</DocSecurity><ScaleCrop>false</ScaleCrop><HeadingPairs><vt:vector size="4" baseType="variant"><vt:variant><vt:lpstr>Feuilles de calcul</vt:lpstr></vt:variant><vt:variant><vt:i4>1</vt:i4></vt:variant><vt:variant><vt:lpstr>Plages nommÃ©es</vt:lpstr></vt:variant><vt:variant><vt:i4>1</vt:i4></vt:variant></vt:vector></HeadingPairs><TitlesOfParts><vt:vector size="2" baseType="lpstr"><vt:lpstr>' & $sSheetName & '</vt:lpstr><vt:lpstr>''' & $sSheetName & '''!Zone_d_impression</vt:lpstr></vt:vector></TitlesOfParts><Manager>Moez Romdhane</Manager><Company>La CommunautÃ© des Enseignants d''Informatique en Tunisie</Company><LinksUpToDate>false</LinksUpToDate><SharedDoc>false</SharedDoc><HyperlinkBase>https://www.facebook.com/groups/InfoTun</HyperlinkBase><HyperlinksChanged>false</HyperlinksChanged><AppVersion>16.0300</AppVersion></Properties>'
+	$sApp = $sApp &  @CRLF & '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><Application>Microsoft Excel</Application><DocSecurity>0</DocSecurity><ScaleCrop>false</ScaleCrop><HeadingPairs><vt:vector size="4" baseType="variant"><vt:variant><vt:lpstr>Feuilles de calcul</vt:lpstr></vt:variant><vt:variant><vt:i4>1</vt:i4></vt:variant><vt:variant><vt:lpstr>Plages nommées</vt:lpstr></vt:variant><vt:variant><vt:i4>1</vt:i4></vt:variant></vt:vector></HeadingPairs><TitlesOfParts><vt:vector size="2" baseType="lpstr"><vt:lpstr>' & $sSheetName & '</vt:lpstr><vt:lpstr>''' & $sSheetName & '''!Zone_d_impression</vt:lpstr></vt:vector></TitlesOfParts><Manager>Moez Romdhane</Manager><Company>La Communauté des Enseignants d''Informatique en Tunisie</Company><LinksUpToDate>false</LinksUpToDate><SharedDoc>false</SharedDoc><HyperlinkBase>https://www.facebook.com/groups/InfoTun</HyperlinkBase><HyperlinksChanged>false</HyperlinksChanged><AppVersion>16.0300</AppVersion></Properties>'
 	Local $FileApp = FileOpen(@TempDir & "\BacCollector\" & $sFldr & "\docProps\app.xml", 256 + 2) ;$FO_UTF8_NOBOM + $FO_OVERWRITE
 	FileWrite($FileApp, $sApp)
 	FileClose($FileApp) ; Close the open file after writing
@@ -3911,8 +3911,8 @@ Func _GenererGrilleEvaluation($aNumCandiats)
 	Return $KesNomGrille
 EndFunc;==>_GenererGrilleEvaluation
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
 Func _TmpGrilleVide()
     $sFldr = StringFormat('%04X_%04X', _
@@ -3954,12 +3954,12 @@ Func _TmpGrilleVide()
 
 EndFunc   ;==>_TmpGrilleVide
 
-#EndRegion "GÃ©nÃ©rer Grille d'Ã©valuation" --------------------------------------------------------------------------------
+#EndRegion "Générer Grille d'évaluation" --------------------------------------------------------------------------------
 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– â– 
-;â– â– â– 
-;~ _ArrayDisplay($TmpList, $PROG_TITLE ,"",32,Default ,"Liste de Dossiers/Fichiers SurveillÃ©s")
-;â– â– â– 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦
+;~ _ArrayDisplay($TmpList, $PROG_TITLE ,"",32,Default ,"Liste de Dossiers/Fichiers Surveillés")
+;¦¦¦
 ;~ MsgBox ( 0, "", $sDir  )
-;â– â– â– 
+;¦¦¦
