@@ -14,10 +14,12 @@ BacCollector.log
 BacCollector.exe
 BacCollector*.7z
 BacCollector*.zip
+changelog.txt
 
 rapport*.txt
 grille*.xlsx
 
 Tests/
+BackUp/
 __dev.txt
 todo.txt
