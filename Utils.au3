@@ -384,9 +384,9 @@ Func _MonthName($MonthNum)
 
 	Return $MON
 EndFunc
-Func _GetUUID($annee=2022)
+Func _GetUUID($annee=2024)
 	$Uuid = RegRead("HKCU\SOFTWARE\BacBackup", "UUID")
-	If @error = 0 And StringRegExp($Uuid, "^((\d{4}-)(\w{4} ){2}\w{4})$") = 1 And StringLeft($Uuid, 4)>=2022 Then Return $Uuid
+	If @error = 0 And StringRegExp($Uuid, "^((\d{4}-)(\w{4} ){2}\w{4})$") = 1 And StringLeft($Uuid, 4)>=2024 Then Return $Uuid
     $Uuid = $annee & "-" & StringFormat('%04X %04X %04X', _
             Random(0, 0xffff), _
             BitOR(Random(0, 0x0fff), 0x4000), _
