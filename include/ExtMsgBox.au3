@@ -26,10 +26,10 @@ Global Const $EMB_ICONINFO = 64 ; Icon consisting of an 'i' in a circle
 
 ; #GLOBAL VARIABLES# =================================================================================================
 
-Global $g_aEMB_Settings[14]
+Global $g_aEMB_Settings[15]
 ; [0] = Style			[6]  = Max Width              [12] = Title bar reduction
 ; [1] = Justification	[7]  = Absolute Width         [13] = Focused button character
-; [2] = Back Colour		[8]  = Default Back Colour
+; [2] = Back Colour		[8]  = Default Back Colour    [14] = Default titlebar icon
 ; [3] = Text Colour		[9]  = Default Text Colour
 ; [4] = Font Size		[10] = Default Font Size
 ; [5] = Font Name		[11] = Default Font Name
@@ -58,7 +58,7 @@ If Not @error And $g_aEMB_TempArray[1] = True Then
 EndIf
 $g_aEMB_TempArray = 0
 
-; Set current settings
+; Set default values
 $g_aEMB_Settings[0] = 0
 $g_aEMB_Settings[1] = 0
 $g_aEMB_Settings[2] = $g_aEMB_Settings[8]
@@ -68,6 +68,7 @@ $g_aEMB_Settings[5] = $g_aEMB_Settings[11]
 $g_aEMB_Settings[6] = 370
 $g_aEMB_Settings[7] = 500
 $g_aEMB_Settings[13] = "~"
+$g_aEMB_Settings[14] = ""
 
 ; #CURRENT# ==========================================================================================================
 ; _ExtMsgBoxSet: Sets the GUI style, justification, colours, font and max width for subsequent _ExtMsgBox function calls
@@ -81,39 +82,43 @@ $g_aEMB_Settings[13] = "~"
 ; #FUNCTION# =========================================================================================================
 ; Name...........: _ExtMsgBoxSet
 ; Description ...: Sets the GUI style, justification, colours, font and max width for subsequent _ExtMsgBox function calls
-; Syntax.........: _ExtMsgBoxSet($iStyle, $iJust, [$iBkCol, [$iCol, [$sFont_Size, [$iFont_Name, [$iWidth, [ $iWidth_Abs, $sFocus_Char]]]]]]])
-; Parameters ....: $iStyle       -> 0 (Default) - Taskbar Button, TOPMOST, button in user font, no tab expansion,
-;                                       no checkbox, titlebar icon, active closure [X] and SysMenu close
-;                                   Combine following to change:
-;                                       1   = No Taskbar Button
-;                                       2   = TOPMOST Style not set
-;                                       4   = Buttons use default font
-;                                       8   = Expand Tabs to ensure adequate sizing of GUI
-;                                       16  = "Do not display again" checkbox
-;                                       32  = Show no icon on title bar
-;                                       64  = Disable EMB closure [X] and SysMenu Close
-;                   $iJust       -> 0 = Left justified (Default), 1 = Centred , 2 = Right justified
-;                                       + 4 = Centred single button.  Note: multiple buttons are always centred
-;                                       ($SS_LEFT, $SS_CENTER, $SS_RIGHT can also be used)
-;                   $iBkCol		 -> The colour for the message box background.  Default = system colour
-;                   $iCol		 -> The colour for the message box text.  Default = system colour
-;                   $iFont_Size  -> The font size in points to use for the message box. Default = system font size
-;                   $sFont_Name  -> The font to use for the message box. Default = system font
-;                   $iWidth      -> Normal max width for EMB.   Default/min = 370 pixels - max = @DesktopWidth - 20
-;                   $iWidth_Abs  -> Absolute max width for EMB. Default/min = 370 pixels - max = @DesktopWidth - 20
+; Syntax.........: _ExtMsgBoxSet($iStyle, $iJust, [$iBkCol, [$iCol, [$sFont_Size, [$iFont_Name, [$iWidth, [$iWidth_Abs, [$sFocus_Char, [$sTitlebar_Icon]]]]]]]])
+; Parameters ....: $iStyle          -> 0 (Default) - Taskbar Button, TOPMOST, button in user font, no tab expansion,
+;                                          no checkbox, titlebar icon, active closure [X] and SysMenu close
+;                                      Combine following to change:
+;                                          1   = No Taskbar Button
+;                                          2   = TOPMOST Style not set
+;                                          4   = Buttons use default font
+;                                          8   = Expand Tabs to ensure adequate sizing of GUI
+;                                          16  = "Do not display again" checkbox
+;                                          32  = Show no icon on title bar
+;                                          64  = Disable EMB closure [X] and SysMenu Close
+;                   $iJust          -> 0 = Left justified (Default), 1 = Centred , 2 = Right justified
+;                                          + 4 = Centred single button.  Note: multiple buttons are always centred
+;                                          ($SS_LEFT, $SS_CENTER, $SS_RIGHT can also be used - must #include <StaticConstants.au3>)
+;                   $iBkCol		    -> The colour for the message box background.  Default = system colour
+;                   $iCol		    -> The colour for the message box text.  Default = system colour
+;                   $iFont_Size     -> The font size in points to use for the message box. Default = system font size
+;                   $sFont_Name     -> The font to use for the message box. Default = system font
+;                   $iWidth         -> Normal max width for EMB.   Default/min = 370 pixels - max = @DesktopWidth - 20
+;                   $iWidth_Abs     -> Absolute max width for EMB. Default/min = 370 pixels - max = @DesktopWidth - 20
 ;                                       EMB will expand to this value to accommodate long unbroken character strings
 ;                                       Forced to $iWidth value if less
-;                   $sFocus_Char -> Character to define focused button. Default = "~"
+;                   $sFocus_Char    -> Character to define focused button. Default = "~"
+;                   $sTitlebar_Icon -> Icon to use on ExtMsgBox titlebar - default is standard AutoIt icon
+;                                          When set to name of an ico or exe file, the main icon within will be displayed
+;                                          If another icon from the file is required, add a trailing "|" followed by the icon index
 ; Requirement(s).: v3.2.12.1 or higher
 ; Return values .: Success - Returns 1
 ;                  Failure - Returns 0 and sets @error to 1 with @extended set to incorrect parameter index number
-; Remarks .......; Setting any parameter to -1 leaves the current value unchanged
-;                  Setting the $iStyle parameter to 'Default' resets ALL parameters to default values <<<<<<<<<<<<<<<<<<<<<<<
-;                  Setting any other parameter to "Default" only resets that parameter
+; Remarks .......; - Setting any parameter to -1 leaves the current value unchanged
+;                    Setting the $iStyle parameter to 'Default' resets ALL parameters to default values <<<<<<<<<<<<<<<<<<<<<<<
+;                    Setting any other parameter to "Default" only resets that parameter
+;                  - Setting a titlebar icon overrides any "show no icon" numeric setting
 ; Author ........: Melba23
 ; Example........; Yes
 ;=====================================================================================================================
-Func _ExtMsgBoxSet($iStyle = -1, $iJust = -1, $iBkCol = -1, $iCol = -1, $iFont_Size = -1, $sFont_Name = -1, $iWidth = -1, $iWidth_Abs = -1, $sFocus_Char = "~")
+Func _ExtMsgBoxSet($iStyle = -1, $iJust = -1, $iBkCol = -1, $iCol = -1, $iFont_Size = -1, $sFont_Name = -1, $iWidth = -1, $iWidth_Abs = -1, $sFocus_Char = "~", $sTitlebar_Icon = "")
 
 	; Set global EMB variables to required values
 	Switch $iStyle
@@ -127,6 +132,7 @@ Func _ExtMsgBoxSet($iStyle = -1, $iJust = -1, $iBkCol = -1, $iCol = -1, $iFont_S
 			$g_aEMB_Settings[6] = 370
 			$g_aEMB_Settings[7] = 370
 			$g_aEMB_Settings[13] = "~"
+			$g_aEMB_Settings[14] = ""
 			Return
 		Case -1
 			; Do nothing
@@ -233,6 +239,19 @@ Func _ExtMsgBoxSet($iStyle = -1, $iJust = -1, $iBkCol = -1, $iCol = -1, $iFont_S
 			EndIf
 	EndSwitch
 
+	Switch $sTitlebar_Icon
+		Case Default
+			$g_aEMB_Settings[14] = ""
+		Case -1
+			; Do nothing
+		Case Else
+			If IsString($sTitlebar_Icon) Then
+				$g_aEMB_Settings[14] = $sTitlebar_Icon
+			Else
+				$g_aEMB_Settings[14] = ""
+			EndIf
+	EndSwitch
+
 	Return 1
 
 EndFunc   ;==>_ExtMsgBoxSet
@@ -240,19 +259,25 @@ EndFunc   ;==>_ExtMsgBoxSet
 ; #FUNCTION# =========================================================================================================
 ; Name...........: _ExtMsgBox
 ; Description ...: Generates user defined message boxes centred on a GUI, the desktop, or at defined coordinates
-; Syntax.........: _ExtMsgBox ($vIcon, $vButton, $sTitle, $sText, [$iTimeout, [$hWin, [$iVPos, [$bMain = True]]]])
-; Parameters ....: $vIcon   -> Icon to use:
-;                                      0   - No icon
-;                                      8   - UAC
-;                                      16  - Stop         )
-;                                      32  - Query        ) or equivalent $MB/$EMB_ICON constant
-;                                      48  - Exclamation  )
-;                                      64  - Information  )
-;                                      128 - Countdown digits if $iTimeout set
-;                                      Any other numeric value returns Error 1
-;                              If set to the name of an ico or exe file, the main icon within will be displayed
-;                                  If another icon from the file is required, add a trailing "|" followed by the icon index
-;                              If set to the name of an image file, that image will be displayed
+; Syntax.........: _ExtMsgBox ($vIcon, $vButton, $sTitle, $sText, [$vTimeout, [$hWin, [$iVPos, [$bMain = True]]]])
+; Parameters ....: $vIcon   -> Sets the required icon in the GUI display and optionally in the titlebar of the ExtMsgBox
+;                                  GUI display icon:
+;                                      Numeric value:
+;                                          0   - No icon
+;                                          8   - UAC
+;                                          16  - Stop         )
+;                                          32  - Query        ) or equivalent $MB/$EMB_ICON constant
+;                                          48  - Exclamation  )
+;                                          64  - Information  )
+;                                          128 - Countdown digits if $iTimeOut set
+;                                              Any other numeric value returns Error 1
+;                                      String value:
+;                                          If set to the name of an ico or exe file, the main icon within will be displayed
+;                                              If another icon from the file is required, add a trailing "|" followed by the icon index
+;                                          If set to the name of an image file, that image will be displayed
+;                                  Titlebar icon:
+;                                      Use a semicolon delimiter followed by the name/index of the required exe/ico file
+;                                      Default (no delimiter or name) = use global icon setting from _ExtMsgBoxSet
 ;                   $vButton  -> Button text separated with "|" character. " " = no buttons.
 ;                                      Putting a user-defined character (default = "~") before the text indicates button to be focused
 ;                                         Two focused buttons returns Error 2. A single button is always focused
@@ -268,9 +293,10 @@ EndFunc   ;==>_ExtMsgBoxSet
 ;                   $sText    -> The text to be displayed. Long lines will wrap. The box depth is adjusted to fit.
 ;                                      If unbroken character strings in $sText too long for set max width,
 ;                                      EMB expands to set absolute width. Error 6 if still not able to fit
-;                   $iTimeout -> Timeout delay before EMB closes. 0 = no timeout (Default).
+;                   $vTimeout -> Single integer sets timeout delay in secs before EMB closes. 0 = no timeout (Default).
 ;                                      If no buttons and no timeout set, timeout automatically set to 5
-;                                      If timeout value negative, reset to 0
+;                                Colon-delimited string sets EMB timeout delay and initial button(s) disabled delay ("EMB:Button")
+;                                      Default = button(s) not disabled
 ;                   $hWin     -> Handle of the GUI in which EMB is centred
 ;                                      If GUI  hidden or no handle passed - EMB centred in desktop (Default)
 ;                                      If not valid window handle, interpreted as horizontal coordinate for EMB location
@@ -291,40 +317,72 @@ EndFunc   ;==>_ExtMsgBoxSet
 ;                               5 - Button text too long for max available button width
 ;                               6 - StringSize error
 ;                               7 - GUI creation error
-; Remarks .......; If $bMain set EMB adjusted to appear on main screen closest to required position
+; Remarks .......; - If $bMain set EMB adjusted to appear on main screen closest to required position.
+;                  - Setting a titlebar icon overrides any _ExtMsgBoxSet global setting - either "no-icon" or a specific file.
+;                  - When buttons disabled, closure "X" still functions. Use $iStyle parameter of _ExtMsgBoxSet to prevent this.
 ; Author ........: Melba23, based on some original code by photonbuddy & YellowLab
 ; Example........; Yes
 ;=====================================================================================================================
-Func _ExtMsgBox($vIcon, $vButton, $sTitle, $sText, $iTimeOut = 0, $hWin = "", $iVPos = 0, $bMain = True)
+Func _ExtMsgBox($vIcon, $vButton, $sTitle, $sText, $vTimeOut = 0, $hWin = "", $iVPos = 0, $bMain = True)
 
 	; Set default sizes for message box
 	Local $iMsg_Width_Max = $g_aEMB_Settings[6], $iMsg_Width_Min = 150, $iMsg_Width_Abs = $g_aEMB_Settings[7]
-	Local $iMsg_Height_Min = 100
-	Local $iButton_Width_Def = 80, $iButton_Width_Min = 50
+	Local $iMsg_Height_Min = 100, $iButton_Width_Def = 80, $iButton_Width_Min = 50, $iTimeOut = 0, $iTimeIn = 0
 
 	; Declare local variables
 	Local $iParent_Win = 0, $fCountdown = False, $cCheckbox, $aLabel_Size, $aRet, $iRet_Value, $iHpos
 	Local $sButton_Text, $iButton_Width, $iButton_Xpos
 
+	; Check for icon(s)
+	Local $vTitlebar_Icon
+	Local $iTitlebar_Icon_Style = 0
+	Local $sTitlebar_DLL = ""
+	Local $iIcon_Style = 0
+	Local $iIcon_Reduction = 42
+	Local $sDLL = "user32.dll"
+	Local $sImg = ""
+	Local $aSplit
+
 	; Validate timeout value
-	$iTimeOut = Int(Number($iTimeOut))
+	$iTimeOut = Int($vTimeOut)
+	; If negative then increase timer font size if required
 	If $iTimeOut < 0 Then
-		$iTimeOut = 0
+		$iTimeOut = Abs($iTimeOut)
+		$iIcon_Reduction = 74
 	EndIf
+	; Check for button disabling
+    If StringInStr($vTimeOut, ":") Then
+        $iTimeIn = Abs(Int(StringSplit($vTimeOut, ":")[2]))
+    EndIf
 	; Set automatic timeout if no buttons and no timeout set
 	If $vButton == " " And $iTimeOut = 0 Then
 		$iTimeOut = 5
 	EndIf
 
-	; Check for icon
-	Local $iIcon_Style = 0
-	Local $iIcon_Reduction = 42
-	Local $sDLL = "user32.dll"
-	Local $sImg = ""
+	; Check icon parameter for titlebar icon data
+	If StringInStr($vIcon, ";") Then
+		; Extract GUI icon data
+		$aSplit = StringSplit($vIcon, ";")
+		; Keep display icon data
+		$vIcon = $aSplit[1]
+		; Get required titlebar icon data
+		$sTitlebar_DLL = $aSplit[2]
+		; Parse data
+		If StringInStr($vTitlebar_Icon, "|") Then
+			$iTitlebar_Icon_Style = StringRegExpReplace($sTitlebar_DLL, "(.*)\|", "")
+            $sTitlebar_DLL = StringRegExpReplace($sTitlebar_DLL, "\|.*$", "")
+		EndIf
+	Else
+		; Use global setting if available
+		$sTitlebar_DLL = $g_aEMB_Settings[14]
+	EndIf
+
 	; Cancel numeric countdown if no timeout
 	If $iTimeOut = 0 And $vIcon = 128 Then
 		$vIcon = 0
 	EndIf
+
+	; Get required display icon data
 	If StringIsDigit($vIcon) Then
 		Switch $vIcon
 			Case 0
@@ -350,15 +408,15 @@ Func _ExtMsgBox($vIcon, $vButton, $sTitle, $sText, $iTimeOut = 0, $hWin = "", $i
 	Else
 		If StringInStr($vIcon, "|") Then
 			$iIcon_Style = StringRegExpReplace($vIcon, "(.*)\|", "")
-            $sDLL = StringRegExpReplace($vIcon, "\|.*$", "")
-		Else
-			Switch StringLower(StringRight($vIcon, 3))
-				Case "exe", "ico"
-					$sDLL = $vIcon
-				Case "bmp", "jpg", "gif", "png"
-					$sImg = $vIcon
-			EndSwitch
+            $vIcon = StringRegExpReplace($vIcon, "\|.*$", "")
 		EndIf
+		; Parse data
+		Switch StringLower(StringRight($vIcon, 3))
+			Case "exe", "ico"
+				$sDLL = $vIcon
+			Case "bmp", "jpg", "gif", "png"
+				$sImg = $vIcon
+		EndSwitch
 	EndIf
 
 	; Check if two buttons are seeking focus
@@ -560,14 +618,21 @@ Func _ExtMsgBox($vIcon, $vButton, $sTitle, $sText, $iTimeOut = 0, $hWin = "", $i
 		Return SetError(7, 0, -1)
 	EndIf
 
-	; Check if titlebar icon hidden - actually uses transparent icon from AutoIt executable
-	If BitAND($g_aEMB_Settings[0], 32) Then
-		If @Compiled Then
-			GUISetIcon(@ScriptName, -2, $hMsgGUI)
-		Else
-			GUISetIcon(@AutoItExe, -2, $hMsgGUI)
-		EndIf
-	EndIf
+	; Check if custom or no titlebar icon required
+	Select
+		; Specific icon set
+		Case $sTitlebar_DLL <> ""
+			GUISetIcon($sTitlebar_DLL, $iTitlebar_Icon_Style)
+		; No icon - actually uses transparent icon from AutoIt executable
+		Case BitAND($g_aEMB_Settings[0], 32)
+			If @Compiled Then
+				GUISetIcon(@ScriptName, -2, $hMsgGUI)
+			Else
+				GUISetIcon(@AutoItExe, -2, $hMsgGUI)
+			EndIf
+		; In all other cases use standard Autoit icon
+	EndSelect
+
 	If $g_aEMB_Settings[2] <> Default Then GUISetBkColor($g_aEMB_Settings[2])
 
 	; Check if user closure permitted
@@ -615,8 +680,8 @@ Func _ExtMsgBox($vIcon, $vButton, $sTitle, $sText, $iTimeOut = 0, $hWin = "", $i
 
 	; Create icon, image or countdown timer
 	If $fCountdown = True Then
-		Local $cCountdown_Label = GUICtrlCreateLabel(StringFormat("%2s", $iTimeOut), 10, 20, 32, 32)
-		GUICtrlSetFont(-1, 18, Default, Default, $g_aEMB_Settings[5])
+		Local $cCountdown_Label = GUICtrlCreateLabel(StringFormat("%2s", $iTimeOut), 10, 20, $iIcon_Reduction - 10, $iIcon_Reduction - 10)
+		GUICtrlSetFont(-1, ($iIcon_Reduction > 42) ? (36) : (18), Default, Default, $g_aEMB_Settings[5])
 		GUICtrlSetColor(-1, $g_aEMB_Settings[3])
 	Else
 		If $iIcon_Reduction Then
@@ -671,6 +736,10 @@ Func _ExtMsgBox($vIcon, $vButton, $sTitle, $sText, $iTimeOut = 0, $hWin = "", $i
             If Not BitAND($g_aEMB_Settings[0], 4) Then GUICtrlSetFont(-1, $g_aEMB_Settings[4], 400, 0, $g_aEMB_Settings[5])
             ; Reset default style parameter
             $iDef_Button_Style = 0
+			; Disable if required
+			If $iTimeIn Then
+				GUICtrlSetState($aButtonCID[$i + 1], 128) ; $GUI_DISABLE
+			EndIf
         Next
     EndIf
 
@@ -711,6 +780,14 @@ Func _ExtMsgBox($vIcon, $vButton, $sTitle, $sText, $iTimeOut = 0, $hWin = "", $i
 		If TimerDiff($iTimeout_Begin) / 1000 >= $iTimeOut And $iTimeOut > 0 Then
 			$iRet_Value = 9
 			ExitLoop
+		EndIf
+
+		; Check for button TimeIn
+		If $iTimeIn > 0 And TimerDiff($iTimeout_Begin) / 1000 >= $iTimeIn Then
+			For $i = 1 To $aButton_Text[0]
+				GUICtrlSetState($aButtonCID[$i], 64) ; $GUI_ENABLE
+			Next
+			$iTimeIn = 0
 		EndIf
 
 		; Show countdown if required
@@ -796,7 +873,7 @@ EndFunc   ;==>__EMB_GetDefaultFont
 Func __EMB_ShowPNG($sImg)
 
 	_GDIPlus_Startup()
-    Local $hPic = GUICtrlCreatePic("", 4, 4, 32, 32)
+    Local $hPic = GUICtrlCreatePic("", 10, 20, 32, 32)
     Local $hBitmap = _GDIPlus_BitmapCreateFromFile($sImg)
     Local $hBitmap_Resized = _GDIPlus_BitmapCreateFromScan0(32, 32)
 	Local $hBMP_Ctxt = _GDIPlus_ImageGetGraphicsContext($hBitmap_Resized)
