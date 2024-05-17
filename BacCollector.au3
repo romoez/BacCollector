@@ -1,27 +1,33 @@
 #NoTrayIcon
-#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#Region ;**** AutoIt3Wrapper ****
 #AutoIt3Wrapper_Compression=2
 #AutoIt3Wrapper_UseUpx=n
 #AutoIt3Wrapper_Run_AU3Check=n
 #AutoIt3Wrapper_Tidy_Stop_OnError=n
 #AutoIt3Wrapper_Run_Au3Stripper=y
-#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
+#AutoIt3Wrapper_Res_Field=URL|https://github.com/romoez/BacCollector
+#AutoIt3Wrapper_Res_Field=Email|moez.romdhane@tarbia.tn
+#AutoIt3Wrapper_Run_After=copy "%out%" ".\Tests\Labo00"
+#AutoIt3Wrapper_Run_After=copy "%out%" ".\Tests\Labo01"
+#AutoIt3Wrapper_Run_After=copy "%out%" ".\Tests\Labo01"
+#EndRegion ;**** AutoIt3Wrapper ****
 
+#Region ;**** pragma ****
 #pragma compile(Icon, BacCollector.ico)
 #pragma compile(Out, BacCollector.exe)
-#pragma compile(UPX, True) ;
+#pragma compile(UPX, False) ;
 #pragma compile(Compression, 9)
 #pragma compile(FileDescription, Récupération des travaux des candidats à l'épreuve pratique d'informatique des examens du baccalauréat)
 #pragma compile(ProductName, BacCollector)
-#pragma compile(ProductVersion, 0.8.11.0503)
-#pragma compile(FileVersion, 0.8.11.0503, 0.8.11.0503) ; Le dernier param est facultatif.
+#pragma compile(ProductVersion, 0.8.13.513)
+#pragma compile(FileVersion, 0.8.13.513)
 #pragma compile(LegalCopyright, 2018-2024 © La Communauté Tunisienne des Enseignants d'Informatique)
 #pragma compile(Comments, BacCollector: Récupération des travaux des candidats à l'épreuve pratique d'informatique des examens du baccalauréat)
-#pragma compile(ProductContact,moez.romdhane@tarbia.tn)
-#pragma compile(ProductPublisherURL, https://github.com/romoez/BacCollector)
 #pragma compile(CompanyName, La Communauté Tunisienne des Enseignants d'Informatique)
 #pragma compile(AutoItExecuteAllowed, False)
+#EndRegion ;**** pragma ****
 
+#Region ;**** include ****
 #include <Array.au3>
 #include <Date.au3>
 #include <EditConstants.au3>
@@ -47,10 +53,12 @@
 #include "include\StringSize.au3"  ; https://www.autoitscript.com/forum/topic/114034-stringsize-m23-new-version-16-aug-11/
 #include "include\Zip.au3"  ; https://www.autoitscript.com/forum/topic/73425-zipau3-udf-in-pure-autoit/
 ;~ #include "CheckSumVerify2.a3x"  ; https://www.autoitscript.com/forum/topic/164148-checksumverify-verify-integrity-of-the-compiled-exe/
+#EndRegion ;**** include ****
+
 
 _KillOtherScript()
 
-#Region "Global Const" -------------------------------------------------------------------------------------
+#Region ;**** Global Const ****
 ;#Program.Info.Const
 Global Const $PROG_TITLE = "BacCollector "
 Global Const $PROG_VERSION = FileGetVersion(@ScriptFullPath) ;"0.8"
@@ -74,7 +82,7 @@ Global Const $GUI_COLOR_CENTER_HEADERS_TEXT = 0xEEEEEE ;0x5EE505
 Global Const $AGE_DU_FICHIER_EN_MINUTES = 80
 Global Const $FREE_SPACE_DRIVE_BACKUP = 1024 ;en Mb, >>1Gb
 Global Const $TAILLE_MAX_DU_DOSSIER_SOUS_LECTEUR = 10 ;en Mb
-#EndRegion "Global Const" -------------------------------------------------------------------------------------
+#EndRegion ;**** Global Const ****
 
 
 If $CMDLINE[0] Then
@@ -615,8 +623,9 @@ EndFunc   ;==>_SaveData_Laboxx
 Func _ShowHelp()
 	DirCreate(@TempDir & "\BacCollector")
 	FileInstall(".\AideBacCollector\AideBacCollector.chm", @TempDir & "\BacCollector\")
-	ShellExecute(@TempDir & "\BacCollector" & "\AideBacCollector.chm")
-
+	If FileExists(@TempDir & "\BacCollector" & "\AideBacCollector.chm") Then
+		ShellExecute(@TempDir & "\BacCollector" & "\AideBacCollector.chm")
+	EndIf
 EndFunc   ;==>_ShowHelp
 
 ;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
@@ -896,7 +905,7 @@ Func _CreateGui()
 	GUICtrlSetBkColor($TextApps_Text, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 9.5, 500)
 	GUICtrlSetState($TextApps_Text, $GUI_HIDE)
-	GUICtrlSetTip(-1, @CRLF & "Veuillez sauvegarder le travail et de quitter ces applications." & @CRLF & @CRLF & "Certaines applications (VSCode, Sublime Text...) ne demandent pas de confirmation de fermeture," & @CRLF & "même si des fichiers ne sont pas encore enregistrés:", "Applications à fermer", 0,1)
+	GUICtrlSetTip(-1, @CRLF & "Veuillez sauvegarder le travail et quitter ces applications." & @CRLF & @CRLF & "Certaines applications (VSCode, Sublime Text...) ne demandent pas de confirmation de fermeture," & @CRLF & "même si des fichiers ne sont pas encore enregistrés:", "Applications à fermer", 0,1)
 
 	Global $TextApps = GUICtrlCreateLabel("", $Left_Header + $GUI_MARGE, $Top_Header + $GUI_HEADER_HAUTEUR + $GUI_MARGE + 6, $WidthHeader - 2 * $GUI_MARGE, 100 - $GUI_HEADER_HAUTEUR - 2 * $GUI_MARGE)
 	GUICtrlSetColor(-1, 0xFFFFFF)
@@ -968,7 +977,7 @@ Func _CreateGui()
 	GUICtrlSetColor($Text, 0xFFFFFF)
 	GUICtrlSetBkColor($Text, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 9.5, 500)
-	GUICtrlSetTip(-1, "Veuillez les mettres à jour chaque séance", "Paramètres de BacCollector.", 1,1)
+	GUICtrlSetTip(-1, "Veuillez les mettre à jour chaque séance", "Paramètres de BacCollector.", 1,1)
 	;;; Bac:
 	Local $TmpLeft = $Left_Header + $GUI_MARGE
 	Local $TmpTop = $Top_Header + $TmpHeaderHauteur + $GUI_MARGE
@@ -978,12 +987,12 @@ Func _CreateGui()
 	GUICtrlSetColor($Text, 0xFFFFFF)
 	GUICtrlSetBkColor($Text, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 10, 550)
-	GUICtrlSetTip(-1, "Cette valeur est utilisé dans le nom du dossier de travail des candidats", "Baccalauréat", 1,1)
+	GUICtrlSetTip(-1, "Cette valeur est utilisée dans le nom du dossier de travail des candidats", "Baccalauréat", 1,1)
 
 	Global $cBac = GUICtrlCreateCombo($ANNEES_BAC[0], $TmpLeft + $TmpWidth + $GUI_MARGE, $TmpTop, $TmpWidth + $GUI_MARGE, $TmpHeight, BitOR($GUI_SS_DEFAULT_COMBO, $CBS_DROPDOWNLIST))
 	GUICtrlSetData(-1, _ArrayToString ($ANNEES_BAC, "|", 1))
 	GUICtrlSetFont(-1, 9, 500)
-	GUICtrlSetTip(-1, "Cette valeur est utilisé dans le nom du dossier de travail des candidats", "Baccalauréat", 1,1)
+	GUICtrlSetTip(-1, "Cette valeur est utilisée dans le nom du dossier de travail des candidats", "Baccalauréat", 1,1)
 	;;; Séance:
 	$TmpLeft = $Left_Header + $GUI_MARGE
 	$TmpTop = $TmpTop + $TmpHeight + $GUI_MARGE ;2 * $GUI_MARGE
@@ -992,12 +1001,12 @@ Func _CreateGui()
 	GUICtrlSetColor($Text, 0xFFFFFF)
 	GUICtrlSetBkColor($Text, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 10, 550)
-	GUICtrlSetTip(-1, "Valeur utilisé dans la grille d'évaluation générée par BacCollector", "Numéro de la séance", 1,1)
+	GUICtrlSetTip(-1, "Valeur utilisée dans la grille d'évaluation générée par BacCollector", "Numéro de la séance", 1,1)
 
 	Global $cSeance = GUICtrlCreateCombo("Séance-1", $TmpLeft + $TmpWidth + $GUI_MARGE, $TmpTop, $TmpWidth + $GUI_MARGE, $TmpHeight, BitOR($GUI_SS_DEFAULT_COMBO, $CBS_DROPDOWNLIST))
 	GUICtrlSetData(-1, "Séance-2|Séance-3|Séance-4|Séance-5|Séance-6")
 	GUICtrlSetFont(-1, 9, 500)
-	GUICtrlSetTip(-1, "Valeur utilisé dans la grille d'évaluation générée par BacCollector", "Numéro de la séance", 1,1)
+	GUICtrlSetTip(-1, "Valeur utilisée dans la grille d'évaluation générée par BacCollector", "Numéro de la séance", 1,1)
 
 	;;; Labo:
 	$TmpLeft = $Left_Header + $GUI_MARGE
@@ -1007,17 +1016,18 @@ Func _CreateGui()
 	GUICtrlSetColor($Text, 0xFFFFFF)
 	GUICtrlSetBkColor($Text, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 10, 550)
-	GUICtrlSetTip(-1, "Valeur utilisé comme noms de la Clé USB," & @CRLF & "et elle est utilisée dans la grille d'évaluation générée par BacCollector", "Laboratoire", 1,1)
+	GUICtrlSetTip(-1, "Valeur utilisée comme nom de la Clé USB," & @CRLF & "et elle est utilisée dans la grille d'évaluation générée par BacCollector", "Laboratoire", 1,1)
 
 	Global $cLabo = GUICtrlCreateCombo("Labo-1", $TmpLeft + $TmpWidth + $GUI_MARGE, $TmpTop, $TmpWidth + $GUI_MARGE, $TmpHeight, BitOR($GUI_SS_DEFAULT_COMBO, $CBS_DROPDOWNLIST))
 	GUICtrlSetData(-1, "Labo-2|Labo-3|Labo-4|Labo-5|Labo-6|Labo-7")
 	GUICtrlSetFont(-1, 9, 500)
-	GUICtrlSetTip(-1, "Valeur utilisé comme noms de la Clé USB," & @CRLF & "et elle est utilisée dans la grille d'évaluation générée par BacCollector", "Laboratoire", 1,1)
+	GUICtrlSetTip(-1, "Valeur utilisée comme nom de la Clé USB," & @CRLF & "et elle est utilisée dans la grille d'évaluation générée par BacCollector", "Laboratoire", 1,1)
 
 	GUICtrlSetState($bRecuperer, $GUI_FOCUS)
 
 	;;;Partie à Droite  - Fin=============================================================================================
 	GUISetState(@SW_SHOW, $hMainGUI)
+
 EndFunc   ;==>_CreateGui
 #EndRegion Function "_CreateGui" -----------------------------------------------------------------------------
 
@@ -1365,8 +1375,8 @@ Func RecupererTic($NumeroCandidat)
 ;~ 			SplashOff()
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
 			Local $Rep = _ExtMsgBox($EMB_ICONEXCLAM, "~Non|Oui", $PROG_TITLE & $PROG_VERSION, "Aucun site web valide trouvé dans le(s) dossier(s) : " & _ArrayToString($Www, ",", 1) & @CRLF & @CRLF _
-					 & "Il se peut que le candidat a mis ses fichiers directement sous le dossier d'hébergement ('www' ou 'htdocs')," &  @CRLF
-					 & "si c'est le cas, veuillez lui créer un dossier et y mettre ses fichiers de travail, puis réessayer la récupération." &  @CRLF&  @CRLF
+					 & "Il se peut que le candidat a mis ses fichiers directement sous le dossier d'hébergement ('www' ou 'htdocs')," &  @CRLF _
+					 & "si c'est le cas, veuillez lui créer un dossier et y mettre ses fichiers de travail, puis réessayer la récupération." &  @CRLF&  @CRLF _
 					 & "Poursuivre la recherche et récupération de la base de données?" & @CRLF & @CRLF, 0)
 			If $Rep = 1 Then
 				_Logging("Non", 2, 0)
@@ -2125,7 +2135,7 @@ Func _CopierLeContenuDesAutresDossiers($Mask)
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des fichiers >> Profil Utilisateur...", "", Default, Default, 1)
 	Local $Liste[1] = [0] ;
 	Local $Dossier = @UserProfileDir & '\' ;
-	$Liste = _FileListToArrayRec($Dossier, "*.py;*.ipynb;*.ui;*.accdb;*.xlsx;*.csv;*.docx||", 1, 0, 0, 1)
+	$Liste = _FileListToArrayRec($Dossier, "*.py;*.ipynb;*.ui;*.accdb;*.xls*;*.csv;*.doc*;*.ppt*||", 1, 0, 0, 1)
 	If IsArray($Liste) Then
 		$iNberreurs = $iNberreurs + _SubCopierLeContenuDesAutresDossiers($Liste, $Dossier, '\ProfilU\')
 	EndIf
@@ -2544,7 +2554,7 @@ Func _AfficherLeContenuDesAutresDossiers($Mask = "*")
 	Local $Dossier = @UserProfileDir & '\' ;
 	$TmpMsgForLogging = ""
 	Local $Liste[1] = [0] ;
-	$Liste = _FileListToArrayRec($Dossier, "*.py;*.ipynb;*.ui;*.accdb;*.xlsx;*.csv;*.docx||", 1, 0, 2, 1)  ; Non récursif..
+	$Liste = _FileListToArrayRec($Dossier, "*.py;*.ipynb;*.ui;*.accdb;*.xls*;*.csv;*.doc*;*.ppt*||", 1, 0, 2, 1)  ; Non récursif..
 
 	If IsArray($Liste) Then
 		_Logging("Scan des fichiers dans Profil Utilisateur : " & $Liste[0] & " fichier(s)", 2, 0)
@@ -3023,13 +3033,13 @@ EndFunc   ;==>_FormatCol
 
 Func FilesByExtension($sSearchDir)
 	Local $sDrive = "", $sDir = "", $sFileName = "", $sExtension = ""
-	$aArray = _FileListToArrayRec($sSearchDir, "*|*.rar;*.zip;*.7z|.vscode", $FLTAR_FILES, $FLTAR_RECUR, $FLTAR_NOSORT, $FLTAR_FULLPATH)
+	$aArray = _FileListToArrayRec($sSearchDir, "*.sql;*.htm*;*.css;*.js;*.php;*.accdb;*.csv;*.py;*.ipynb;*.doc;*.docx;*.xls;*.xlsx;*.ppt;*.pptx;*.ui;*.dat;*.txt||", $FLTAR_FILES, $FLTAR_RECUR, $FLTAR_NOSORT, $FLTAR_FULLPATH)
 	If @error Or Not IsArray($aArray) Then
 		Return ""
 	EndIf
 	For $i = 1 To $aArray[0]
 		$aPathSplit = _PathSplit($aArray[$i], $sDrive, $sSearchDir, $sFileName, $sExtension)
-		$aArray[$i] = $sExtension
+		$aArray[$i] = StringLower($sExtension)
 	Next
 	Local $sd = ObjCreate("Scripting.Dictionary"), $col = 2 ; col to search in
 	; get the number of occurences for each unique element in col $col
@@ -3195,18 +3205,20 @@ Func _GenererRapportPdf($sRapportFileName, $Liste, $DestLocalFldr, $sExamMatiere
 			$iRowH = .7
 			$iStepUp = 0.2
 			$CellFillColour = 0xefefef
-			$iHeaderWidth = 13.2
+			$iHeaderWidth = 12.4
 			Local $aCellsWidth[1] = [$iHeaderWidth]
 			Local $aCellsContent[1] = ['Types des fichiers demandés par section']
 			_InsertPdfTableRow(1.5, $iY, $aCellsWidth,  $aCellsContent, "_CalibriB" , $iRowH, $iStepUp, $CellFillColour, $CellBorderColor, $fThickness, $_FontSize, 100, $PDF_ALIGN_CENTER , 0x1e1e1e, 0x1e1e1e )
 			$iY += $iRowH
-			Local $aCellsWidth[5] = [3.3, 2.2, 2.2, 2.2, 3.3]
+			Local $aCellsWidth[5] = [3.4, 2.4, 1.9, 1.8, 2.9]
 			Local $aCellsContent[5] = ['Éco & Gest', 'Sc • T • M', 'Lettres','Sport', 'SI']
 			_InsertPdfTableRow(1.5, $iY, $aCellsWidth,  $aCellsContent, "_CalibriB" , $iRowH, $iStepUp, $CellFillColour, $CellBorderColor, $fThickness, $_FontSize, 100, $PDF_ALIGN_CENTER , 0x1e1e1e, 0x1e1e1e )
 			$iY += $iRowH
 			$CellFillColour = 0xFFFFFF
-			Local $aCellsContent[5] = ['accdb • xlsx • csv', 'py • ui', 'xlsx • docx', 'xlsx • pptx', 'py • ui • dat • txt']
-			_InsertPdfTableRow(1.5, $iY, $aCellsWidth,  $aCellsContent, "_Calibri" , $iRowH, $iStepUp, $CellFillColour, $CellBorderColor, $fThickness, $_FontSize, 100, $PDF_ALIGN_CENTER , 0x1e1e1e, 0x1e1e1e )
+			Local $aCellsContent1[5] = ['accdb • xlsx • csv', 'py ou ipynb', 'xlsx', 'xlsx', 'py ou ipynb']
+			Local $aCellsContent2[5] = ['py ou ipynb', 'ui', 'docx', 'pptx', 'ui • dat • txt']
+			_InsertPdf2TableRows(1.5, $iY, $aCellsWidth,  $aCellsContent1, $aCellsContent2, "_Calibri" , $iRowH, $iStepUp, $CellFillColour, $CellBorderColor, $fThickness, $_FontSize, 100, $PDF_ALIGN_CENTER , 0x1e1e1e, 0x1e1e1e )
+			$iY += $iRowH
 		EndIf
 
 		$iY += $iRowH  + .5
@@ -3230,6 +3242,29 @@ Func _InsertPdfTableRow($iX, $iY, $aCellsWidth,  $aCellsContent, $sAlias = "_Cal
 			_InsertRenderedText($iX + $aCellsWidth[$i] / 2, $iYbuttom + $iStepUp, $aCellsContent[$i], $sAlias, $_FontSize, 100, $sAlign, $iTextFillColour, $iTextOutlineColour)
 		Else
 			_InsertRenderedText($iX + $aCellsWidth[$i], $iYbuttom + $iStepUp, $aCellsContent[$i], $sAlias, $_FontSize, 100, $sAlign, $iTextFillColour, $iTextOutlineColour)
+		EndIf
+
+		$iX += $aCellsWidth[$i]
+    Next
+    _SetColourStroke(0)
+EndFunc   ;==>_InsertTable
+
+Func _InsertPdf2TableRows($iX, $iY, $aCellsWidth,  $aCellsContent1, $aCellsContent2, $sAlias = "_Calibri" , $iRowH = 0.7, $iStepUp = 0.2, $CellFillColour = 0xFFFFFF, $CellBorderColour = 0x000000, $fThickness = 0.01, $_FontSize = 13, $iScale = 100, $sAlign = $PDF_ALIGN_LEFT , $iTextFillColour = 0x000000, $iTextOutlineColour = 0x000000 )
+    Local $iPgW = Round(_GetPageWidth() / _GetUnit(), 1)
+    Local $iPgH = Round(_GetPageHeight() / _GetUnit(), 1)
+	Local $iYbuttom = $iPgH - ($iY + $iRowH * 2)
+    For $i = 0 To UBound($aCellsWidth) - 1
+		_SetColourStroke($CellBorderColour)
+        _Draw_Rectangle($iX, $iYbuttom, $aCellsWidth[$i], $iRowH * 2, $PDF_STYLE_STROKED, 0, $CellFillColour, $fThickness)
+		If $sAlign = $PDF_ALIGN_LEFT Then
+			_InsertRenderedText($iX + 0.1, $iYbuttom + $iStepUp + $iRowH, $aCellsContent1[$i], $sAlias, $_FontSize, 100, $sAlign, $iTextFillColour, $iTextOutlineColour)
+			_InsertRenderedText($iX + 0.1, $iYbuttom + $iStepUp, $aCellsContent2[$i], $sAlias, $_FontSize, 100, $sAlign, $iTextFillColour, $iTextOutlineColour)
+		ElseIf $sAlign = $PDF_ALIGN_CENTER Then
+			_InsertRenderedText($iX + $aCellsWidth[$i] / 2, $iYbuttom + $iStepUp + $iRowH, $aCellsContent1[$i], $sAlias, $_FontSize, 100, $sAlign, $iTextFillColour, $iTextOutlineColour)
+			_InsertRenderedText($iX + $aCellsWidth[$i] / 2, $iYbuttom + $iStepUp, $aCellsContent2[$i], $sAlias, $_FontSize, 100, $sAlign, $iTextFillColour, $iTextOutlineColour)
+		Else
+			_InsertRenderedText($iX + $aCellsWidth[$i], $iYbuttom + $iStepUp + $iRowH, $aCellsContent1[$i], $sAlias, $_FontSize, 100, $sAlign, $iTextFillColour, $iTextOutlineColour)
+			_InsertRenderedText($iX + $aCellsWidth[$i], $iYbuttom + $iStepUp, $aCellsContent2[$i], $sAlias, $_FontSize, 100, $sAlign, $iTextFillColour, $iTextOutlineColour)
 		EndIf
 
 		$iX += $aCellsWidth[$i]
