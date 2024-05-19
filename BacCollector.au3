@@ -19,8 +19,8 @@
 #pragma compile(Compression, 9)
 #pragma compile(FileDescription, Récupération des travaux des candidats à l'épreuve pratique d'informatique des examens du baccalauréat)
 #pragma compile(ProductName, BacCollector)
-#pragma compile(ProductVersion, 0.8.14.519)
-#pragma compile(FileVersion, 0.8.14.519)
+#pragma compile(ProductVersion, 0.8.15.519)
+#pragma compile(FileVersion, 0.8.15.519)
 #pragma compile(LegalCopyright, 2018-2024 © La Communauté Tunisienne des Enseignants d'Informatique)
 #pragma compile(Comments, BacCollector: Récupération des travaux des candidats à l'épreuve pratique d'informatique des examens du baccalauréat)
 #pragma compile(CompanyName, La Communauté Tunisienne des Enseignants d'Informatique)
@@ -506,10 +506,18 @@ Func _InitialParams()
 
 	;;;BacBackup détecté
 	If _IsRegistryExist("HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{498AA8A4-2CBE-4368-BFA0-E0CF3F338536}_is1", "DisplayName") And ProcessExists('BacBackup.exe') Then
-		GUICtrlSetState($lblBacBackup, $GUI_SHOW)
+		GUICtrlSetBkColor($lblBacBackup, $GUI_BKCOLOR_TRANSPARENT)
+		GUICtrlSetFont(-1, 11, 100, 0, "Segoe UI Light")
+	;~ 	GUICtrlSetState($lblBacBackup, $GUI_HIDE)
+		GUICtrlSetTip($lblBacBackup, "Cliquez ici pour ouvrir BacBackup", "BacBackup surveille le PC.", 0,1)
+		GUICtrlSetData($lblBacBackup, "BacBackup est Installé.")
 ;~ 		_Logging("BacBackup est installé, et surveille les dossiers de travail des candidats.", 2, 0)
 	Else
-		GUICtrlSetState($lblBacBackup, $GUI_HIDE)
+		GUICtrlSetBkColor($lblBacBackup, $GUI_BKCOLOR_TRANSPARENT)
+		GUICtrlSetFont(-1, 11, 800, 0, "Segoe UI Light")
+;~ 		GUICtrlSetState($lblBacBackup, $GUI_HIDE)
+		GUICtrlSetTip($lblBacBackup, "Cliquez ici pour aller à la page de téléchargement de BacBackup", "BacBackup", 0,1)
+		GUICtrlSetData($lblBacBackup, "BacBackup non Installé ;(")
 ;~ 		_Logging("BacBackup n'est pas installé" & $Bac20xx, 2, 0)
 	EndIf
 
@@ -646,7 +654,9 @@ Func _OpenBacBackupInterface()
 	Local $iID = ProcessExists('BacBackup.exe')
 
 	If $iID = 0 Then
-		GUICtrlSetState($lblBacBackup, $GUI_HIDE)
+		_Logging("Ouverture de la page de télépchargement de BacBackup", 2, 0)
+		ShellExecute("https://github.com/romoez/BacBackup", "", "", "open")
+;~ 		GUICtrlSetState($lblBacBackup, $GUI_HIDE)
 		Return 0
 	EndIf
 	Local $sDrive = "", $sDir = "", $sFileName = "", $sExtension = "", $sBBInterface = ""
@@ -700,7 +710,7 @@ Func _CreateGui()
 
 
 	; Déplacé vers _InitialParams(), si le fichier de config existe...
-	_GUIExtender_Section_Action($hMainGUI, 1, 0) ;2ème paramètre (1) Numéro de la Section  -  3ème paramètre (0) to retract the Section
+	_GUIExtender_Section_Action($hMainGUI, 1, 1) ;2ème paramètre (1) Numéro de la Section  -  3ème paramètre (0) to retract the Section
 
 	;;; Partie 3 à droite + bouton Slider - Fin=====================================================================================
 
@@ -934,7 +944,8 @@ Func _CreateGui()
 
 	$GuiTmpLeft = ($GUI_LARGEUR_PARTIE / 2 - $TmpButtonWidth / 2) + 3 * $GUI_LARGEUR_PARTIE
 	$GuiTmpTop = $GuiTmpTop + $GUI_MARGE + $TmpButtonHeight
-	Global $bCreerSauvegarde = GUICtrlCreateButton("Créer Sauvegarde sur PC", $GuiTmpLeft, $GuiTmpTop, $TmpButtonWidth, $TmpButtonHeight)
+;~ 	Global $bCreerSauvegarde = GUICtrlCreateButton("Créer Sauvegarde sur PC", $GuiTmpLeft, $GuiTmpTop, $TmpButtonWidth, $TmpButtonHeight)
+	Global $bCreerSauvegarde = GUICtrlCreateButton("Sauve sur SERVEUR", $GuiTmpLeft, $GuiTmpTop, $TmpButtonWidth, $TmpButtonHeight)
 	GUICtrlSetColor(-1, 0xffffff)
 	GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
 	GUICtrlSetFont(-1, 10)
@@ -954,11 +965,11 @@ Func _CreateGui()
 	GUICtrlSetFont(-1, 10)
 	GUICtrlSetTip($bAide, " ", "Aide & Fonctionnalités de BacCollector.", 1,1)
 
-	Global $lblBacBackup = GUICtrlCreateLabel("BacBackup détecté", 3 * $GUI_LARGEUR_PARTIE + $GUI_LARGEUR_PARTIE / 2 - $TmpButtonWidth / 2, $GUI_HAUTEUR - 2 * $GUI_MARGE - 2 * $TmpButtonHeight, $TmpButtonWidth, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
+	Global $lblBacBackup = GUICtrlCreateLabel("BacBackup est installé", 3 * $GUI_LARGEUR_PARTIE + $GUI_LARGEUR_PARTIE / 2 - $TmpButtonWidth / 2, $GUI_HAUTEUR - 2 * $GUI_MARGE - 2 * $TmpButtonHeight, $TmpButtonWidth, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor($lblBacBackup, 0xFFFFFF)
 	GUICtrlSetBkColor($lblBacBackup, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 11, 100, 0, "Segoe UI Light")
-	GUICtrlSetState($lblBacBackup, $GUI_HIDE)
+;~ 	GUICtrlSetState($lblBacBackup, $GUI_HIDE)
 	GUICtrlSetTip($lblBacBackup, "Cliquez ici pour ouvrir BacBackup", "BacBackup surveille le PC.", 0,1)
 
 	;;; Cadre
