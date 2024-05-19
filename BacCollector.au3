@@ -19,8 +19,8 @@
 #pragma compile(Compression, 9)
 #pragma compile(FileDescription, Récupération des travaux des candidats à l'épreuve pratique d'informatique des examens du baccalauréat)
 #pragma compile(ProductName, BacCollector)
-#pragma compile(ProductVersion, 0.8.13.513)
-#pragma compile(FileVersion, 0.8.13.513)
+#pragma compile(ProductVersion, 0.8.14.519)
+#pragma compile(FileVersion, 0.8.14.519)
 #pragma compile(LegalCopyright, 2018-2024 © La Communauté Tunisienne des Enseignants d'Informatique)
 #pragma compile(Comments, BacCollector: Récupération des travaux des candidats à l'épreuve pratique d'informatique des examens du baccalauréat)
 #pragma compile(CompanyName, La Communauté Tunisienne des Enseignants d'Informatique)
@@ -3178,7 +3178,7 @@ Func _GenererRapportPdf($sRapportFileName, $Liste, $DestLocalFldr, $sExamMatiere
 		$iY += $iRowH
 		Local $_sConsigne = "N.B. :"
 		_InsertRenderedText(1.5, $pHight - $iY, $_sConsigne, "_CalibriB", 11, 100, $PDF_ALIGN_LEFT, $_iColorText2, $_iColorText2)
-		Local $_sConsigne = "Assurez-vous que les fichiers manquants ne se trouvent pas déjà sur l'ordinateur du candidat. Si c'est le cas, veuillez les noter devant le numéro d'inscription correspondant en utilisant un stylo de couleur."
+		Local $_sConsigne = "Assurez-vous que les fichiers manquants ne se trouvent pas déjà sur l'ordinateur du candidat."
 ;~ 		Local $_sConsigne = "Écrire devant le numéro du candidat correspondant, les types des fichiers manquants dans son travail."
 		_Paragraph( $_sConsigne , 1.5 + 1.2, $pHight - $iY, 16.8, "_Calibri", 11)
 
