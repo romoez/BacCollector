@@ -1,7 +1,5 @@
 #NoTrayIcon
 #Region ;**** AutoIt3Wrapper ****
-#AutoIt3Wrapper_Compression=2
-#AutoIt3Wrapper_UseUpx=n
 #AutoIt3Wrapper_Run_AU3Check=n
 #AutoIt3Wrapper_Tidy_Stop_OnError=n
 #AutoIt3Wrapper_Run_Au3Stripper=y
@@ -16,7 +14,7 @@
 #Region ;**** pragma ****
 #pragma compile(Icon, BacCollector.ico)
 #pragma compile(Out, BacCollector.exe)
-#pragma compile(UPX, False) ;
+#pragma compile(UPX, True) ;
 #pragma compile(Compression, 9)
 #pragma compile(FileDescription, Récupération des travaux des candidats à l'épreuve pratique d'informatique des examens du baccalauréat)
 #pragma compile(ProductName, BacCollector)
@@ -47,12 +45,12 @@
 #include <WindowsConstants.au3>
 #include <GUIToolTip.au3>
 #include "Utils.au3"
-;~ #include "include\7Zip.au3"  ; https://www.autoitscript.fr/forum/viewtopic.php?f=21&t=1943
+#include "include\7Zip.au3"  ; https://www.autoitscript.fr/forum/viewtopic.php?f=21&t=1943
 #include "include\ExtMsgBox.au3"  ; https://www.autoitscript.com/forum/topic/109096-extended-message-box-new-version-19-nov-21/
 #include "include\GUIExtender.au3"  ; https://www.autoitscript.com/forum/topic/117909-guiextender-original-version/
 #include "include\MPDF_UDF.au3" ; https://www.autoitscript.com/forum/topic/118827-create-pdf-from-your-application/
 #include "include\StringSize.au3"  ; https://www.autoitscript.com/forum/topic/114034-stringsize-m23-new-version-16-aug-11/
-#include "include\Zip.au3"  ; https://www.autoitscript.com/forum/topic/73425-zipau3-udf-in-pure-autoit/
+;~ #include "include\Zip.au3"  ; https://www.autoitscript.com/forum/topic/73425-zipau3-udf-in-pure-autoit/
 ;~ #include "CheckSumVerify2.a3x"  ; https://www.autoitscript.com/forum/topic/164148-checksumverify-verify-integrity-of-the-compiled-exe/
 #EndRegion ;**** include ****
 
@@ -4022,23 +4020,23 @@ Func _GenererGrilleEvaluation($aNumCandiats)
 
 ;~ 	Run("explorer.exe /n, /e, " & '"' & @TempDir & "\BacCollector\" & $sFldr & '"')
 ;~ ************** Zip avec zipfldr.dll
-	Local $Zip = _Zip_Create(@TempDir & "\BacCollector\Grille.zip") ;Create The Zip File. Returns a Handle to the zip File
-	_Zip_AddFolderContents($Zip, @TempDir & "\BacCollector\" & $sFldr) ;Add a folder's content in the zip file
+;~ 	Local $Zip = _Zip_Create(@TempDir & "\BacCollector\Grille.zip") ;Create The Zip File. Returns a Handle to the zip File
+;~ 	_Zip_AddFolderContents($Zip, @TempDir & "\BacCollector\" & $sFldr) ;Add a folder's content in the zip file
 
 
 ;~ ************** Zip avec external 7-zip32.dll/7-zip64.dll
-;~ 	Local $ArcFile = @TempDir & "\BacCollector\Grille.zip"
-;~ 	Local $FolderName = @TempDir & "\BacCollector\" & $sFldr & "\*"
+	Local $ArcFile = @TempDir & "\BacCollector\Grille.zip"
+	Local $FolderName = @TempDir & "\BacCollector\" & $sFldr & "\*"
 
-;~ 	If _7ZipStartup() Then ; To test dll opening (can be omitted for some functions)
-;~ 		$retResult = _7ZipAdd(0, $ArcFile, $FolderName)
-;~ 		If @error Then
-;~ 			MsgBox(16, "Erreur Grille d'évaluation", "Erreur lors de la préparation de la Grille d'évaluation")
-;~ 		EndIf
-;~ 	Else
-;~ 		MsgBox(16, "Erreur Grille d'évaluation", "Erreur lors de la préparation de la Grille d'évaluation")
-;~ 	EndIf
-;~ 	_7ZipShutdown()
+	If _7ZipStartup() Then ; To test dll opening (can be omitted for some functions)
+		$retResult = _7ZipAdd(0, $ArcFile, $FolderName)
+		If @error Then
+			MsgBox(16, "Erreur Grille d'évaluation", "Erreur lors de la préparation de la Grille d'évaluation")
+		EndIf
+	Else
+		MsgBox(16, "Erreur Grille d'évaluation", "Erreur lors de la préparation de la Grille d'évaluation")
+	EndIf
+	_7ZipShutdown()
 
 
 
