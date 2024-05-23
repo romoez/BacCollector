@@ -10,6 +10,7 @@
 #AutoIt3Wrapper_Run_After=copy "%out%" ".\Tests\Labo00"
 #AutoIt3Wrapper_Run_After=copy "%out%" ".\Tests\Labo01"
 #AutoIt3Wrapper_Run_After=copy "%out%" ".\Tests\Labo01"
+#AutoIt3Wrapper_Run_After=copy "%out%" "D:\14 SharedFolder\00-BacCollector"
 #EndRegion ;**** AutoIt3Wrapper ****
 
 #Region ;**** pragma ****
@@ -19,8 +20,8 @@
 #pragma compile(Compression, 9)
 #pragma compile(FileDescription, Récupération des travaux des candidats à l'épreuve pratique d'informatique des examens du baccalauréat)
 #pragma compile(ProductName, BacCollector)
-#pragma compile(ProductVersion, 0.8.15.519)
-#pragma compile(FileVersion, 0.8.15.519)
+#pragma compile(ProductVersion, 0.8.16.523)
+#pragma compile(FileVersion, 0.8.16.523)
 #pragma compile(LegalCopyright, 2018-2024 © La Communauté Tunisienne des Enseignants d'Informatique)
 #pragma compile(Comments, BacCollector: Récupération des travaux des candidats à l'épreuve pratique d'informatique des examens du baccalauréat)
 #pragma compile(CompanyName, La Communauté Tunisienne des Enseignants d'Informatique)
@@ -78,30 +79,41 @@ Global Const $GUI_COLOR_CENTER = 0x073b4c
 ;~ Global Const $GUI_COLOR_CENTER = 0x073b4c ; 0x2E363F
 Global Const $GUI_COLOR_SIDES = 0x118ab2  ; 0x01A3FA
 Global Const $GUI_COLOR_CENTER_HEADERS_TEXT = 0xEEEEEE ;0x5EE505
+Global Const $GUI_COLOR_SUCCESS = 0x007848
 
 Global Const $AGE_DU_FICHIER_EN_MINUTES = 80
 Global Const $FREE_SPACE_DRIVE_BACKUP = 1024 ;en Mb, >>1Gb
 Global Const $TAILLE_MAX_DU_DOSSIER_SOUS_LECTEUR = 10 ;en Mb
+Global $sUserName = @UserName
 #EndRegion ;**** Global Const ****
-
 
 If $CMDLINE[0] Then
 	Select
-		Case StringInStr($CMDLINE[1], "Unlock") Or StringInStr($CMDLINE[1], "Deblo") _
-				Or StringInStr($CMDLINE[1], "Clea") Or StringInStr($CMDLINE[1], "Nett") _
-				Or StringInStr($CMDLINE[1], "Deverr") Or StringInStr($CMDLINE[1], "Déverr") _
-				Or StringInStr($CMDLINE[1], "Déblo") ;Debloquer Deblocage Unlock Clean CleanUp Clear Unlock Deverrouillage Deverrouiller Nettoyage Nettoyer...
+		Case StringInStr(StringLower($CMDLINE[1]), "unlock") Or StringInStr(StringLower($CMDLINE[1]), "deblo") _
+				Or StringInStr(StringLower($CMDLINE[1]), "clea") Or StringInStr(StringLower($CMDLINE[1]), "nett") _
+				Or StringInStr(StringLower($CMDLINE[1]), "deverr") Or StringInStr(StringLower($CMDLINE[1]), "déverr") _
+				Or StringInStr(StringLower($CMDLINE[1]), "déblo") ;Debloquer Deblocage Unlock Clean CleanUp Clear Unlock Deverrouillage Deverrouiller Nettoyage Nettoyer...
 			_UnLockAll()
 			Exit
-		Case Else
+		Case StringInStr(StringLower($CMDLINE[1]), "help") Or StringInStr(StringLower($CMDLINE[1]), "aide") _
+				Or StringInStr($CMDLINE[1], "?")
 			MsgBox(262144, $PROG_TITLE & $PROG_VERSION, "Syntaxe de ligne de commande: " & @CRLF & @CRLF _
+					 & "» Aifficher l'aide : " & @CRLF _
+					 & @TAB & "- BacCollector /?, ou:" & @CRLF _
+					 & @TAB & "- BacCollector /help, ou:" & @CRLF _
+					 & @TAB & "- BacCollector /aide, ou:" & @CRLF _
 					 & "» Déverrouillage des dossiers ""X:\Sauvegardes\"" : " & @CRLF _
-					 & @TAB & "- BacCollector /Déverrouiller, ou:" & @CRLF _
-					 & @TAB & "- BacCollector /Unlock, ou encore:" & @CRLF _
-					 & @TAB & "- BacCollector /Débloquer" & @CRLF & @CRLF _
+					 & @TAB & "- BacCollector /déverrouiller, ou:" & @CRLF _
+					 & @TAB & "- BacCollector /unlock, ou encore:" & @CRLF _
+					 & @TAB & "- BacCollector /débloquer" & @CRLF & @CRLF _
 					 & "» Récupération automatique des dossiers de travail du candidat: " & @CRLF _
 					 & @TAB & "- [Cette fonctionnalité n'est pas encore implémentée.]") ; & @CRLF _
 			Exit
+		Case StringInStr(StringLower($CMDLINE[1]), "run_as_admin")
+			If $CMDLINE[0] > 1 Then
+				$sUserName = $CMDLINE[2]
+			EndIf
+
 	EndSelect
 EndIf
 
@@ -403,14 +415,10 @@ Func _InitialParams()
 	Global $DossierBacCollector = "0-BacCollector"
 	Global $DossierSauve = "Sauvegardes"
 	Global $Lecteur = ""
-
-	;Contrôle ajouté après la Demo au Crefoc de Tunis 1
 	Local $aDrive = DriveGetDrive('FIXED')
-
-;~ 		_ArraySort($aDrive, 0, 1)
-	$Lecteur = @HomeDrive ; "C:" ; $aDrive[1] ; $aDrive[1] peut être A: !!
+	$Lecteur = StringLeft(@WindowsDir,2) ; "C:" ; $aDrive[1] ; $aDrive[1] peut être A: !!
 	For $i = 1 To $aDrive[0]
-		If $aDrive[$i] = @HomeDrive Then ContinueLoop
+		If $aDrive[$i] = StringLeft(@WindowsDir,2) Then ContinueLoop
 		If (DriveGetType($aDrive[$i], $DT_BUSTYPE) <> "USB") _ ; to Exclude external Hdd(s)
 				And _WinAPI_IsWritable($aDrive[$i]) _ ;writable
 				And DriveSpaceFree($aDrive[$i] & "\") > $FREE_SPACE_DRIVE_BACKUP _
@@ -420,6 +428,14 @@ Func _InitialParams()
 		EndIf
 	Next
 	$Lecteur = StringUpper($Lecteur) & "\"
+	If Not _Directory_Is_Accessible($Lecteur) And Not ($CMDLINE[0] And StringInStr($CMDLINE[1], "run_as_admin"))Then
+		If RegRead('HKEY_CLASSES_ROOT\exefile\shell\runas\command', '') <> '"%1" %*' Then
+			  RegWrite('HKEY_CURRENT_USER\SOFTWARE\Classes\exefile\shell\runas', 'HasLUAShield', 'REG_SZ', '')
+			  RegWrite('HKEY_CURRENT_USER\SOFTWARE\Classes\exefile\shell\runas\command', '', 'REG_SZ', '"%1" %*')
+			  RegWrite('HKEY_CURRENT_USER\SOFTWARE\Classes\exefile\shell\runas\command', 'IsolatedCommand', 'REG_SZ', '"%1" %*')
+		EndIf
+		ShellExecute(@ScriptFullPath, 'run_as_admin' & " " & @UserName, StringRegExpReplace(@WorkingDir, '\\+$', ''), 'runas')
+	EndIf
 	_Logging("Mise à jour des paramètres ____Début___", 2, 0)
 	ProgressSet(20, "[" & 20 & "%] " & "")
 	Local $Ok
@@ -437,7 +453,7 @@ Func _InitialParams()
 	Local $Repeated = 0, $Success = 0
 	If Not FileExists($Lecteur & $DossierSauve & "\" & $DossierBacCollector) Then
 		While ($Repeated < 5)
-			_UnLockFolder($Lecteur & $DossierSauve)
+			_UnLockFolder($Lecteur & $DossierSauve, $sUserName)
 			$Success = DirCreate($Lecteur & $DossierSauve & "\" & $DossierBacCollector)
 			$Repeated += 1
 			If $Success Then
@@ -460,7 +476,7 @@ Func _InitialParams()
 		_Logging("Dossier BacCollector  : """ & $Lecteur & $DossierSauve & "\" & $DossierBacCollector & """", 2, 0)
 	EndIf
 	FileSetAttrib($Lecteur & $DossierSauve, "+SH")
-	_LockFolder($Lecteur & $DossierSauve)
+	_LockFolder($Lecteur & $DossierSauve, $sUserName)
 	ProgressSet(40, "[" & 40 & "%] " & "")
 
 	Global $Matiere = IniRead(StringTrimRight(@ScriptFullPath, 4) & ".ini", "Params", "Matiere", "-1")
@@ -531,6 +547,23 @@ Func _InitialParams()
 EndFunc   ;==>_InitialParams
 #EndRegion Function "_InitialParams" --------------------------------------------------------------------------
 
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
+Func _Directory_Is_Accessible($sPath)
+    If Not StringInStr(FileGetAttrib($sPath), "D", 2) Then Return SetError(1, 0, 0)
+    Local $iEnum = 0
+    While FileExists($sPath & "\_test_" & $iEnum)
+        $iEnum += 1
+    WEnd
+    Local $iSuccess = DirCreate($sPath & "\_test_" & $iEnum)
+    Switch $iSuccess
+        Case 1
+            DirRemove($sPath & "\_test_" & $iEnum)
+            Return True
+        Case Else
+            Return False
+    EndSwitch
+EndFunc   ;==>_Directory_Is_Assesible
 ;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 ;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 
@@ -1130,7 +1163,6 @@ Func RecupererInfo($NumeroCandidat)
 		Return
 	EndIf
 ;~    Fin-Vérification de l'existence d'un Dossier Bac*20*
-
 	;===========================================================
 ;~    Début-Vérification si au moins l'un des dossier Bac*20* n'est pas vide (Vide=aucun Fichier)
 	SplashTextOn("Sans Titre", "Vérification des dossiers ""Bac*20*"" sous la racine ""C:""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
@@ -1230,8 +1262,8 @@ Func RecupererInfo($NumeroCandidat)
 ;~ 		SplashTextOn("Sans Titre", "Copie du dossier """ & $Bac[$i] & """." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 		ProgressSet(Round($i / $Bac[0] * 100), "[" & Round($i / $Bac[0] * 100) & "%] " & "Vérif. du dossier : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
 		$Error1_CopyBacFldr = DirCopy($Bac[$i], $Dest1FlashUSB & StringTrimLeft($Bac[$i], 2), $FC_OVERWRITE)
-		$TmpError = DirCopy($Bac[$i], $Dest2LocalFldr & StringTrimLeft($Bac[$i], 2), $FC_OVERWRITE)
 
+		$TmpError = DirCopy($Bac[$i], $Dest2LocalFldr & StringTrimLeft($Bac[$i], 2), $FC_OVERWRITE)
 		If $Error1_CopyBacFldr = 0 Then ;0: error et 1:Success
 ;~ 			SplashOff()
 
@@ -1279,26 +1311,27 @@ Func RecupererInfo($NumeroCandidat)
 		_Logging("Création d'un dossion pour une nouvelle session pour BacBackup") ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
 	EndIf
 
+	_Initialisation()
 	SplashOff()
 	If $iNberreurs = 0 Then
 		;;;_Logging($sText, $iSuccess = 1, $iGuiLog = 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green
 		_Logging("Récupération terminée  avec succès", 3, 1)
 		_Logging("______", 2, 0)
-		_ExtMsgBoxSet(1, 0, $GUI_COLOR_CENTER, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La récupération du travail du candidat a été effectuée avec succès!", 0)
+		_ExtMsgBoxSet(1, 0, $GUI_COLOR_SUCCESS, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
+		_ExtMsgBox($EMB_ICONINFO, "Ok", $PROG_TITLE & $PROG_VERSION, "La récupération du travail du candidat N° " & $NumeroCandidat & " a été effectuée avec succès!", 0)
 
 	ElseIf $iNberreurs = 1 Then
 		_Logging("Récupération terminée, avec une erreur non critique", 2, 1)
 		_Logging("______", 2, 0)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La récupération du travail du candidat est terminée." & @CRLF _
+		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La récupération du travail du candidat N° " & $NumeroCandidat & " est terminée." & @CRLF _
 				 & "Une erreur non critique est produite lors de cette opération." & @CRLF _
 				 & "Veuillez lire le log et prendre les mesures nécessaires.", 0)
 	Else
 		_Logging("Récupération terminée, avec " & $iNberreurs & " erreurs non critiques", 2, 1)
 		_Logging("______", 2, 0)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La récupération du travail du candidat est terminée." & @CRLF _
+		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La récupération du travail du candidat N° " & $NumeroCandidat & " est terminée." & @CRLF _
 				 & $iNberreurs & " erreurs non critiques sont produites lors de cette opération." & @CRLF _
 				 & "Veuillez lire le log et prendre les mesures nécessaires.", 0)
 	EndIf
@@ -1655,19 +1688,20 @@ Func RecupererTic($NumeroCandidat)
 		_Logging("Création d'un dossion pour une nouvelle session pour BacBackup") ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
 	EndIf
 
+	_Initialisation()
 	SplashOff()
 	If $iNberreurs = 0 And $YaDatabase And $YaSiteWeb Then
 		;;;_Logging($sText, $iSuccess = 1, $iGuiLog = 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green
 		_Logging("Récupération terminée  avec succès", 3, 1)
 		_Logging("______", 2, 0)
-		_ExtMsgBoxSet(1, 0, $GUI_COLOR_CENTER, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La récupération du travail du candidat a été effectuée avec succès!" & @CRLF, 0)
+		_ExtMsgBoxSet(1, 0, $GUI_COLOR_SUCCESS, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
+		_ExtMsgBox($EMB_ICONINFO, "Ok", $PROG_TITLE & $PROG_VERSION, "La récupération du travail du candidat N° " & $NumeroCandidat & " a été effectuée avec succès!" & @CRLF, 0)
 
 	Else
 		_Logging("Récupération terminée, avec " & $iNberreurs - ($YaDatabase - 1) - ($YaSiteWeb - 1) & " erreurs.", 2, 1)
 		_Logging("______", 2, 0)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La récupération du travail du candidat est terminée." & @CRLF _
+		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "La récupération du travail du candidat N° " & $NumeroCandidat & " est terminée." & @CRLF _
 				 & $iNberreurs - ($YaDatabase - 1) - ($YaSiteWeb - 1) & " erreurs sont produites lors de cette opération." & @CRLF _
 				 & "Veuillez lire attentivement le log et prendre les mesures nécessaires." & @CRLF, 0)
 	EndIf
@@ -3646,9 +3680,9 @@ Func _InitLogging()
 	Local $aDrive = DriveGetDrive('FIXED')
 
 ;~ 		_ArraySort($aDrive, 0, 1)
-	$Lecteur = @HomeDrive ; "C:" ; $aDrive[1] ; $aDrive[1] peut être A: !!
+	$Lecteur = StringLeft(@WindowsDir,2) ; "C:" ; $aDrive[1] ; $aDrive[1] peut être A: !!
 	For $i = 1 To $aDrive[0]
-		If $aDrive[$i] = @HomeDrive Then ContinueLoop
+		If $aDrive[$i] = StringLeft(@WindowsDir,2) Then ContinueLoop
 		If (DriveGetType($aDrive[$i], $DT_BUSTYPE) <> "USB") _ ; to Exclude external Hdd(s)
 				And _WinAPI_IsWritable($aDrive[$i]) _ ;writable
 				And DriveSpaceFree($aDrive[$i] & "\") > $FREE_SPACE_DRIVE_BACKUP _
@@ -3750,7 +3784,7 @@ EndFunc   ;==>_UnLockFoldersBC
 Func _LockFoldersBC()
 ;~ 	_UnLockFolder($Lecteur & $DossierSauve)
 ;~ 	_LockFolder($Lecteur & $DossierSauve & "\" & $DossierBacCollector)
-	_LockFolder($Lecteur & $DossierSauve)
+	_LockFolder($Lecteur & $DossierSauve, $sUserName)
 EndFunc   ;==>_LockFoldersBC
 
 ;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
@@ -3876,7 +3910,7 @@ Func _UnLockAll()
 			$Lecteur = StringUpper($aDrive[$i] & "\")
 			If FileExists($Lecteur & $DossierSauve) Then
 				$TmpMsg &= "Déverrouillage du dossier [" & $Lecteur & $DossierSauve & "]" & @CRLF
-				_UnLockFolder($Lecteur & $DossierSauve)
+				_UnLockFolder($Lecteur & $DossierSauve, $sUserName)
 				FileSetAttrib($Lecteur & $DossierSauve, "-RASH")
 			EndIf
 		EndIf
