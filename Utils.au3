@@ -63,7 +63,8 @@ Func _FineSize($iTaille) ;reçoit une taille en Octet >> retourne la taille en "
 EndFunc
 
 Func DossiersBac($Path = 1) ; 1:Chemins complets, 0:Chemins relatifs
-	Local $Bac = _FileListToArray(@HomeDrive, "bac*2*", 2, $Path)
+;~ 	dans certain cas @HomeDrive retoune une chaîne vide --> remplacée par : StringLeft(@WindowsDir,2)
+	Local $Bac = _FileListToArray(StringLeft(@WindowsDir,2), "bac*2*", 2, $Path)
 	Local $Liste[1] = [0] ;
 
 	If IsArray($Bac) Then
@@ -76,25 +77,10 @@ EndFunc   ;==>DossiersBac
 ;#########################################################################################
 ;#########################################################################################
 ;#########################################################################################
-Func DossiersTPW($Path = 1) ; 1:Chemins complets, 0:Chemins relatifs
-	Local $TPW = _FileListToArray(@HomeDrive, "TPW*", 2, $Path)
-	Local $Liste[1] = [0] ;
-
-	If IsArray($TPW) Then
-		$Liste[0] += $TPW[0] ;
-		_ArrayDelete($TPW, 0)
-		_ArrayAdd($Liste, $TPW) ;
-	EndIf
-	Return $Liste
-EndFunc   ;==>DossiersTPW
-;#########################################################################################
-;#########################################################################################
-;#########################################################################################
 Func DossiersEasyPHPwww($FullPath = 1) ; 1:Chemins complets, 0:Chemins relatifs
 	Local $aEasyPHP[1] = [0]
 
-	Local $aTmpEasyPHP = _FileListToArrayRec(@HomeDrive, "EasyPHP*;wamp*;xampp*;apachefriends*", 30, 0, 2, $FullPath + 1)
-;~ 	Local $aTmpEasyPHP = _FileListToArray(@HomeDrive, "EasyPHP*", 2, $Path)
+	Local $aTmpEasyPHP = _FileListToArrayRec(StringLeft(@WindowsDir,2), "EasyPHP*;wamp*;xampp*;apachefriends*", 30, 0, 2, $FullPath + 1)
 
 	If IsArray($aTmpEasyPHP) Then
 				$aEasyPHP[0] += $aTmpEasyPHP[0]
@@ -143,8 +129,7 @@ EndFunc   ;==>DossiersEasyPHPwww
 Func DossiersEasyPHPdata($FullPath = 1) ; 1:Chemins complets, 0:Chemins relatifs
 	Local $aEasyPHP[1] = [0]
 
-;~ 	Local $aTmpEasyPHP = _FileListToArray(@HomeDrive, "EasyPHP*", 2, $Path)
-	Local $aTmpEasyPHP = _FileListToArrayRec(@HomeDrive, "EasyPHP*;wamp*;xampp*;apachefriends*", 30, 0, 2, $FullPath + 1)
+	Local $aTmpEasyPHP = _FileListToArrayRec(StringLeft(@WindowsDir,2), "EasyPHP*;wamp*;xampp*;apachefriends*", 30, 0, 2, $FullPath + 1)
 
 	If IsArray($aTmpEasyPHP) Then
 				$aEasyPHP[0] += $aTmpEasyPHP[0]
@@ -239,14 +224,20 @@ Func AgeDuFichierEnMinutesCreation($cFichier)
 	Return $iMinutes
 EndFunc   ;==>AgeDuFichierEnMinutesCreation
 
-Func _LockFolder($sObj)
+Func _LockFolder($sObj, $sUserName = @UserName)
 	If FileExists($sObj) = 0 Then Return SetError(1, 0, -1)
-	RunWait('"' & @ComSpec & '" /c cacls.exe "' & $sObj & '" /E /P "' & @UserName & '":N', '', @SW_HIDE)
+	RunWait('"' & @ComSpec & '" /c cacls.exe "' & $sObj & '" /E /P "' & $sUserName & '":N', '', @SW_HIDE)
+	If $sUserName <> @UserName Then
+		RunWait('"' & @ComSpec & '" /c cacls.exe "' & $sObj & '" /E /P "' & @UserName & '":N', '', @SW_HIDE)
+	EndIf
 EndFunc   ;==>_LockFolder
 
-Func _UnlockFolder($sObj)
+Func _UnlockFolder($sObj, $sUserName = @UserName)
 	If FileExists($sObj) = 0 Then Return SetError(1, 0, -1)
-	RunWait('"' & @ComSpec & '" /c cacls.exe "' & $sObj & '" /E /P "' & @UserName & '":F', '', @SW_HIDE)
+	RunWait('"' & @ComSpec & '" /c cacls.exe "' & $sObj & '" /E /P "' & $sUserName & '":F', '', @SW_HIDE)
+	If $sUserName <> @UserName Then
+		RunWait('"' & @ComSpec & '" /c cacls.exe "' & $sObj & '" /E /P "' & @UserName & '":F', '', @SW_HIDE)
+	EndIf
 EndFunc   ;==>_UnlockFolder
 
 ;This will check if an app with a window title = $strtitle is hosted by wowexec
