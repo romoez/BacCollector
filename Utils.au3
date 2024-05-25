@@ -240,6 +240,18 @@ Func _UnlockFolder($sObj, $sUserName = @UserName)
 	EndIf
 EndFunc   ;==>_UnlockFolder
 
+
+;~ Find out current username when executed as admin
+;~ https://www.autoitscript.com/forum/topic/183689-find-out-current-username-when-executed-as-admin/#comment-1319682
+Func _GetUsername()
+    Local $aResult = DllCall("Wtsapi32.dll", "int", "WTSQuerySessionInformationW", "int", 0, "dword", -1, "int", 5, "dword*", 0, "dword*", 0)
+    If @error Or $aResult[0] = 0 Then Return SetError(1, 0, @UserName)
+    Local $sUsername = BinaryToString(DllStructGetData(DllStructCreate("byte[" & $aResult[5] & "]", $aResult[4]), 1), 2)
+    DllCall("Wtsapi32.dll", "int", "WTSFreeMemory", "ptr", $aResult[4])
+    Return $sUsername
+EndFunc
+
+
 ;This will check if an app with a window title = $strtitle is hosted by wowexec
 ;Return 1 if exists, 0 if not exists
 ;Not all 16 bits apps seem to be hosted by wowexec and wowexec is itself hosted by ntvdm
