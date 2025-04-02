@@ -432,7 +432,7 @@ Func _InitialParams()
  					 RegWrite('HKEY_CURRENT_USER\SOFTWARE\Classes\exefile\shell\runas\command', '', 'REG_SZ', '"%1" %*')
  					 RegWrite('HKEY_CURRENT_USER\SOFTWARE\Classes\exefile\shell\runas\command', 'IsolatedCommand', 'REG_SZ', '"%1" %*')
 		   EndIf
-		   GUISetState(SW_HIDE, $hMainGUI) ;
+		   GUISetState(@SW_HIDE, $hMainGUI) ;
  		   ShellExecute(@ScriptFullPath, 'run_as_admin' & " " & @UserName, StringRegExpReplace(@WorkingDir, '\\+$', ''), 'runas')
 		   Exit
     EndIf
