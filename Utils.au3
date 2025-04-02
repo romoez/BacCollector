@@ -149,13 +149,16 @@ Func DossiersEasyPHPdata($FullPath = 1) ; 1:Chemins complets, 0:Chemins relatifs
 
 	If IsArray($aEasyPHP) Then
 		For $i = 1 To $aEasyPHP[0]
-			$data = $aEasyPHP[$i] & '\mysql\data'  ;EasyPHP 1.x & 2.x & 3.x & 5.x & 6.x & 12.x
+			$data = $aEasyPHP[$i] & '\apps\mysql\data'  ;xampp-lite
 			If FileExists($data) Then
 				$Liste[0] += 1 ;
 				_ArrayAdd($Liste, $data) ;
 			ElseIf FileExists($aEasyPHP[$i] & '\binaries\mysql\data') Then ;EasyPHP 13.x & 14.x
 				$Liste[0] += 1 ;
 				_ArrayAdd($Liste, $aEasyPHP[$i] & '\binaries\mysql\data') ;
+			ElseIf FileExists($aEasyPHP[$i] & '\mysql\data') Then ;easyphp < 7 & xampp
+				$Liste[0] += 1 ;
+				_ArrayAdd($Liste, $aEasyPHP[$i] & '\mysql\data') ;
 			ElseIf FileExists($aEasyPHP[$i] & '\eds-binaries\dbserver')  Then ;EasyPHP 15.x & 16.x & 17.x
 				$data = _FindDataFldr($aEasyPHP[$i] & '\eds-binaries\dbserver')  ;EasyPHP 15.x & 16.x & 17.x
 				If FileExists($data) Then
@@ -168,9 +171,12 @@ Func DossiersEasyPHPdata($FullPath = 1) ; 1:Chemins complets, 0:Chemins relatifs
 					$Liste[0] += 1 ;
 					_ArrayAdd($Liste, $data) ;
 				EndIf
-			ElseIf FileExists($aEasyPHP[$i] & '\xampp\mysql\data') Then ;EasyPHP 13.x & 14.x
-				$Liste[0] += 1 ;
-				_ArrayAdd($Liste, $aEasyPHP[$i] & '\xampp\mysql\data') ;
+			ElseIf (FileExists($aEasyPHP[$i] & '\bin\mariadb')) Then ;Wamp
+				$data = _FindDataFldr($aEasyPHP[$i] & '\bin\mariadb')
+				If FileExists($data) Then
+					$Liste[0] += 1 ;
+					_ArrayAdd($Liste, $data) ;
+				EndIf
 			EndIf
 		Next
 	EndIf
@@ -292,39 +298,41 @@ Func _SystemInfo()
 	Local $objWMIService = ObjGet("winmgmts:\\localhost\root\CIMV2")
 	Local $Output = ""
 	;Get info from WMIC
-	$colCompSysPro = $objWMIService.ExecQuery("SELECT * FROM Win32_ComputerSystemProduct", "WQL", 0x10 + 0x20)
+	if IsObj($objWMIService) Then
+		$colCompSysPro = $objWMIService.ExecQuery("SELECT * FROM Win32_ComputerSystemProduct", "WQL", 0x10 + 0x20)
 
-	;If variable is acceptable
-	If IsObj($colCompSysPro) Then
-		For $objCompSysPro In $colCompSysPro
-			;The Hardware Info
-			;Manufacturer/Marque/Vendor
-			Local $TmpOrdinateur = $objCompSysPro.Vendor
-			Local $BuiltInTunisia = 0
-			If $TmpOrdinateur = "ECS" Then
-				$TmpOrdinateur = "PC assemblé, probablement ""Versus"""
-				$BuiltInTunisia = 1
-			ElseIf $TmpOrdinateur = "To be filled by O.E.M." Then
-				$TmpOrdinateur = "PC assemblé, probablement ""Microlux"" ou ""Discovery"""
-				$BuiltInTunisia = 1
-			ElseIf $TmpOrdinateur = "System manufacturer" Then
-				$TmpOrdinateur = "PC assemblé (Microlux, Versus, Discovery...)"
-				$BuiltInTunisia = 1
-			EndIf
-
-			$Output &= "Ordinateur  : " & $TmpOrdinateur & @CRLF
-
-			;Model
-			If Not $BuiltInTunisia Then
-				If $objCompSysPro.Vendor = "Lenovo" Then
-					$objModel = $objCompSysPro.Version
-				Else
-					$objModel = $objCompSysPro.Name
+		;If variable is acceptable
+		If IsObj($colCompSysPro) Then
+			For $objCompSysPro In $colCompSysPro
+				;The Hardware Info
+				;Manufacturer/Marque/Vendor
+				Local $TmpOrdinateur = $objCompSysPro.Vendor
+				Local $BuiltInTunisia = 0
+				If $TmpOrdinateur = "ECS" Then
+					$TmpOrdinateur = "PC assemblé, probablement ""Versus"""
+					$BuiltInTunisia = 1
+				ElseIf $TmpOrdinateur = "To be filled by O.E.M." Then
+					$TmpOrdinateur = "PC assemblé, probablement ""Microlux"" ou ""Discovery"""
+					$BuiltInTunisia = 1
+				ElseIf $TmpOrdinateur = "System manufacturer" Then
+					$TmpOrdinateur = "PC assemblé (Microlux, Versus, Discovery...)"
+					$BuiltInTunisia = 1
 				EndIf
-				$Output &= "Modèle      : " & $objModel & @CRLF
 
-			EndIf
-		Next
+				$Output &= "Ordinateur  : " & $TmpOrdinateur & @CRLF
+
+				;Model
+				If Not $BuiltInTunisia Then
+					If $objCompSysPro.Vendor = "Lenovo" Then
+						$objModel = $objCompSysPro.Version
+					Else
+						$objModel = $objCompSysPro.Name
+					EndIf
+					$Output &= "Modèle      : " & $objModel & @CRLF
+
+				EndIf
+			Next
+		EndIf
 	EndIf
 	;CPU
 	$CPUName = RegRead("HKLM64\HARDWARE\DESCRIPTION\System\CentralProcessor\0", "ProcessorNameString")
@@ -387,9 +395,9 @@ Func _MonthName($MonthNum)
 
 	Return $MON
 EndFunc
-Func _GetUUID($annee=2024)
+Func _GetUUID($annee=2025)
 	$Uuid = RegRead("HKCU\SOFTWARE\BacBackup", "UUID")
-	If @error = 0 And StringRegExp($Uuid, "^((\d{4}-)(\w{4} ){2}\w{4})$") = 1 And StringLeft($Uuid, 4)>=2024 Then Return $Uuid
+	If @error = 0 And StringRegExp($Uuid, "^((\d{4}-)(\w{4} ){2}\w{4})$") = 1 And StringLeft($Uuid, 4)>=2025 Then Return $Uuid
     $Uuid = $annee & "-" & StringFormat('%04X %04X %04X', _
             Random(0, 0xffff), _
             BitOR(Random(0, 0x0fff), 0x4000), _
