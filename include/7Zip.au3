@@ -161,14 +161,16 @@ EndFunc   ;==>_7ZipShutdown
 ; #FUNCTION# ====================================================================================================================
 ; Name...........: _7ZipAdd
 ; Description ...: Adds files to archive
-; Syntax.........: _7ZipAdd($hWnd, $sArcName, $sFileName[, $sFileType = 0[, $sHide = 0[, $sCompress = 5[, $sRecurse = 1[, $sIncludeFile = 0[, _
-;				   $sExcludeFile = 0[, $sPassword = 0[, $sSFX = 0[, $sVolume = 0[, $sWorkDir = 0]]]]]]]]]])
+; Syntax.........: _7ZipAdd($hWnd, $sArcName, $sFileName[, $sFileType = 0[, $sHide = 0[, $sFilesOpen = 0[, $sCompress = 5[, $sRecurse = 1[, $sIncludeFile = 0[, _
+;				   $sExcludeFile = 0[, $sPassword = 0[, $sSFX = 0[, $sVolume = 0[, $sWorkDir = 0]]]]]]]]]]])
 ; Parameters ....: $hWnd         - Handle to parent or owner window
 ;				   $sArcName     - Archive file name
 ;				   $sFileName    - File names to archive up
 ;				   $sFileType    - 0 : File or Folder
 ;				                 - 1 : Folder Content
 ;				   $sHide        - Use this switch if you want the CallBack function to be called
+;				   $sFilesOpen   - 0 : Do not include files open for writing by another applications.
+;				                 - 1 : Include files open for writing by another applications.
 ;				   $sCompress    - Compress level 0-9
 ;				   $sRecurse     - Recursion method: 0 - Disable recursion
 ;													 1 - Enable recursion
@@ -181,20 +183,21 @@ EndFunc   ;==>_7ZipShutdown
 ;				   $sWorkDir     - Sets working directory for temporary base archive
 ;
 ; Return values .: Success - Returns the string with results
-;                  Failure - Returns 0 and and sets @error
+;                  Failure - Returns 0 and sets @error
 ;                  @Error  - 0 = No error.
 ;				   |1 = Function failed
 ;				   |2 = Dll not started
 ;
 ; Author ........: R. Gilman (rasim)
-; Modified.......: Elementary (Use of -mhe switch that not compatible with Zip archives)
+; Modified.......: 1. Elementary (Use of -mhe switch that not compatible with Zip archives)
+;                  2. Add -ssw switch to include files open for writing by another applications (romoez@github)
 ; Remarks .......:
 ; Related .......:
 ; Link ..........:
 ; Example .......:
 ; ===============================================================================================================================
-Func _7ZipAdd($hWnd, $sArcName, $sFileName, $sFileType = 0, $sHide = 0, $sCompress = 5, $sRecurse = 1, $sIncludeFile = 0, $sExcludeFile = 0, _
-		$sPassword = 0, $sSFX = 0, $sVolume = 0, $sWorkDir = 0)
+Func _7ZipAdd($hWnd, $sArcName, $sFileName, $sFileType = 0, $sHide = 0, $sFilesOpen = 0, $sCompress = 5, $sRecurse = 1, $sIncludeFile = 0, _
+        $sExcludeFile = 0, $sPassword = 0, $sSFX = 0, $sVolume = 0, $sWorkDir = 0)
 
 	Local $iFlagDll = _7ZipControlStartup()
 	If $iFlagDll = 0 Then Return SetError(2, 0, 0)
@@ -211,6 +214,7 @@ Func _7ZipAdd($hWnd, $sArcName, $sFileName, $sFileType = 0, $sHide = 0, $sCompre
 	Local $iSwitch = ""
 
 	If $sHide Then $iSwitch &= " -hide"
+	If $sFilesOpen Then $iSwitch &= " -ssw"
 
 	$iSwitch &= " -mx" & $sCompress
 	$iSwitch &= _RecursionSet($sRecurse)
