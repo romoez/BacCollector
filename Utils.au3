@@ -395,6 +395,39 @@ Func _MonthName($MonthNum)
 
 	Return $MON
 EndFunc
+
+Func _MonthFullName($MonthNum)
+
+    Switch $MonthNum
+        Case 01
+            $MON = "Janvier";
+        Case 02
+            $MON = "Février";
+        Case 03
+            $MON = "Mars";
+        Case 04
+            $MON = "Avril";
+        Case 05
+            $MON = "Mai";
+        Case 06
+            $MON = "Juin";
+        Case 07
+            $MON = "Juillet";
+        Case 08
+            $MON = "Août";
+        Case 09
+            $MON = "Septembre";
+        Case 10
+            $MON = "Octobre";
+        Case 11
+            $MON = "Novembre";
+        Case 12
+            $MON = "Décembre";
+	EndSwitch
+
+	Return $MON
+EndFunc
+
 Func _GetUUID($annee=2025)
 	$Uuid = RegRead("HKCU\SOFTWARE\BacBackup", "UUID")
 	If @error = 0 And StringRegExp($Uuid, "^((\d{4}-)(\w{4} ){2}\w{4})$") = 1 And StringLeft($Uuid, 4)>=2025 Then Return $Uuid
