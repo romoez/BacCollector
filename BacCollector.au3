@@ -4017,7 +4017,7 @@ Func _GenererGrilleEvaluation($aNumCandiats)
 		Local $result = _GenererFichiersExcel($chunk, $sSeance, $sLabo, $KesNomGrille)
 		If Not $result Then Return 0
 	Next
-	Return 1
+	Return $result
 EndFunc
 
 Func _GenererFichiersExcel($aNumCandiats, $sSeance, $sLabo, $NomGrille)
@@ -4109,7 +4109,7 @@ Func _GenererFichiersExcel($aNumCandiats, $sSeance, $sLabo, $NomGrille)
 	Local $FolderName = @TempDir & "\BacCollector\" & $sFldr & "\*"
 
 	If _7ZipStartup() Then ; To test dll opening (can be omitted for some functions)
-		$retResult = _7ZipAdd(0, $ArcFile, $FolderName)
+		$retResult = _7ZipAdd(0, $ArcFile, $FolderName, 0, 1)  ; $hWnd, $sArcName, $sFileName, $sFileType = 0, $sHide = 0, $sFilesOpen = 0,...
 		If @error Then
 			MsgBox(16, "Erreur Grille d'évaluation", "Erreur lors de la préparation de la Grille d'évaluation")
 		EndIf
