@@ -18,8 +18,8 @@
 #pragma compile(Compression, 9)
 #pragma compile(FileDescription, Collecte des travaux lors des examens pratiques d'informatique.)
 #pragma compile(ProductName, BacCollector)
-#pragma compile(ProductVersion, 0.8.18.414)
-#pragma compile(FileVersion, 0.8.18.414)
+#pragma compile(ProductVersion, 0.8.18.415)
+#pragma compile(FileVersion, 0.8.18.415)
 #pragma compile(LegalCopyright, 2018-2025 © La Communauté Tunisienne des Enseignants d'Informatique)
 #pragma compile(Comments, BacCollector: Collecte des travaux lors des examens pratiques d'informatique.)
 #pragma compile(CompanyName, La Communauté Tunisienne des Enseignants d'Informatique)
@@ -1406,6 +1406,7 @@ Func RecupererInfo($NumeroCandidat)
 		EndIf
 	Next
 	ProgressOff()
+	SplashOff()
 ;~ 	//////////////////////////////////////////////////////
 	Local $DossierSession = IniRead($Lecteur & $DossierSauve & "\BacBackup\BacBackup.ini", "Params", "DossierSession", "/^_^\")
 	If FileExists($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher") Then
@@ -1413,14 +1414,10 @@ Func RecupererInfo($NumeroCandidat)
 		_Logging("Fraude possible. Candidat N° " & $NumeroCandidat & ". Copie du dossier ""CapturesEcran"" vers le dossier du candidat", 5)
 		FileWriteLine($hInfoFile, 'Une clé USB a été insérée dans cette session de Windows. Veuillez vérifier les captures d''écran dans le dossier "CapturesEcran".')
 		FileClose($hInfoFile)
-		SplashTextOn("Sans Titre", "Copie des captures d'écran" & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
-		$Error1_CopyBacFldr = DirCopy($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher", $Dest1FlashUSB & "\CapturesEcran", $FC_OVERWRITE)
-		$TmpError = DirCopy($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher", $Dest2LocalFldr & "\CapturesEcran", $FC_OVERWRITE)
-
+		$Error1_CopyBacFldr = _DirCopyWithProgress($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher", $Dest1FlashUSB & "\CapturesEcran", 1, "Copie des captures d'écran...")
+		$TmpError = _DirCopyWithProgress($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher", $Dest2LocalFldr & "\CapturesEcran", 1, "Copie des captures d'écran...")
 	EndIf
-
 ;~ 	//////////////////////////////////////////////////////
-	SplashOff()
 	Local $sMaskAutresFichiers = "*"
 	$iNberreurs = $iNberreurs + _CopierLeContenuDesAutresDossiers($sMaskAutresFichiers)
 
@@ -1794,7 +1791,18 @@ Func RecupererTic($NumeroCandidat)
 	EndIf
 
 	ProgressOff()
-;~ 	SplashOff()
+	SplashOff()
+;~ 	//////////////////////////////////////////////////////
+	Local $DossierSession = IniRead($Lecteur & $DossierSauve & "\BacBackup\BacBackup.ini", "Params", "DossierSession", "/^_^\")
+	If FileExists($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher") Then
+		Local $hInfoFile = FileOpen($Dest1FlashUSB & "\" & "possibilité_de_fraude.txt", 1)
+		_Logging("Fraude possible. Candidat N° " & $NumeroCandidat & ". Copie du dossier ""CapturesEcran"" vers le dossier du candidat", 5)
+		FileWriteLine($hInfoFile, 'Une clé USB a été insérée dans cette session de Windows. Veuillez vérifier les captures d''écran dans le dossier "CapturesEcran".')
+		FileClose($hInfoFile)
+		$Error1_CopyBacFldr = _DirCopyWithProgress($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher", $Dest1FlashUSB & "\CapturesEcran", 1, "Copie des captures d'écran...")
+		$TmpError = _DirCopyWithProgress($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher", $Dest2LocalFldr & "\CapturesEcran", 1, "Copie des captures d'écran...")
+	EndIf
+;~ 	//////////////////////////////////////////////////////
 	Local $sMaskAutresFichiers = "*"
 	$iNberreurs = $iNberreurs + _CopierLeContenuDesAutresDossiersNoRemove($sMaskAutresFichiers)
 
@@ -1804,7 +1812,6 @@ Func RecupererTic($NumeroCandidat)
 	EndIf
 
 	_Initialisation()
-	SplashOff()
 	If $iNberreurs = 0 And $YaDatabase And $YaSiteWeb Then
 		;;;_Logging($sText, $iSuccess = 1, $iGuiLog = 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green
 		_Logging("Récupération terminée  avec succès", 3, 1)
@@ -2276,6 +2283,18 @@ Func _CopierLeContenuDesAutresDossiers($Mask)
 	EndIf
 
 ;~ ///////**********************************************************************
+;~ ///////******** Copy - Fichiers Modifiés dans le dossier mu_code      *******
+;~ ///////**********************************************************************
+;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des fichiers récents sur le" & @CRLF & """Bureau""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des fichiers >> mu_code...", "", Default, Default, 1)
+	Local $Liste[1] = [0] ;
+	Local $Dossier = @UserProfileDir & '\mu_code\' ;
+	$Liste = _FileListToArrayRec($Dossier, "*.py||", 1, 0, 0, 1)
+	If IsArray($Liste) Then
+		$iNberreurs = $iNberreurs + _SubCopierLeContenuDesAutresDossiers($Liste, $Dossier, '\mu_code\')
+	EndIf
+
+;~ ///////**********************************************************************
 ;~ ///////**********      Copy - Dossiers créés dans Mes documents      ********
 ;~ ///////**********************************************************************
 ;~ 	SplashTextOn("Sans Titre", "Recherche/Copie des dossiers récents dans" & @CRLF & """Mes documents""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
@@ -2403,8 +2422,6 @@ EndFunc   ;==>_CopierLeContenuDesAutresDossiers
 
 Func _CopierLeContenuDesAutresDossiersNoRemove($Mask)
 	Local $iNberreurs = 0
-	SplashOff()
-
 ;~ ///////**********************************************************************
 ;~ ///////**********      Copy - Dossiers créés sur le Bureau           ********
 ;~ ///////**********************************************************************
