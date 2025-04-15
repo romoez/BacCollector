@@ -18,8 +18,8 @@
 #pragma compile(Compression, 9)
 #pragma compile(FileDescription, Collecte des travaux lors des examens pratiques d'informatique.)
 #pragma compile(ProductName, BacCollector)
-#pragma compile(ProductVersion, 0.8.17)
-#pragma compile(FileVersion, 0.8.17)
+#pragma compile(ProductVersion, 0.8.18.414)
+#pragma compile(FileVersion, 0.8.18.414)
 #pragma compile(LegalCopyright, 2018-2025 © La Communauté Tunisienne des Enseignants d'Informatique)
 #pragma compile(Comments, BacCollector: Collecte des travaux lors des examens pratiques d'informatique.)
 #pragma compile(CompanyName, La Communauté Tunisienne des Enseignants d'Informatique)
@@ -61,7 +61,7 @@ _KillOtherScript()
 #Region ;**** Global Const ****
 ;#Program.Info.Const
 Global Const $PROG_TITLE = "BacCollector "
-Global Const $PROG_VERSION = StringTrimRight(FileGetVersion(@ScriptFullPath), 2) ;"0.8.2.0" --> "0.8.2"
+Global Const $PROG_VERSION = VersionWXY() ;"0.8.2.0" --> "0.8.2"
 
 Global Const $ANNEES_BAC[5] = ["2025", "2026", "2027", "2028", "2029"]
 
@@ -170,6 +170,9 @@ While 1
 		Case $lblBacBackup
 			_CheckBacCollectorExists()
 			_OpenBacBackupInterface()
+		Case $lblUsbCleaner
+			_CheckBacCollectorExists()
+			_OpenUsbCleanerUrl()
 ;~ 			MsgBox('0',"","Hello")
 ;~ 		Case $bAide
 ;~ 			_CheckBacCollectorExists()
@@ -405,9 +408,11 @@ EndFunc   ;==>_InitialisationTic
 
 #Region Function "_InitialParams" --------------------------------------------------------------------------
 Func _InitialParams()
-	If not FileExists(StringTrimRight(@ScriptFullPath, 4) & ".ini") Then
-		_GUIExtender_Section_Action($hMainGUI, 1, 1) ;2ème paramètre (1) Numéro de la Section  -  3ème paramètre (0) to retract the Section
+	Local $GuiPart3Extend = IniRead(StringTrimRight(@ScriptFullPath, 4) & ".ini", "Params", "GuiPart3Extend", "-1")
+	If StringIsInt($GuiPart3Extend) = 0 Or ($GuiPart3Extend <> 0 And $GuiPart3Extend <> 1) Then
+		$GuiPart3Extend = 1
 	EndIf
+	_GUIExtender_Section_Action($hMainGUI, 1, $GuiPart3Extend) ;2ème paramètre (1) Numéro de la Section  -  3ème paramètre (0) to retract the Section
 
 ;~ 	SplashTextOn("Sans Titre", "Lecture des paramètres de ""BacCollector""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Mise à jour des paramètres...", "[0%] Veuillez patienter un moment, initialisation...", Default, Default, 1)
@@ -526,18 +531,24 @@ Func _InitialParams()
 	;;;BacBackup détecté
 	If _IsRegistryExist("HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{498AA8A4-2CBE-4368-BFA0-E0CF3F338536}_is1", "DisplayName") And ProcessExists('BacBackup.exe') Then
 		GUICtrlSetBkColor($lblBacBackup, $GUI_BKCOLOR_TRANSPARENT)
-		GUICtrlSetFont(-1, 11, 100, 0, "Segoe UI Light")
-	;~ 	GUICtrlSetState($lblBacBackup, $GUI_HIDE)
-		GUICtrlSetTip($lblBacBackup, "Cliquez ici pour ouvrir BacBackup", "BacBackup surveille le PC.", 0,1)
+		GUICtrlSetFont($lblBacBackup, 10, 900, 0, "Segoe UI Light")
+		GUICtrlSetTip($lblBacBackup, "Cliquez pour ouvrir l'interface de BacBackup", "PC sous surveillance 💙 BacBackup 💙", 0,1)
 		GUICtrlSetData($lblBacBackup, "BacBackup est Installé.")
+		GUICtrlSetColor($lblBacBackup, 0xFFFFFF)
 ;~ 		_Logging("BacBackup est installé, et surveille les dossiers de travail des candidats.", 2, 0)
 	Else
 		GUICtrlSetBkColor($lblBacBackup, $GUI_BKCOLOR_TRANSPARENT)
-		GUICtrlSetFont(-1, 11, 800, 0, "Segoe UI Light")
-;~ 		GUICtrlSetState($lblBacBackup, $GUI_HIDE)
-		GUICtrlSetTip($lblBacBackup, "Cliquez ici pour aller à la page de téléchargement de BacBackup", "BacBackup", 0,1)
-		GUICtrlSetData($lblBacBackup, "BacBackup non Installé ;(")
+		GUICtrlSetFont($lblBacBackup, 10, 900, 0, "Segoe UI Light")
+		GUICtrlSetTip($lblBacBackup, "Cliquez pour aller à la page de téléchargement de BacBackup", "⚠️ Absence de surveillance BacBackup ⚠", 0,1)
+		GUICtrlSetData($lblBacBackup, "⚠️ BacBackup ⚠️")
+		GUICtrlSetColor($lblBacBackup, 0xFF0000)
 ;~ 		_Logging("BacBackup n'est pas installé" & $Bac20xx, 2, 0)
+	EndIf
+
+
+	If Not _IsRegistryExist("HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{D50A90DE-3118-4B58-9ABE-FDF795C59970}_is1", "DisplayName") Or Not ProcessExists('UsbCleaner.exe') Then
+		GUICtrlSetState($CUsbCleaner, $GUI_SHOW)
+		GUICtrlSetState($lblUsbCleaner, $GUI_SHOW)
 	EndIf
 
 	ProgressSet(99, "[" & 99 & "%] " & "")
@@ -555,13 +566,16 @@ EndFunc   ;==>_InitialParams
 Func _Directory_Is_Accessible($sPath)
     If Not StringInStr(FileGetAttrib($sPath), "D", 2) Then Return SetError(1, 0, 0)
     Local $iEnum = 0
-    While FileExists($sPath & "\_test_" & $iEnum)
+    While FileExists($sPath & "\_bc_test_" & $iEnum)
+		If DirGetSize($sPath & "\_bc_test_" & $iEnum) = 0 Then
+			DirRemove($sPath & "\_bc_test_" & $iEnum)
+		EndIf
         $iEnum += 1
     WEnd
-    Local $iSuccess = DirCreate($sPath & "\_test_" & $iEnum)
+    Local $iSuccess = DirCreate($sPath & "\_bc_test_" & $iEnum)
     Switch $iSuccess
         Case 1
-            Return DirRemove($sPath & "\_test_" & $iEnum)
+            Return DirRemove($sPath & "\_bc_test_" & $iEnum)
         Case Else
             Return False
     EndSwitch
@@ -675,33 +689,34 @@ Func _ShowAPropos()
     Local $aCompileDate = FileGetTime(@ScriptFullPath)
     Local $sCompileDate = $aCompileDate[2] & " " & _MonthFullName($aCompileDate[1]) & " " & $aCompileDate[0] & " à " & _
                           $aCompileDate[3] & ":" & $aCompileDate[4] & ":" & $aCompileDate[5]
-    Local $GitHubLink = "https://github.com/romoez/BacCollector"
+    Local $GithubLink = "https://github.com/romoez/BacCollector"
 
     ; Création de la fenêtre GUI
-    Local $hGUI = GUICreate("À propos", 300, 170, -1, -1, BitOR($WS_CAPTION, $WS_SYSMENU), $WS_EX_TOPMOST)
+    Local $hGUI = GUICreate("À propos", 340, 170, -1, -1, BitOR($WS_CAPTION, $WS_SYSMENU), $WS_EX_TOPMOST)
 	GUISetBkColor($GUI_COLOR_CENTER)
 
     ; Labels centrés
-    GUICtrlCreateLabel($PROG_TITLE & " v" & $PROG_VERSION, 20, 20, 260, 20, $SS_CENTER)
+    GUICtrlCreateLabel($PROG_TITLE & " v" & $PROG_VERSION, 20, 20, 300, 20, $SS_CENTER)
     GUICtrlSetFont(-1, 16, 700)
 	GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
 
-    GUICtrlCreateLabel("Compilé le " & $sCompileDate, 20, 50, 260, 20, $SS_CENTER)
+    GUICtrlCreateLabel("Compilé le " & $sCompileDate, 20, 50, 300, 20, $SS_CENTER)
     GUICtrlSetFont(-1, 8, 300)
 	GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
 
-    GUICtrlCreateLabel("Site Web :", 20, 80, 260, 20, $SS_CENTER)
+    GUICtrlCreateLabel("Site Web :", 20, 80, 280, 20, $SS_CENTER)
     GUICtrlSetFont(-1, 9, 300)
 	GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
 
-    Local $idGitHubLink = GUICtrlCreateLabel($GitHubLink, 20, 100, 260, 20, $SS_CENTER)
-    GUICtrlSetFont(-1, 10, 400)
+    Local $idGitHubLink = GUICtrlCreateLabel($GithubLink, 20, 100, 300, 20, $SS_CENTER)
+    GUICtrlSetFont(-1, 10, 400, $GUI_FONTUNDER, "Consolas")
     GUICtrlSetColor(-1, 0x63C2F5) ; Couleur bleue pour le lien
     GUICtrlSetCursor(-1, 0) ; Curseur main
-    GUICtrlSetTip(-1, "Cliquez pour ouvrir")
+;~     GUICtrlSetTip(-1, "Cliquez pour ouvrir")
 
     ; Bouton OK centré
-    Local $idOK = GUICtrlCreateButton("OK", 110, 130, 80, 30)
+    Local $idOK = GUICtrlCreateButton("OK", 130, 130, 80, 30)
+	GUICtrlSetCursor(-1, 0) ; Curseur main
 
     ; Affichage de la fenêtre
     GUISetState(@SW_SHOW, $hGUI)
@@ -724,26 +739,33 @@ EndFunc
 
 #Region Functions BB
 Func _NouvelleSessionBacBackup()
-	Local $iID = ProcessExists('BacBackup.exe')
+	Local $iIDBacBackup = ProcessExists('BacBackup.exe')
 
-	If $iID = 0 Then
-		Return 0
+	If $iIDBacBackup = 0 Then
+		Local $iIDUsbCleaner = ProcessExists('UsbCleaner.exe')
+		If $iIDUsbCleaner = 0 Then
+			Return 0
+		Else
+			Run(_WinAPI_GetProcessFileName($iIDUsbCleaner))
+			Return 1
+		EndIf
+	Else
+		Run(_WinAPI_GetProcessFileName($iIDBacBackup))  ; Le lancement de BacBackup arrête l'ancienne instance, et crée un nouveau dossier de capture
+		Return 1
 	EndIf
-	Run(_WinAPI_GetProcessFileName($iID))  ; Le lancement de BacBackup arrête l'ancienne instance, et crée un nouveau dossier de capture
-	Return 1
 EndFunc   ;==>_NouvelleSessionBacBackup
 
 Func _OpenBacBackupInterface()
-	Local $iID = ProcessExists('BacBackup.exe')
+	Local $iIDBacBackup = ProcessExists('BacBackup.exe')
 
-	If $iID = 0 Then
+	If $iIDBacBackup = 0 Then
 		_Logging("Ouverture de la page de télépchargement de BacBackup", 2, 0)
 		ShellExecute("https://github.com/romoez/BacBackup", "", "", "open")
 ;~ 		GUICtrlSetState($lblBacBackup, $GUI_HIDE)
 		Return 0
 	EndIf
 	Local $sDrive = "", $sDir = "", $sFileName = "", $sExtension = "", $sBBInterface = ""
-	Local $aPathSplit = _PathSplit(_WinAPI_GetProcessFileName($iID), $sDrive, $sDir, $sFileName, $sExtension)
+	Local $aPathSplit = _PathSplit(_WinAPI_GetProcessFileName($iIDBacBackup), $sDrive, $sDir, $sFileName, $sExtension)
 
 	$sBBInterface = $sDrive & $sDir & "BacBackup_Interface.exe"
 ;~ 	MsgBox(0,"",$sBBInterface)
@@ -753,6 +775,11 @@ Func _OpenBacBackupInterface()
 	EndIf
 	Return -1
 EndFunc   ;==>_OpenBacBackupInterface
+
+Func _OpenUsbCleanerUrl()
+		_Logging("Ouverture de la page de télépchargement de UsbCleaner", 2, 0)
+		ShellExecute("https://github.com/romoez/UsbCleaner", "", "", "open")
+EndFunc     ;==>_OpenUsbCleanerUrl
 #EndRegion Functions BB
 
 ;=========================================================
@@ -762,10 +789,12 @@ Func _TogglePart3()
 		Case 0
 			; Extend to the right (default)
 			_GUIExtender_Section_Action($hMainGUI, 1, 1)
+			IniWrite(StringTrimRight(@ScriptFullPath, 4) & ".ini", "Params", "GuiPart3Extend", 1)
 			_Logging("Ouverture de la partie droite de l'interface", 2, 0)
 		Case 1
-			; Retract from the right (default
+			; Retract from the right
 			_GUIExtender_Section_Action($hMainGUI, 1, 0)
+			IniWrite(StringTrimRight(@ScriptFullPath, 4) & ".ini", "Params", "GuiPart3Extend", 0)
 			_Logging("Fermeture de la partie droite de l'interface", 2, 0)
 	EndSwitch
 EndFunc   ;==>_TogglePart3
@@ -791,11 +820,10 @@ Func _CreateGui()
 	GUICtrlSetBkColor(-1, $GUI_COLOR_SIDES)
 	_GUIExtender_Section_Create($hMainGUI, $GUI_LARGEUR - $GUI_LARGEUR_PARTIE, $GUI_LARGEUR_PARTIE)
 	_GUIExtender_Section_Activate($hMainGUI, 1)
-	GUICtrlSetTip($bTogglePart3, " ", "Cliquez ici pour afficher/masquer la partie droite de la fenêtre.", 0,1)
+	GUICtrlSetTip($bTogglePart3, " ", "Cliquez pour afficher/masquer la partie droite de la fenêtre.", 0,1)
 
 
-	; Déplacé vers _InitialParams(), si le fichier de config existe...
-	_GUIExtender_Section_Action($hMainGUI, 1, 1) ;2ème paramètre (1) Numéro de la Section  -  3ème paramètre (0) to retract the Section
+	_GUIExtender_Section_Action($hMainGUI, 1, 0) ;2ème paramètre (1) Numéro de la Section  -  3ème paramètre (0) to retract the Section
 
 	;;; Partie 3 à droite + bouton Slider - Fin=====================================================================================
 
@@ -851,7 +879,7 @@ Func _CreateGui()
 	Global $lblMatiere = GUICtrlCreateLabel("Matière...", $TmpLeft, $TmpTop, $WidthHeader / 2 - 2 * $GUI_MARGE, $GUI_HEADER_HAUTEUR + 10, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor(-1, 0xFFFFFF)
 	GUICtrlSetFont(-1, 16, 100, 4, "Segoe UI Light")
-	GUICtrlSetTip($lblMatiere, "Cliquez ici pour Actualiser tout.", "Actualiser.", 0,1)
+	GUICtrlSetTip($lblMatiere, "Cliquez pour Actualiser tout.", "Actualiser.", 0,1)
 
 	;;;***** Matière Info || Prog
 	$TmpTop = $TmpTop + $GUI_HEADER_HAUTEUR + 2 * $GUI_MARGE
@@ -945,7 +973,7 @@ Func _CreateGui()
 	GUICtrlSetColor($lblComputerID, 0xFFFFFF)
 	GUICtrlSetBkColor($lblComputerID, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 8, 100, 0, "Segoe UI Light")
-	GUICtrlSetTip($lblComputerID, "L'Identifiant Unique de ce PC." & @CRLF & @CRLF & "Cliquer pour copier.", GUICtrlRead($lblComputerID), 0,1)
+	GUICtrlSetTip($lblComputerID, "L'Identifiant Unique de ce PC." & @CRLF & @CRLF & "Cliquez pour copier.", GUICtrlRead($lblComputerID), 0,1)
 
 	Local $TmpButtonWidth = $GUI_LARGEUR_PARTIE - 4 * $GUI_MARGE ; * 2/3
 	Local $TmpButtonHeight = $GUI_HEADER_HAUTEUR * 2
@@ -1055,12 +1083,41 @@ Func _CreateGui()
 	GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
 	GUICtrlSetFont(-1, 10)
 
-	Global $lblBacBackup = GUICtrlCreateLabel("BacBackup est installé", 3 * $GUI_LARGEUR_PARTIE + $GUI_LARGEUR_PARTIE / 2 - $TmpButtonWidth / 2, $GUI_HAUTEUR - 2 * $GUI_MARGE - 2 * $TmpButtonHeight, $TmpButtonWidth, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
+	;;; Cadre BacBackup
+	$Left_Header = $GUI_MARGE + 3 * $GUI_LARGEUR_PARTIE
+;~ 	$Top_Header = $GuiTmpTop + $TmpButtonHeight + 2 * $GUI_MARGE
+	$Top_Header = $GUI_HAUTEUR - 2 * $GUI_MARGE - 2 * $TmpButtonHeight
+	$WidthHeader = $GUI_LARGEUR_PARTIE - 2 * $GUI_MARGE
+
+	Local $CBacBackup = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
+	GUICtrlSetColor($CBacBackup, 0x66c7fc)
+	GUICtrlSetState($CBacBackup, $GUI_DISABLE)
+
+;~ 	Global $lblBacBackup = GUICtrlCreateLabel("BacBackup est installé", 3 * $GUI_LARGEUR_PARTIE + $GUI_LARGEUR_PARTIE / 2 - $TmpButtonWidth / 2, $GUI_HAUTEUR - 2 * $GUI_MARGE - 2 * $TmpButtonHeight, $TmpButtonWidth, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
+	Global $lblBacBackup = GUICtrlCreateLabel("BacBackup est installé", $Left_Header, $Top_Header, $WidthHeader, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor($lblBacBackup, 0xFFFFFF)
 	GUICtrlSetBkColor($lblBacBackup, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 11, 100, 0, "Segoe UI Light")
 ;~ 	GUICtrlSetState($lblBacBackup, $GUI_HIDE)
-	GUICtrlSetTip($lblBacBackup, "Cliquez ici pour ouvrir BacBackup", "BacBackup surveille le PC.", 0,1)
+	GUICtrlSetTip($lblBacBackup, "Cliquez pour ouvrir BacBackup", "BacBackup surveille le PC.", 0,1)
+	GUICtrlSetCursor(-1, 0) ; Curseur main
+
+	;;; Cadre USBCleaner
+	$Top_Header = $GUI_HAUTEUR - 2 * $GUI_MARGE - 3 * $TmpButtonHeight
+	$WidthHeader = $GUI_LARGEUR_PARTIE - 2 * $GUI_MARGE
+
+	Global $CUsbCleaner = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
+	GUICtrlSetColor($CUsbCleaner, 0x66c7fc)
+	GUICtrlSetState($CUsbCleaner, $GUI_DISABLE)
+
+	Global $lblUsbCleaner = GUICtrlCreateLabel("⚠️ UsbCleaner ⚠️", $Left_Header, $Top_Header, $WidthHeader, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
+	GUICtrlSetColor($lblUsbCleaner, 0xFF0000)
+	GUICtrlSetBkColor($lblUsbCleaner, $GUI_BKCOLOR_TRANSPARENT)
+	GUICtrlSetFont(-1, 10, 900, 0, "Segoe UI Light")
+	GUICtrlSetTip($lblUsbCleaner, "Cliquez pour aller à la page de téléchargement de UsbCleaner", "⚠️ Absence de surveillance UsbCleaner ⚠", 0,1)
+	GUICtrlSetCursor(-1, 0) ; Curseur main
+	GUICtrlSetState($lblUsbCleaner, $GUI_HIDE)
+	GUICtrlSetState($CUsbCleaner, $GUI_HIDE)
 
 	;;; Cadre
 	$Top_Header = $GuiTmpTop + $TmpButtonHeight + 2 * $GUI_MARGE
@@ -1348,7 +1405,7 @@ Func RecupererInfo($NumeroCandidat)
 			;;;Log+++++++
 		EndIf
 	Next
-	SplashOff()
+	ProgressOff()
 ;~ 	//////////////////////////////////////////////////////
 	Local $DossierSession = IniRead($Lecteur & $DossierSauve & "\BacBackup\BacBackup.ini", "Params", "DossierSession", "/^_^\")
 	If FileExists($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher") Then
@@ -1356,16 +1413,16 @@ Func RecupererInfo($NumeroCandidat)
 		_Logging("Fraude possible. Candidat N° " & $NumeroCandidat & ". Copie du dossier ""CapturesEcran"" vers le dossier du candidat", 5)
 		FileWriteLine($hInfoFile, 'Une clé USB a été insérée dans cette session de Windows. Veuillez vérifier les captures d''écran dans le dossier "CapturesEcran".')
 		FileClose($hInfoFile)
+		SplashTextOn("Sans Titre", "Copie des captures d'écran" & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 		$Error1_CopyBacFldr = DirCopy($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher", $Dest1FlashUSB & "\CapturesEcran", $FC_OVERWRITE)
 		$TmpError = DirCopy($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher", $Dest2LocalFldr & "\CapturesEcran", $FC_OVERWRITE)
 
 	EndIf
 
 ;~ 	//////////////////////////////////////////////////////
-
+	SplashOff()
 	Local $sMaskAutresFichiers = "*"
 	$iNberreurs = $iNberreurs + _CopierLeContenuDesAutresDossiers($sMaskAutresFichiers)
-	ProgressOff()
 
 	Local $Bac20xx = 'C:\Bac' & GUICtrlRead($cBac)
 	SplashTextOn("Sans Titre", "Création du Dossier : """ & $Bac20xx & """" & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
@@ -3830,6 +3887,11 @@ Func _LockFoldersBC()
 	_LockFolder($Lecteur & $DossierSauve, $sUserName)
 EndFunc   ;==>_LockFoldersBC
 
+;=========================================================
+Func VersionWXY()
+	Local $parts = StringSplit(FileGetVersion(@ScriptFullPath), '.')
+	return $parts[1] & '.' & $parts[2] & '.' & $parts[3]
+EndFunc
 ;=========================================================
 
 Func WM_NOTIFY($hWnd, $iMsg, $wParam, $lParam)
