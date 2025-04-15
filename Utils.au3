@@ -17,7 +17,7 @@ EndFunc
 
 Func _FineSize($iTaille) ;reçoit une taille en Octet >> retourne la taille en "multiple" approprié Ko ou Mo...
 	if $iTaille<1024 Then
-		return $iTaille & " otc."
+		return $iTaille & " o"
 	EndIf
 
 	$iTaille = Round($iTaille / 1024, 1)
@@ -439,6 +439,7 @@ Func _GetUUID($annee=2025)
 	RegWrite("HKCU\SOFTWARE\BacBackup", "UUID", "REG_SZ", $Uuid)
 	Return $Uuid
 EndFunc
+
 Func _IsRegistryExist($sKeyName, $sValueName)
     $x = RegRead($sKeyName, $sValueName)
     Return @error = 0
@@ -463,3 +464,76 @@ Func _WinGetByPID($iPID, $iArray = 1) ; 0 Will Return 1 Base Array & 1 Will Retu
     EndIf
     Return SetError(1, 0, $aError)
 EndFunc   ;==>_WinGetByPID
+
+; #FUNCTION# ====================================================================================================================
+; Name ..........: _DirCopyWithProgress
+; Description ...: Copy one directory and its structure to another directory with a progress bar
+; Syntax ........: _DirCopyWithProgress($sSource, $sDest[, [$iOverwrite = 1[, $sMsg = "Copying in progress..."]]])
+; Parameters ....: $sSource      - Source path of the folder to copy
+;                  $sDest        - Destination path
+;                  $iOverwrite   - [optional] 1 to overwrite existing files (default), 0 to not overwrite
+;                  $sMsg         - [optional] Message to show in the progress dialog title
+; Return values .: Success - Returns 1
+;                  Failure - Returns 0 and sets @error to:
+;                  |1 - The source folder does not exist
+;                  |2 - Unable to create the destination folder
+;                  |3 - No files found or unable to list files
+;                  |4 - Source and destination are the same
+; Author ........: romoez@github
+; Modified ......:
+; Remarks .......: Does not delete files in the destination that are not in the source, unlike DirCopy with overwrite.
+; Related .......: DirCopy, FileCopy
+; Link ..........: https://github.com/romoez/BacCollector
+; ===============================================================================================================================
+Func _DirCopyWithProgress($sourceDir, $destDir, $overwrite = 1, $sMsg = "Copie en cours...")
+    If Not FileExists($sourceDir) Then Return SetError(1, 0, 0)
+    If $sourceDir = $destDir Then Return SetError(4, 0, 0)
+
+    ; Créer le dossier de destination s'il n'existe pas
+    If Not FileExists($destDir) Then
+        If Not DirCreate($destDir) Then Return SetError(2, 0, 0)
+    EndIf
+
+    ; Récupérer la liste complète des fichiers dans le dossier source (récursif)
+    Local $aFiles = _FileListToArrayRec($sourceDir, "*", $FLTAR_FILES, $FLTAR_RECUR, $FLTAR_NOSORT, $FLTAR_FULLPATH)
+    If @error Or Not IsArray($aFiles) Then Return SetError(3, 0, 0)
+
+    ; Initialiser la barre de progression
+    ProgressOn($sMsg, "Initialisation...", "0%", Default, Default, 1)
+
+    ; Compter le nombre total de fichiers à copier
+    Local $totalFiles = UBound($aFiles) - 1
+    If $totalFiles = 0 Then
+        ProgressOff()
+        Return SetError(3, 0, 0) ; No files to copy
+    EndIf
+    Local $currentFile = 0
+
+    ; Boucle pour copier chaque fichier
+    For $i = 1 To $totalFiles
+        Local $sourcePath = $aFiles[$i]
+
+        ; Construire le chemin de destination correspondant
+        Local $relativePath = StringReplace($sourcePath, $sourceDir, "", 1)
+        Local $destPath = $destDir & $relativePath
+
+        ; Créer le dossier de destination s'il n'existe pas
+        Local $destFolder = StringRegExpReplace($destPath, "(^.*\\).*", "$1")
+        If Not FileExists($destFolder) Then
+            DirCreate($destFolder)
+        EndIf
+
+        ; Copier le fichier
+        FileCopy($sourcePath, $destPath, $overwrite ? $FC_OVERWRITE + $FC_CREATEPATH : $FC_CREATEPATH)
+
+        ; Mettre à jour la barre de progression
+        $currentFile += 1
+        Local $percent = Round(($currentFile / $totalFiles) * 100, 0)
+        ProgressSet($percent, "[" & $currentFile & "/" & $totalFiles & "] " & StringRegExpReplace($sourcePath, "^.*\\", ""), $sMsg)
+    Next
+
+    ; Fermer la barre de progression
+    ProgressOff()
+
+    Return 1
+EndFunc   ;==>_DirCopyWithProgress
