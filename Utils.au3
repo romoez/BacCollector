@@ -13,28 +13,28 @@
 Func _NbOccurrences($substring, $string)
 	StringReplace($string, $substring, $substring)
 	Return @extended
-EndFunc
+EndFunc   ;==>_NbOccurrences
 
 Func _FineSize($iTaille) ;reçoit une taille en Octet >> retourne la taille en "multiple" approprié Ko ou Mo...
-    ; Tableau des unités de mesure
-    Local $aUnits = ["oct.", "Ko", "Mo", "Go", "To", "Po", "Eo", "Zo", "Yo"]
+	; Tableau des unités de mesure
+	Local $aUnits = ["oct.", "Ko", "Mo", "Go", "To", "Po", "Eo", "Zo", "Yo"]
 
-    ; Initialiser l'index de l'unité
-    Local $iUnitIndex = 0
+	; Initialiser l'index de l'unité
+	Local $iUnitIndex = 0
 
-    ; Boucle pour convertir la taille en multiples appropriés
-    While $iTaille >= 1024 And $iUnitIndex < UBound($aUnits) - 1
-        $iTaille /= 1024
-        $iUnitIndex += 1
-    WEnd
+	; Boucle pour convertir la taille en multiples appropriés
+	While $iTaille >= 1024 And $iUnitIndex < UBound($aUnits) - 1
+		$iTaille /= 1024
+		$iUnitIndex += 1
+	WEnd
 
-    ; Arrondir la taille à une décimale et retourner avec l'unité correspondante
-    Return Round($iTaille, 1) & " " & $aUnits[$iUnitIndex]
-EndFunc
+	; Arrondir la taille à une décimale et retourner avec l'unité correspondante
+	Return Round($iTaille, 1) & " " & $aUnits[$iUnitIndex]
+EndFunc   ;==>_FineSize
 
 Func DossiersBac($Path = 1) ; 1:Chemins complets, 0:Chemins relatifs
 ;~ 	dans certain cas @HomeDrive retoune une chaîne vide --> remplacée par : StringLeft(@WindowsDir,2)
-	Local $Bac = _FileListToArray(StringLeft(@WindowsDir,2), "bac*2*", 2, $Path)
+	Local $Bac = _FileListToArray(StringLeft(@WindowsDir, 2), "bac*2*", 2, $Path)
 	Local $Liste[1] = [0] ;
 
 	If IsArray($Bac) Then
@@ -50,20 +50,20 @@ EndFunc   ;==>DossiersBac
 Func DossiersEasyPHPwww($FullPath = 1) ; 1:Chemins complets, 0:Chemins relatifs
 	Local $aEasyPHP[1] = [0]
 
-	Local $aTmpEasyPHP = _FileListToArrayRec(StringLeft(@WindowsDir,2), "EasyPHP*;wamp*;xampp*;apachefriends*", 30, 0, 2, $FullPath + 1)
+	Local $aTmpEasyPHP = _FileListToArrayRec(StringLeft(@WindowsDir, 2), "EasyPHP*;wamp*;xampp*;apachefriends*", 30, 0, 2, $FullPath + 1)
 
 	If IsArray($aTmpEasyPHP) Then
-				$aEasyPHP[0] += $aTmpEasyPHP[0]
-				_ArrayDelete($aTmpEasyPHP, 0)
-				_ArrayAdd($aEasyPHP, $aTmpEasyPHP)
+		$aEasyPHP[0] += $aTmpEasyPHP[0]
+		_ArrayDelete($aTmpEasyPHP, 0)
+		_ArrayAdd($aEasyPHP, $aTmpEasyPHP)
 	EndIf
 
 	Local $aTmpEasyPHP = _FileListToArray(@ProgramFilesDir, "EasyPHP*", 2, $FullPath)
 
 	If IsArray($aTmpEasyPHP) Then
-				$aEasyPHP[0] += $aTmpEasyPHP[0]
-				_ArrayDelete($aTmpEasyPHP, 0)
-				_ArrayAdd($aEasyPHP, $aTmpEasyPHP)
+		$aEasyPHP[0] += $aTmpEasyPHP[0]
+		_ArrayDelete($aTmpEasyPHP, 0)
+		_ArrayAdd($aEasyPHP, $aTmpEasyPHP)
 	EndIf
 
 	Local $Liste[1] = [0]
@@ -99,20 +99,20 @@ EndFunc   ;==>DossiersEasyPHPwww
 Func DossiersEasyPHPdata($FullPath = 1) ; 1:Chemins complets, 0:Chemins relatifs
 	Local $aEasyPHP[1] = [0]
 
-	Local $aTmpEasyPHP = _FileListToArrayRec(StringLeft(@WindowsDir,2), "EasyPHP*;wamp*;xampp*;apachefriends*", 30, 0, 2, $FullPath + 1)
+	Local $aTmpEasyPHP = _FileListToArrayRec(StringLeft(@WindowsDir, 2), "EasyPHP*;wamp*;xampp*;apachefriends*", 30, 0, 2, $FullPath + 1)
 
 	If IsArray($aTmpEasyPHP) Then
-				$aEasyPHP[0] += $aTmpEasyPHP[0]
-				_ArrayDelete($aTmpEasyPHP, 0)
-				_ArrayAdd($aEasyPHP, $aTmpEasyPHP)
+		$aEasyPHP[0] += $aTmpEasyPHP[0]
+		_ArrayDelete($aTmpEasyPHP, 0)
+		_ArrayAdd($aEasyPHP, $aTmpEasyPHP)
 	EndIf
 
 	Local $aTmpEasyPHP = _FileListToArray(@ProgramFilesDir, "EasyPHP*", 2, $FullPath)
 
 	If IsArray($aTmpEasyPHP) Then
-				$aEasyPHP[0] += $aTmpEasyPHP[0]
-				_ArrayDelete($aTmpEasyPHP, 0)
-				_ArrayAdd($aEasyPHP, $aTmpEasyPHP)
+		$aEasyPHP[0] += $aTmpEasyPHP[0]
+		_ArrayDelete($aTmpEasyPHP, 0)
+		_ArrayAdd($aEasyPHP, $aTmpEasyPHP)
 	EndIf
 
 	Local $Liste[1] = [0], $data
@@ -129,7 +129,7 @@ Func DossiersEasyPHPdata($FullPath = 1) ; 1:Chemins complets, 0:Chemins relatifs
 			ElseIf FileExists($aEasyPHP[$i] & '\mysql\data') Then ;easyphp < 7 & xampp
 				$Liste[0] += 1 ;
 				_ArrayAdd($Liste, $aEasyPHP[$i] & '\mysql\data') ;
-			ElseIf FileExists($aEasyPHP[$i] & '\eds-binaries\dbserver')  Then ;EasyPHP 15.x & 16.x & 17.x
+			ElseIf FileExists($aEasyPHP[$i] & '\eds-binaries\dbserver') Then  ;EasyPHP 15.x & 16.x & 17.x
 				$data = _FindDataFldr($aEasyPHP[$i] & '\eds-binaries\dbserver')  ;EasyPHP 15.x & 16.x & 17.x
 				If FileExists($data) Then
 					$Liste[0] += 1 ;
@@ -156,11 +156,11 @@ EndFunc   ;==>DossiersEasyPHPdata
 ;#########################################################################################
 ;#########################################################################################
 Func _FindDataFldr($PathEasy)
-	Local $aSearch = _FileListToArrayRec($PathEasy,"data",2,1,0,2)
+	Local $aSearch = _FileListToArrayRec($PathEasy, "data", 2, 1, 0, 2)
 	If IsArray($aSearch) Then Return $aSearch[1]
 
 	Return 0
-EndFunc
+EndFunc   ;==>_FindDataFldr
 
 
 ;#########################################################################################
@@ -187,7 +187,7 @@ Func AgeDuFichierEnMinutesModification($cFichier)
 	If @error Then Return 9999
 
 	Local $iMinutes = _DateDiff("n", $cFileDate[0] & "/" & $cFileDate[1] & "/" & $cFileDate[2] & " " & $cFileDate[3] & ":" & $cFileDate[4] & ":" & $cFileDate[5], _NowCalc())
-	if $iMinutes < 0 Then $iMinutes = 9999
+	If $iMinutes < 0 Then $iMinutes = 9999
 	Return $iMinutes
 EndFunc   ;==>AgeDuFichierEnMinutesModification
 
@@ -196,7 +196,7 @@ Func AgeDuFichierEnMinutesCreation($cFichier)
 	If @error Then Return 9999
 
 	Local $iMinutes = _DateDiff("n", $cFileDate[0] & "/" & $cFileDate[1] & "/" & $cFileDate[2] & " " & $cFileDate[3] & ":" & $cFileDate[4] & ":" & $cFileDate[5], _NowCalc())
-	if $iMinutes < 0 Then $iMinutes = 9999
+	If $iMinutes < 0 Then $iMinutes = 9999
 	Return $iMinutes
 EndFunc   ;==>AgeDuFichierEnMinutesCreation
 
@@ -220,12 +220,12 @@ EndFunc   ;==>_UnlockFolder
 ;~ Find out current username when executed as admin
 ;~ https://www.autoitscript.com/forum/topic/183689-find-out-current-username-when-executed-as-admin/#comment-1319682
 Func _GetUsername()
-    Local $aResult = DllCall("Wtsapi32.dll", "int", "WTSQuerySessionInformationW", "int", 0, "dword", -1, "int", 5, "dword*", 0, "dword*", 0)
-    If @error Or $aResult[0] = 0 Then Return SetError(1, 0, @UserName)
-    Local $sUsername = BinaryToString(DllStructGetData(DllStructCreate("byte[" & $aResult[5] & "]", $aResult[4]), 1), 2)
-    DllCall("Wtsapi32.dll", "int", "WTSFreeMemory", "ptr", $aResult[4])
-    Return $sUsername
-EndFunc
+	Local $aResult = DllCall("Wtsapi32.dll", "int", "WTSQuerySessionInformationW", "int", 0, "dword", -1, "int", 5, "dword*", 0, "dword*", 0)
+	If @error Or $aResult[0] = 0 Then Return SetError(1, 0, @UserName)
+	Local $sUserName = BinaryToString(DllStructGetData(DllStructCreate("byte[" & $aResult[5] & "]", $aResult[4]), 1), 2)
+	DllCall("Wtsapi32.dll", "int", "WTSFreeMemory", "ptr", $aResult[4])
+	Return $sUserName
+EndFunc   ;==>_GetUsername
 
 
 ;This will check if an app with a window title = $strtitle is hosted by wowexec
@@ -268,7 +268,7 @@ Func _SystemInfo()
 	Local $objWMIService = ObjGet("winmgmts:\\localhost\root\CIMV2")
 	Local $Output = ""
 	;Get info from WMIC
-	if IsObj($objWMIService) Then
+	If IsObj($objWMIService) Then
 		$colCompSysPro = $objWMIService.ExecQuery("SELECT * FROM Win32_ComputerSystemProduct", "WQL", 0x10 + 0x20)
 
 		;If variable is acceptable
@@ -277,30 +277,15 @@ Func _SystemInfo()
 				;The Hardware Info
 				;Manufacturer/Marque/Vendor
 				Local $TmpOrdinateur = $objCompSysPro.Vendor
-				Local $BuiltInTunisia = 0
-				If $TmpOrdinateur = "ECS" Then
-					$TmpOrdinateur = "PC assemblé, probablement ""Versus"""
-					$BuiltInTunisia = 1
-				ElseIf $TmpOrdinateur = "To be filled by O.E.M." Then
-					$TmpOrdinateur = "PC assemblé, probablement ""Microlux"" ou ""Discovery"""
-					$BuiltInTunisia = 1
-				ElseIf $TmpOrdinateur = "System manufacturer" Then
-					$TmpOrdinateur = "PC assemblé (Microlux, Versus, Discovery...)"
-					$BuiltInTunisia = 1
-				EndIf
-
 				$Output &= "Ordinateur  : " & $TmpOrdinateur & @CRLF
 
 				;Model
-				If Not $BuiltInTunisia Then
-					If $objCompSysPro.Vendor = "Lenovo" Then
-						$objModel = $objCompSysPro.Version
-					Else
-						$objModel = $objCompSysPro.Name
-					EndIf
-					$Output &= "Modèle      : " & $objModel & @CRLF
-
+				If $objCompSysPro.Vendor = "Lenovo" Then
+					$objModel = $objCompSysPro.Version
+				Else
+					$objModel = $objCompSysPro.Name
 				EndIf
+				$Output &= "Modèle      : " & $objModel & @CRLF
 			Next
 		EndIf
 	EndIf
@@ -315,12 +300,12 @@ Func _SystemInfo()
 
 	;OS
 	$Output &= "Système     : " & "Windows " & StringTrimLeft(@OSVersion, 4) & " " & @OSServicePack & " " & (@OSArch = "X86" ? "32-bit" : "64-bit") & @CRLF
-	$Output &= "Computer ID : "	& _GetUUID()
+	$Output &= "Computer ID : " & _GetUUID()
 
 	Return $Output
 
 
-EndFunc   ;==>_Hardware
+EndFunc   ;==>_SystemInfo
 
 Func _RAMSuffix($Bytes)
 	Local $x, $BytesSuffix[6] = ["KB", "MB", "GB", "TB", "PB"]
@@ -333,106 +318,54 @@ Func _RAMSuffix($Bytes)
 	Return $Bytes & " " & $BytesSuffix[$x]
 EndFunc   ;==>_RAMSuffix
 
-
-Func _MonthName($MonthNum)
-
-    Switch $MonthNum
-        Case 01
-            $MON = "Janv";
-        Case 02
-            $MON = "Févr";
-        Case 03
-            $MON = "Mars";
-        Case 04
-            $MON = "Avr.";
-        Case 05
-            $MON = "Mai";
-        Case 06
-            $MON = "Juin";
-        Case 07
-            $MON = "Juil";
-        Case 08
-            $MON = "Août";
-        Case 09
-            $MON = "Sept";
-        Case 10
-            $MON = "Oct.";
-        Case 11
-            $MON = "Nov.";
-        Case 12
-            $MON = "Déc.";
-	EndSwitch
-
-	Return $MON
-EndFunc
-
 Func _MonthFullName($MonthNum)
+	Local $aMonths = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"]
+	If $MonthNum >= 1 And $MonthNum <= 12 Then
+		Return $aMonths[$MonthNum - 1]
+	EndIf
+	Return ""
+EndFunc   ;==>_MonthFullName
 
-    Switch $MonthNum
-        Case 01
-            $MON = "Janvier";
-        Case 02
-            $MON = "Février";
-        Case 03
-            $MON = "Mars";
-        Case 04
-            $MON = "Avril";
-        Case 05
-            $MON = "Mai";
-        Case 06
-            $MON = "Juin";
-        Case 07
-            $MON = "Juillet";
-        Case 08
-            $MON = "Août";
-        Case 09
-            $MON = "Septembre";
-        Case 10
-            $MON = "Octobre";
-        Case 11
-            $MON = "Novembre";
-        Case 12
-            $MON = "Décembre";
-	EndSwitch
+Func JourDeLaSemaine()
+	Local $aDays = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"]
+	Return $aDays[@WDAY - 1]
+EndFunc   ;==>JourDeLaSemaine
 
-	Return $MON
-EndFunc
-
-Func _GetUUID($annee=2025)
+Func _GetUUID($annee = 2025)
 	$Uuid = RegRead("HKCU\SOFTWARE\BacBackup", "UUID")
-	If @error = 0 And StringRegExp($Uuid, "^((\d{4}-)(\w{4} ){2}\w{4})$") = 1 And StringLeft($Uuid, 4)>=2025 Then Return $Uuid
-    $Uuid = $annee & "-" & StringFormat('%04X %04X %04X', _
-            Random(0, 0xffff), _
-            BitOR(Random(0, 0x0fff), 0x4000), _
-            BitOR(Random(0, 0x3fff), 0x8000) _
-        )
+	If @error = 0 And StringRegExp($Uuid, "^((\d{4}-)(\w{4} ){2}\w{4})$") = 1 And StringLeft($Uuid, 4) >= 2025 Then Return $Uuid
+	$Uuid = $annee & "-" & StringFormat('%04X %04X %04X', _
+			Random(0, 0xffff), _
+			BitOR(Random(0, 0x0fff), 0x4000), _
+			BitOR(Random(0, 0x3fff), 0x8000) _
+			)
 	RegWrite("HKCU\SOFTWARE\BacBackup", "UUID", "REG_SZ", $Uuid)
 	Return $Uuid
-EndFunc
+EndFunc   ;==>_GetUUID
 
 Func _IsRegistryExist($sKeyName, $sValueName)
-    $x = RegRead($sKeyName, $sValueName)
-    Return @error = 0
+	$x = RegRead($sKeyName, $sValueName)
+	Return @error = 0
 EndFunc   ;==>_IsRegistryExist
 
 Func _WinGetByPID($iPID, $iArray = 1) ; 0 Will Return 1 Base Array & 1 Will Return The First Window.
-    Local $aError[1] = [0], $aWinList, $sReturn
-    If IsString($iPID) Then
-        $iPID = ProcessExists($iPID)
-    EndIf
-    $aWinList = WinList()
-    For $A = 1 To $aWinList[0][0]
-        If WinGetProcess($aWinList[$A][1]) = $iPID And BitAND(WinGetState($aWinList[$A][1]), 2) Then
-            If $iArray Then
-                Return $aWinList[$A][1]
-            EndIf
-            $sReturn &= $aWinList[$A][1] & Chr(1)
-        EndIf
-    Next
-    If $sReturn Then
-        Return StringSplit(StringTrimRight($sReturn, 1), Chr(1))
-    EndIf
-    Return SetError(1, 0, $aError)
+	Local $aError[1] = [0], $aWinList, $sReturn
+	If IsString($iPID) Then
+		$iPID = ProcessExists($iPID)
+	EndIf
+	$aWinList = WinList()
+	For $A = 1 To $aWinList[0][0]
+		If WinGetProcess($aWinList[$A][1]) = $iPID And BitAND(WinGetState($aWinList[$A][1]), 2) Then
+			If $iArray Then
+				Return $aWinList[$A][1]
+			EndIf
+			$sReturn &= $aWinList[$A][1] & Chr(1)
+		EndIf
+	Next
+	If $sReturn Then
+		Return StringSplit(StringTrimRight($sReturn, 1), Chr(1))
+	EndIf
+	Return SetError(1, 0, $aError)
 EndFunc   ;==>_WinGetByPID
 
 ; #FUNCTION# ====================================================================================================================
@@ -456,56 +389,56 @@ EndFunc   ;==>_WinGetByPID
 ; Link ..........: https://github.com/romoez/BacCollector
 ; ===============================================================================================================================
 Func _DirCopyWithProgress($sourceDir, $destDir, $overwrite = 1, $sMsg = "Copie en cours...")
-    If Not FileExists($sourceDir) Then Return SetError(1, 0, 0)
-    If $sourceDir = $destDir Then Return SetError(4, 0, 0)
+	If Not FileExists($sourceDir) Then Return SetError(1, 0, 0)
+	If $sourceDir = $destDir Then Return SetError(4, 0, 0)
 
-    ; Créer le dossier de destination s'il n'existe pas
-    If Not FileExists($destDir) Then
-        If Not DirCreate($destDir) Then Return SetError(2, 0, 0)
-    EndIf
+	; Créer le dossier de destination s'il n'existe pas
+	If Not FileExists($destDir) Then
+		If Not DirCreate($destDir) Then Return SetError(2, 0, 0)
+	EndIf
 
-    ; Récupérer la liste complète des fichiers dans le dossier source (récursif)
-    Local $aFiles = _FileListToArrayRec($sourceDir, "*", $FLTAR_FILES, $FLTAR_RECUR, $FLTAR_NOSORT, $FLTAR_FULLPATH)
-    If @error Or Not IsArray($aFiles) Then Return SetError(3, 0, 0)
+	; Récupérer la liste complète des fichiers dans le dossier source (récursif)
+	Local $aFiles = _FileListToArrayRec($sourceDir, "*", $FLTAR_FILES, $FLTAR_RECUR, $FLTAR_NOSORT, $FLTAR_FULLPATH)
+	If @error Or Not IsArray($aFiles) Then Return SetError(3, 0, 0)
 
-    ; Initialiser la barre de progression
-    ProgressOn($sMsg, "Initialisation...", "0%", Default, Default, 1)
+	; Initialiser la barre de progression
+	ProgressOn($sMsg, "Initialisation...", "0%", Default, Default, 1)
 
-    ; Compter le nombre total de fichiers à copier
-    Local $totalFiles = UBound($aFiles) - 1
-    If $totalFiles = 0 Then
-        ProgressOff()
-        Return SetError(3, 0, 0) ; No files to copy
-    EndIf
-    Local $currentFile = 0
+	; Compter le nombre total de fichiers à copier
+	Local $totalFiles = UBound($aFiles) - 1
+	If $totalFiles = 0 Then
+		ProgressOff()
+		Return SetError(3, 0, 0) ; No files to copy
+	EndIf
+	Local $currentFile = 0
 
-    ; Boucle pour copier chaque fichier
-    For $i = 1 To $totalFiles
-        Local $sourcePath = $aFiles[$i]
+	; Boucle pour copier chaque fichier
+	For $i = 1 To $totalFiles
+		Local $sourcePath = $aFiles[$i]
 
-        ; Construire le chemin de destination correspondant
-        Local $relativePath = StringReplace($sourcePath, $sourceDir, "", 1)
-        Local $destPath = $destDir & $relativePath
+		; Construire le chemin de destination correspondant
+		Local $relativePath = StringReplace($sourcePath, $sourceDir, "", 1)
+		Local $destPath = $destDir & $relativePath
 
-        ; Créer le dossier de destination s'il n'existe pas
-        Local $destFolder = StringRegExpReplace($destPath, "(^.*\\).*", "$1")
-        If Not FileExists($destFolder) Then
-            DirCreate($destFolder)
-        EndIf
+		; Créer le dossier de destination s'il n'existe pas
+		Local $destFolder = StringRegExpReplace($destPath, "(^.*\\).*", "$1")
+		If Not FileExists($destFolder) Then
+			DirCreate($destFolder)
+		EndIf
 
-        ; Copier le fichier
-        FileCopy($sourcePath, $destPath, $overwrite ? $FC_OVERWRITE + $FC_CREATEPATH : $FC_CREATEPATH)
+		; Copier le fichier
+		FileCopy($sourcePath, $destPath, $overwrite ? $FC_OVERWRITE + $FC_CREATEPATH : $FC_CREATEPATH)
 
-        ; Mettre à jour la barre de progression
-        $currentFile += 1
-        Local $percent = Round(($currentFile / $totalFiles) * 100, 0)
-        ProgressSet($percent, "[" & $currentFile & "/" & $totalFiles & "] " & StringRegExpReplace($sourcePath, "^.*\\", ""), $sMsg)
-    Next
+		; Mettre à jour la barre de progression
+		$currentFile += 1
+		Local $percent = Round(($currentFile / $totalFiles) * 100, 0)
+		ProgressSet($percent, "[" & $currentFile & "/" & $totalFiles & "] " & StringRegExpReplace($sourcePath, "^.*\\", ""), $sMsg)
+	Next
 
-    ; Fermer la barre de progression
-    ProgressOff()
+	; Fermer la barre de progression
+	ProgressOff()
 
-    Return 1
+	Return 1
 EndFunc   ;==>_DirCopyWithProgress
 
 
