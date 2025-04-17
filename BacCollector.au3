@@ -5,6 +5,8 @@
 #AutoIt3Wrapper_Run_Au3Stripper=y
 #AutoIt3Wrapper_Res_Field=URL|https://github.com/romoez/BacCollector
 #AutoIt3Wrapper_Res_Field=Email|moez.romdhane@tarbia.tn
+#AutoIt3Wrapper_Res_Language=1036
+
 #AutoIt3Wrapper_Run_After=copy "%out%" ".\Tests\Labo00"
 #AutoIt3Wrapper_Run_After=copy "%out%" ".\Tests\Labo01"
 #AutoIt3Wrapper_Run_After=copy "%out%" ".\Tests\Labo02"
@@ -18,8 +20,8 @@
 #pragma compile(Compression, 9)
 #pragma compile(FileDescription, Collecte des travaux lors des examens pratiques d'informatique.)
 #pragma compile(ProductName, BacCollector)
-#pragma compile(ProductVersion, 0.8.18.415)
-#pragma compile(FileVersion, 0.8.18.415)
+#pragma compile(ProductVersion, 0.8.19.417)
+#pragma compile(FileVersion, 0.8.19.417)
 #pragma compile(LegalCopyright, 2018-2025 © La Communauté Tunisienne des Enseignants d'Informatique)
 #pragma compile(Comments, BacCollector: Collecte des travaux lors des examens pratiques d'informatique.)
 #pragma compile(CompanyName, La Communauté Tunisienne des Enseignants d'Informatique)
@@ -739,36 +741,44 @@ EndFunc
 
 #Region Functions BB
 Func _NouvelleSessionBacBackup()
-	Local $iIDBacBackup = ProcessExists('BacBackup.exe')
+	Local $sProcessName = "BacBackup.exe"
+	Local $sAppId = "{498AA8A4-2CBE-4368-BFA0-E0CF3F338536}_is1"
+	Local $sAppPath = @ProgramFilesDir & "\BacBackup\" & $sProcessName
 
-	If $iIDBacBackup = 0 Then
-		Local $iIDUsbCleaner = ProcessExists('UsbCleaner.exe')
-		If $iIDUsbCleaner = 0 Then
-			Return 0
-		Else
-			Run(_WinAPI_GetProcessFileName($iIDUsbCleaner))
-			Return 1
-		EndIf
+	Local $sProcessPath = _GetProcessPath($sProcessName, $sAppPath, $sAppId)
+	If $sProcessPath <> "" Then
+		; Si le chemin est trouvé, relancer BacBackup
+		Return _RunOrShellExecute($sProcessPath)
 	Else
-		Run(_WinAPI_GetProcessFileName($iIDBacBackup))  ; Le lancement de BacBackup arrête l'ancienne instance, et crée un nouveau dossier de capture
-		Return 1
+		$sProcessName = "UsbCleaner.exe"
+		$sAppId = "{D50A90DE-3118-4B58-9ABE-FDF795C59970}_is1"
+		$sAppPath = @ProgramFilesDir & "\UsbCleaner\" & $sProcessName
+
+		$sProcessPath = _GetProcessPath($sProcessName, $sAppPath, $sAppId)
+		; Si aucun chemin n'est trouvé, retourner 0
+		If $sProcessPath <> "" Then
+			; Si le chemin est trouvé, relancer BacBackup
+			Return _RunOrShellExecute($sProcessPath)
+		Else
+			Return 0
+		EndIf
 	EndIf
 EndFunc   ;==>_NouvelleSessionBacBackup
 
 Func _OpenBacBackupInterface()
-	Local $iIDBacBackup = ProcessExists('BacBackup.exe')
+	Local $sProcessName = "BacBackup.exe"
+	Local $sAppId = "{498AA8A4-2CBE-4368-BFA0-E0CF3F338536}_is1"
+	Local $sAppPath = @ProgramFilesDir & "\BacBackup\" & $sProcessName
 
-	If $iIDBacBackup = 0 Then
+	Local $sProcessPath = _GetProcessPath($sProcessName, $sAppPath, $sAppId)
+	If $sProcessPath = "" Then
 		_Logging("Ouverture de la page de télépchargement de BacBackup", 2, 0)
 		ShellExecute("https://github.com/romoez/BacBackup", "", "", "open")
 ;~ 		GUICtrlSetState($lblBacBackup, $GUI_HIDE)
 		Return 0
 	EndIf
-	Local $sDrive = "", $sDir = "", $sFileName = "", $sExtension = "", $sBBInterface = ""
-	Local $aPathSplit = _PathSplit(_WinAPI_GetProcessFileName($iIDBacBackup), $sDrive, $sDir, $sFileName, $sExtension)
 
-	$sBBInterface = $sDrive & $sDir & "BacBackup_Interface.exe"
-;~ 	MsgBox(0,"",$sBBInterface)
+	$sBBInterface = _ExtractFolderPath($sProcessPath) & "BacBackup_Interface.exe"
 	If FileExists($sBBInterface) Then
 		_Logging("Ouverture de la fenêtre de BacBackup", 2, 0)
 		Return Run("""" & $sBBInterface & """")
@@ -1412,7 +1422,7 @@ Func RecupererInfo($NumeroCandidat)
 	If FileExists($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher") Then
 		Local $hInfoFile = FileOpen($Dest1FlashUSB & "\" & "possibilité_de_fraude.txt", 1)
 		_Logging("Fraude possible. Candidat N° " & $NumeroCandidat & ". Copie du dossier ""CapturesEcran"" vers le dossier du candidat", 5)
-		FileWriteLine($hInfoFile, 'Une clé USB a été insérée dans cette session de Windows. Veuillez vérifier les captures d''écran dans le dossier "CapturesEcran".')
+		FileWriteLine($hInfoFile, 'Clé USB non autorisée détectée pendant l''examen. Captures d''écran et inventaire des fichiers dans le dossier "CapturesEcran".')
 		FileClose($hInfoFile)
 		$Error1_CopyBacFldr = _DirCopyWithProgress($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher", $Dest1FlashUSB & "\CapturesEcran", 1, "Copie des captures d'écran...")
 		$TmpError = _DirCopyWithProgress($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher", $Dest2LocalFldr & "\CapturesEcran", 1, "Copie des captures d'écran...")
@@ -1431,7 +1441,9 @@ Func RecupererInfo($NumeroCandidat)
 	;;;Log+++++++
 	SplashTextOn("Sans Titre", "Recherche de BacBackup." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	If _NouvelleSessionBacBackup() Then
-		_Logging("Création d'un dossion pour une nouvelle session pour BacBackup") ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
+		_Logging("Création d'une nouvelle session BacBackup") ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
+	Else
+		_Logging("BacBackup est introuvable ou la création d'une nouvelle session de surveillance a échoué.", 5) ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
 	EndIf
 
 	_Initialisation()
@@ -1797,7 +1809,7 @@ Func RecupererTic($NumeroCandidat)
 	If FileExists($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher") Then
 		Local $hInfoFile = FileOpen($Dest1FlashUSB & "\" & "possibilité_de_fraude.txt", 1)
 		_Logging("Fraude possible. Candidat N° " & $NumeroCandidat & ". Copie du dossier ""CapturesEcran"" vers le dossier du candidat", 5)
-		FileWriteLine($hInfoFile, 'Une clé USB a été insérée dans cette session de Windows. Veuillez vérifier les captures d''écran dans le dossier "CapturesEcran".')
+		FileWriteLine($hInfoFile, 'Clé USB non autorisée détectée pendant l''examen. Captures d''écran et inventaire des fichiers dans le dossier "CapturesEcran".')
 		FileClose($hInfoFile)
 		$Error1_CopyBacFldr = _DirCopyWithProgress($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher", $Dest1FlashUSB & "\CapturesEcran", 1, "Copie des captures d'écran...")
 		$TmpError = _DirCopyWithProgress($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher", $Dest2LocalFldr & "\CapturesEcran", 1, "Copie des captures d'écran...")
@@ -1808,7 +1820,9 @@ Func RecupererTic($NumeroCandidat)
 
 	SplashTextOn("Sans Titre", "Recherche de BacBackup." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	If _NouvelleSessionBacBackup() Then
-		_Logging("Création d'un dossion pour une nouvelle session pour BacBackup") ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
+		_Logging("Création d'une nouvelle session BacBackup") ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
+	Else
+		_Logging("BacBackup est introuvable ou la création d'une nouvelle session de surveillance a échoué.", 5) ; _Logging($sText, $iSuccess = 1, $iGuiLog = 1)
 	EndIf
 
 	_Initialisation()
