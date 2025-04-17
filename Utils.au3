@@ -16,50 +16,20 @@ Func _NbOccurrences($substring, $string)
 EndFunc
 
 Func _FineSize($iTaille) ;reçoit une taille en Octet >> retourne la taille en "multiple" approprié Ko ou Mo...
-	if $iTaille<1024 Then
-		return $iTaille & " o"
-	EndIf
+    ; Tableau des unités de mesure
+    Local $aUnits = ["oct.", "Ko", "Mo", "Go", "To", "Po", "Eo", "Zo", "Yo"]
 
-	$iTaille = Round($iTaille / 1024, 1)
-	if $iTaille<1024 Then
-		return $iTaille & " Ko" ;Kilo
-	EndIf
+    ; Initialiser l'index de l'unité
+    Local $iUnitIndex = 0
 
-	$iTaille = Round($iTaille / 1024, 1)
-	if $iTaille<1024 Then
-		return $iTaille & " Mo" ;Mega
-	EndIf
+    ; Boucle pour convertir la taille en multiples appropriés
+    While $iTaille >= 1024 And $iUnitIndex < UBound($aUnits) - 1
+        $iTaille /= 1024
+        $iUnitIndex += 1
+    WEnd
 
-	$iTaille = Round($iTaille / 1024, 1)
-	if $iTaille<1024 Then
-		return $iTaille & " Go" ;Gigaoctet
-	EndIf
-
-	$iTaille = Round($iTaille / 1024, 1)
-	if $iTaille<1024 Then
-		return $iTaille & " To" ;Tera
-	EndIf
-
-	$iTaille = Round($iTaille / 1024, 1)
-	if $iTaille<1024 Then
-		return $iTaille & " Po" ;Peta
-	EndIf
-
-	$iTaille = Round($iTaille / 1024, 1)
-	if $iTaille<1024 Then
-		return $iTaille & " Eo" ;Exaoctet
-	EndIf
-
-	$iTaille = Round($iTaille / 1024, 1)
-	if $iTaille<1024 Then
-		return $iTaille & " Zo" ;Zetaoctet
-	EndIf
-
-	$iTaille = Round($iTaille / 1024, 1)
-	if $iTaille<1024 Then
-		return $iTaille & " Yo" ;Yotaoctet
-	EndIf
-
+    ; Arrondir la taille à une décimale et retourner avec l'unité correspondante
+    Return Round($iTaille, 1) & " " & $aUnits[$iUnitIndex]
 EndFunc
 
 Func DossiersBac($Path = 1) ; 1:Chemins complets, 0:Chemins relatifs
@@ -537,3 +507,97 @@ Func _DirCopyWithProgress($sourceDir, $destDir, $overwrite = 1, $sMsg = "Copie e
 
     Return 1
 EndFunc   ;==>_DirCopyWithProgress
+
+
+; #FUNCTION# ====================================================================================================================
+; Nom............: _GetProcessPath
+; Description ...: Récupère le chemin d'un processus en cours d'exécution ou recherche dans des emplacements alternatifs.
+; Syntax.........: _GetProcessPath($sProcessName, $sAppId, $sAppPath)
+; Paramètres ....: $sProcessName - Nom du processus (ex. "BacBackup.exe")
+;                  $sAppId - ID unique de l'application pour la recherche dans la base de registre
+;                  $sAppPath - Chemin par défaut où l'exécutable est attendu
+; Retour ........: Le chemin complet du processus si trouvé, sinon une chaîne vide avec @error défini.
+;                  @error = 1 si le chemin n'est pas trouvé
+; Auteur ........: romoez@github
+; Lien ..........: https://github.com/romoez/BacCollector
+; ===============================================================================================================================
+
+Func _GetProcessPath($sProcessName, $sAppPath = "", $sAppId = "")
+	Local $iPID = ProcessExists($sProcessName)
+	If $iPID Then
+		Local $sPath = _WinAPI_GetProcessFileName($iPID)
+		If Not @error Then
+			Return $sPath
+		EndIf
+	EndIf
+
+	; Vérifier le chemin par défaut fourni par $sAppPath
+	If FileExists($sAppPath) Then
+		Return $sAppPath
+	EndIf
+
+	; Chercher dans la base de registre avec $sAppId
+	If $sAppId <> "" Then
+		Local $sRegKey = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\" & $sAppId
+		Local $sInstallLocation = RegRead($sRegKey, "InstallLocation")
+		If Not @error And $sInstallLocation <> "" Then
+			Local $sFullPath = $sInstallLocation & "\" & $sProcessName
+			If FileExists($sFullPath) Then
+				Return $sFullPath
+			EndIf
+		EndIf
+	EndIf
+
+	; Si aucune méthode ne fonctionne, retourner une erreur
+	Return SetError(1, 0, "")
+EndFunc   ;==>_GetProcessPath
+
+; #FUNCTION# ====================================================================================================================
+; Nom...........: _RunOrShellExecute
+; Description ...: Tente de lancer un programme avec Run, et si cela échoue, avec ShellExecute.
+; Syntax.........: _RunOrShellExecute($sPath)
+; Paramètres ....: $sPath - Chemin complet du programme à lancer
+; Retour ........: 1 si le programme est lancé avec succès, sinon 0 avec @error défini.
+;                  @error = 2 si Run et ShellExecute échouent
+; Auteur ........: romoez@github
+; Lien ..........: https://github.com/romoez/BacCollector
+; ===============================================================================================================================
+Func _RunOrShellExecute($sPath)
+	Local $iPID = Run($sPath)
+	If $iPID <> 0 Then
+		Return 1
+	EndIf
+
+	; Si Run échoue, tenter ShellExecute
+	ShellExecute($sPath)
+	If @error Then
+		Return SetError(2, 0, 0)
+	Else
+		Return 1
+	EndIf
+EndFunc   ;==>_RunOrShellExecute
+
+
+; #FUNCTION# ====================================================================================================================
+; Nom...........: _ExtractFolderPath
+; Description ...: Extrait le chemin du dossier à partir du chemin complet d'un fichier.
+;                  Retourne le chemin avec un backslash à la fin.
+; Syntax.........: _ExtractFolderPath($sFilePath)
+; Paramètres ....: $sFilePath - Chemin complet du fichier (ex. "C:\Program Files (x86)\BacBackup\BacBackup.exe")
+; Retour ........: Le chemin du dossier avec un backslash à la fin (ex. "C:\Program Files (x86)\BacBackup\")
+;                  Retourne une chaîne vide si aucune barre oblique n'est trouvée dans le chemin.
+; Auteur ........: romoez@github
+; Lien ..........: https://github.com/romoez/BacCollector
+; Exemple .......: Local $sFilePath = "C:\Program Files (x86)\BacBackup\BacBackup.exe"
+;                  Local $sFolderPath = _ExtractFolderPath($sFilePath)
+;                  ConsoleWrite($sFolderPath & @CRLF)
+;                  ; Résultat attendu : "C:\Program Files (x86)\BacBackup\"
+; ===============================================================================================================================
+Func _ExtractFolderPath($sFilePath)
+	Local $iPos = StringInStr($sFilePath, "\", 0, -1) ; Trouve la position de la dernière "\"
+	If $iPos > 0 Then
+		Return StringLeft($sFilePath, $iPos) ; Extrait le chemin jusqu'à cette position
+	Else
+		Return "" ; Retourne vide si aucune barre oblique n'est trouvée
+	EndIf
+EndFunc   ;==>_ExtractFolderPath
