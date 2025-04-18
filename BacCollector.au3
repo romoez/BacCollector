@@ -132,7 +132,6 @@ While 1
 	$aMsg = GUIGetMsg(1)
 	Switch $aMsg[0]
 		Case $GUI_EVENT_CLOSE
-			_CheckBacCollectorExists()
 			_FinLogging()
 			_GUICtrlRichEdit_Destroy($GUI_Log)
 			Exit
@@ -175,10 +174,6 @@ While 1
 		Case $lblUsbCleaner
 			_CheckBacCollectorExists()
 			_OpenUsbCleanerUrl()
-;~ 			MsgBox('0',"","Hello")
-;~ 		Case $bAide
-;~ 			_CheckBacCollectorExists()
-;~ 			_ShowHelp()
 		Case $bAPropos
 			_CheckBacCollectorExists()
 			_ShowAPropos()
@@ -435,16 +430,20 @@ Func _InitialParams()
 		EndIf
 	Next
 	$Lecteur = StringUpper($Lecteur) & "\"
-    If Not _Directory_Is_Accessible($Lecteur) And Not ($CMDLINE[0] And StringInStr($CMDLINE[1], "run_as_admin"))Then
- 		   If RegRead('HKEY_CLASSES_ROOT\exefile\shell\runas\command', '') <> '"%1" %*' Then
- 					 RegWrite('HKEY_CURRENT_USER\SOFTWARE\Classes\exefile\shell\runas', 'HasLUAShield', 'REG_SZ', '')
- 					 RegWrite('HKEY_CURRENT_USER\SOFTWARE\Classes\exefile\shell\runas\command', '', 'REG_SZ', '"%1" %*')
- 					 RegWrite('HKEY_CURRENT_USER\SOFTWARE\Classes\exefile\shell\runas\command', 'IsolatedCommand', 'REG_SZ', '"%1" %*')
-		   EndIf
-		   GUISetState(@SW_HIDE, $hMainGUI) ;
- 		   ShellExecute(@ScriptFullPath, 'run_as_admin' & " " & @UserName, StringRegExpReplace(@WorkingDir, '\\+$', ''), 'runas')
-		   Exit
-    EndIf
+	If Not _Directory_Is_Accessible($Lecteur)  And Not IsAdmin() And Not ($CMDLINE[0] > 0 And StringInStr($CMDLINE[1], "run_as_admin")) Then
+		Local $sRegKey = 'HKEY_CURRENT_USER\SOFTWARE\Classes\exefile\shell\runas'
+		If RegRead($sRegKey & '\command', '') <> '"%1" %*' Then
+			RegWrite($sRegKey, 'HasLUAShield', 'REG_SZ', '')
+			RegWrite($sRegKey & '\command', '', 'REG_SZ', '"%1" %*')
+			RegWrite($sRegKey & '\command', 'IsolatedCommand', 'REG_SZ', '"%1" %*')
+		EndIf
+
+		GUISetState(@SW_HIDE, $hMainGUI)
+		Local $cleanWorkingDir = @WorkingDir
+		If StringRight($cleanWorkingDir, 1) = '\' Then $cleanWorkingDir = StringTrimRight($cleanWorkingDir, 1)
+		ShellExecute(@ScriptFullPath, 'run_as_admin ' & @UserName, $cleanWorkingDir, 'runas')
+		Exit
+	EndIf
 	_Logging("Mise à jour des paramètres ____Début___", 2, 0)
 	ProgressSet(20, "[" & 20 & "%] " & "")
 	Local $Ok
@@ -475,6 +474,20 @@ Func _InitialParams()
 		WEnd
         If Not $Success Then
 			ProgressOff()
+			If Not IsAdmin() And Not ($CMDLINE[0] > 0 And StringInStr($CMDLINE[1], "run_as_admin")) Then
+				Local $sRegKey = 'HKEY_CURRENT_USER\SOFTWARE\Classes\exefile\shell\runas'
+				If RegRead($sRegKey & '\command', '') <> '"%1" %*' Then
+					RegWrite($sRegKey, 'HasLUAShield', 'REG_SZ', '')
+					RegWrite($sRegKey & '\command', '', 'REG_SZ', '"%1" %*')
+					RegWrite($sRegKey & '\command', 'IsolatedCommand', 'REG_SZ', '"%1" %*')
+				EndIf
+
+				GUISetState(@SW_HIDE, $hMainGUI)
+				Local $cleanWorkingDir = @WorkingDir
+				If StringRight($cleanWorkingDir, 1) = '\' Then $cleanWorkingDir = StringTrimRight($cleanWorkingDir, 1)
+				ShellExecute(@ScriptFullPath, 'run_as_admin ' & @UserName, $cleanWorkingDir, 'runas')
+				Exit
+			EndIf
 			_Logging("Création du dossier  BacCollector : " & $Lecteur & $DossierSauve & "\" & $DossierBacCollector, 0, 0)
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
 			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Échec lors de la création du dossier de sauvegarde local, " & @CRLF _
@@ -587,8 +600,8 @@ EndFunc   ;==>_Directory_Is_Assesible
 
 #Region Functions _SaveParams & _SaveData_xxxx
 Func _SaveParams()
-	;;; En cas où le fichier ini est effacé après l'ouvertur du BacCollector,
-	;;; Exple: Après l'ouvertur de BacCollector, l'utilisateur a volu effacer le contenu du Flash USB
+	;;; En cas où le fichier ini est effacé après l'ouverture du BacCollector,
+	;;; Exemple : après l'ouverture de BacCollector, l'utilisateur a voulu effacer le contenu du Flash USB.
 	SplashTextOn("Sans Titre", "Enregistrement des paramètres de ""BacCollector""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	;;;Save $Matiere From Interface to ini File
 	If GUICtrlGetState($rInfoProg) = $GUI_CHECKED Then
@@ -675,16 +688,6 @@ Func _SaveData_Laboxx()
 	IniWrite(StringTrimRight(@ScriptFullPath, 4) & ".ini", "Params", "Labo", StringRight(GUICtrlRead($cLabo), 1))
 EndFunc   ;==>_SaveData_Laboxx
 #EndRegion Functions _SaveParams & _SaveData_xxxx
-
-;=========================================================
-
-;~ Func _ShowHelp()
-;~ 	DirCreate(@TempDir & "\BacCollector")
-;~ 	FileInstall(".\AideBacCollector\AideBacCollector.chm", @TempDir & "\BacCollector\")
-;~ 	If FileExists(@TempDir & "\BacCollector" & "\AideBacCollector.chm") Then
-;~ 		ShellExecute(@TempDir & "\BacCollector" & "\AideBacCollector.chm")
-;~ 	EndIf
-;~ EndFunc   ;==>_ShowHelp
 
 ;=========================================================
 Func _ShowAPropos()
@@ -815,7 +818,7 @@ EndFunc   ;==>_TogglePart3
 Func _CreateGui()
 	;;; Fenêtre principale  - Début
 	Local $sMode = ""
-	If ($CMDLINE[0] And StringInStr($CMDLINE[1], "run_as_admin")) Then
+	If IsAdmin() Then
 		$sMode = " [Administrateur]"
 	EndIf
 	Global $hMainGUI = GUICreate($PROG_TITLE & $PROG_VERSION & $sMode, $GUI_LARGEUR, $GUI_HAUTEUR, -1, -1, -1, 0)
@@ -1017,13 +1020,14 @@ Func _CreateGui()
 	GUICtrlSetColor($Text, 0xFFFFFF)
 	GUICtrlSetBkColor($Text, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 9.5, 500)
-	GUICtrlSetTip($Text, "Veuillez créer un dossier pour chaque candidat absent, et y mettre un sous-dossier intitulé ""Absent""", "Dossiers récupérés", 0,1)
+	Local $sMsgCandidatAbs = "Pour chaque candidat absent, veuillez :" & @CRLF & @TAB & "1. Créer un dossier portant son numéro d'inscription." & @CRLF & @TAB & "2. À l'intérieur, ajouter un sous-dossier vide nommé 'Absent'."
+	GUICtrlSetTip($Text, $sMsgCandidatAbs, "Dossiers récupérés", 0,1)
 
 	Global $TextDossiersRecuperes = GUICtrlCreateLabel("", $Left_Header + $GUI_MARGE, $Top_Header + $GUI_HEADER_HAUTEUR + $GUI_MARGE + 6, $WidthHeader - 2 * $GUI_MARGE, $GUI_HAUTEUR - 310)
 	GUICtrlSetColor(-1, 0xFFFFFF)
 	GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 10, 200)
-	GUICtrlSetTip($TextDossiersRecuperes, "Veuillez créer un dossier pour chaque candidat absent, et y mettre un sous-dossier intitulé ""Absent""", "Dossiers récupérés", 0,1)
+	GUICtrlSetTip($TextDossiersRecuperes, $sMsgCandidatAbs, "Dossiers récupérés", 0,1)
 
 	$Top_Header = $GUI_HAUTEUR - 100 - $GUI_MARGE
 	$Left_Header = $GUI_MARGE
@@ -3468,29 +3472,6 @@ Func _InsertLink($iX, $iY, $sURL, $sFontAlias, $iFontSize, $iAlign, $iRotate)
     __EndObj()
 EndFunc   ;==>_InsertLink
 
-Func JourDeLaSemaine()
-	Local $iDayOfWeek = @WDAY ; Récupère le jour de la semaine pour la date d'aujourd'hui
-
-	; Conversion du résultat numérique en nom du jour de la semaine
-	Local $sDayOfWeek = ""
-	Switch $iDayOfWeek
-		Case 1
-			$sDayOfWeek = "Dimanche"
-		Case 2
-			$sDayOfWeek = "Lundi"
-		Case 3
-			$sDayOfWeek = "Mardi"
-		Case 4
-			$sDayOfWeek = "Mercredi"
-		Case 5
-			$sDayOfWeek = "Jeudi"
-		Case 6
-			$sDayOfWeek = "Vendredi"
-		Case 7
-			$sDayOfWeek = "Samedi"
-	EndSwitch
-	Return $sDayOfWeek
-EndFunc
 
 ;=========================================================
 
