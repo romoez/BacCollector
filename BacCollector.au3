@@ -20,8 +20,8 @@
 #pragma compile(Compression, 9)
 #pragma compile(FileDescription, Collecte des travaux lors des examens pratiques d'informatique.)
 #pragma compile(ProductName, BacCollector)
-#pragma compile(ProductVersion, 0.8.19.417)
-#pragma compile(FileVersion, 0.8.19.417)
+#pragma compile(ProductVersion, 0.8.19.418)
+#pragma compile(FileVersion, 0.8.19.418)
 #pragma compile(LegalCopyright, 2018-2025 © La Communauté Tunisienne des Enseignants d'Informatique)
 #pragma compile(Comments, BacCollector: Collecte des travaux lors des examens pratiques d'informatique.)
 #pragma compile(CompanyName, La Communauté Tunisienne des Enseignants d'Informatique)
@@ -39,14 +39,15 @@
 #include <GuiListView.au3>
 #include <GuiMenu.au3>
 #include <GuiRichEdit.au3>
+#include <GUIToolTip.au3>
 #include <ListViewConstants.au3>
+#include <Misc.au3> ; Pour _IsPressed()
 #include <Process.au3>
 #include <StaticConstants.au3>
 #include <WinAPIFiles.au3>
 #include <WinAPIProc.au3>
 #include <WinAPIShellEx.au3>
 #include <WindowsConstants.au3>
-#include <GUIToolTip.au3>
 #include "Utils.au3"
 #include "include\7Zip.au3"  ; https://www.autoitscript.fr/forum/viewtopic.php?f=21&t=1943
 #include "include\ExtMsgBox.au3"  ; https://www.autoitscript.com/forum/topic/109096-extended-message-box-new-version-19-nov-21/
@@ -87,6 +88,8 @@ Global Const $FREE_SPACE_DRIVE_BACKUP = 1024 ;en Mb, >>1Gb
 Global Const $TAILLE_MAX_DU_DOSSIER_SOUS_LECTEUR = 10 ;en Mb
 Global $sUserName = @UserName
 #EndRegion ;**** Global Const ****
+
+Global $g_bDragging = False, $g_iOffsetX, $g_iOffsetY
 
 If $CMDLINE[0] Then
 	Select
@@ -219,6 +222,26 @@ While 1
 				ToolTip("")
 			EndIf
 	EndSwitch
+    ; Détection du clic molette (MBUTTON) sur n'importe où
+    If _IsPressed("04") Then ; "04" = Code virtuel de la molette (sans WinAPIvK.au3)
+        If Not $g_bDragging Then
+            $g_bDragging = True
+			WinSetTrans($hMainGUI, "", 153) ; 60% de transparence (153/255)
+            Local $aMousePos = MouseGetPos()
+            Local $aWinPos = WinGetPos($hMainGUI)
+            $g_iOffsetX = $aMousePos[0] - $aWinPos[0]
+            $g_iOffsetY = $aMousePos[1] - $aWinPos[1]
+        EndIf
+        ; Déplacement fluide
+        Local $aNewMousePos = MouseGetPos()
+        WinMove($hMainGUI, "", $aNewMousePos[0] - $g_iOffsetX, $aNewMousePos[1] - $g_iOffsetY)
+    Else
+		WinSetTrans($hMainGUI, "", 255)
+        $g_bDragging = False
+    EndIf
+
+    Sleep(10) ; Réduire l'utilisation du CPU
+
 WEnd
 
 ;=========================================================
@@ -274,15 +297,15 @@ Func _InitialisationInfo($initNumeroCandidat = 1)
 	If $sApps <> "" Then
 		$TmpSpaces = "                                           "
 		_Logging("Applications ouvertes: " & StringReplace($sApps, @CRLF, @CRLF & $TmpSpaces), 2, 0)
-		GUICtrlSetState($TextApps_Header, BitOR($GUI_SHOW, $GUI_DISABLE))
-		GUICtrlSetState($TextApps_Text, $GUI_SHOW)
-		GUICtrlSetState($TextApps, $GUI_SHOW)
+;~ 		GUICtrlSetState($TextApps_Header, BitOR($GUI_SHOW, $GUI_DISABLE))
+;~ 		GUICtrlSetState($TextApps_Text, $GUI_SHOW)
+;~ 		GUICtrlSetState($TextApps, $GUI_SHOW)
 		GUICtrlSetData($TextApps, $sApps)
 	Else
-		GUICtrlSetState($TextApps_Header, BitOR($GUI_HIDE, $GUI_DISABLE))
-		GUICtrlSetState($TextApps_Text, $GUI_HIDE)
-		GUICtrlSetState($TextApps, $GUI_HIDE)
-		GUICtrlSetData($TextApps, "")
+;~ 		GUICtrlSetState($TextApps_Header, BitOR($GUI_HIDE, $GUI_DISABLE))
+;~ 		GUICtrlSetState($TextApps_Text, $GUI_HIDE)
+;~ 		GUICtrlSetState($TextApps, $GUI_HIDE)
+		GUICtrlSetData($TextApps, "-")
 	EndIf
 
 	Local $sDossiersRecuperes = _ListeDeDossiersRecuperes()
@@ -359,15 +382,15 @@ Func _InitialisationTic($initNumeroCandidat = 1)
 
 	$sApps = _ListeDApplicationsOuvertes()
 	If $sApps <> "" Then
-		GUICtrlSetState($TextApps_Header, BitOR($GUI_SHOW, $GUI_DISABLE))
-		GUICtrlSetState($TextApps_Text, $GUI_SHOW)
-		GUICtrlSetState($TextApps, $GUI_SHOW)
+;~ 		GUICtrlSetState($TextApps_Header, BitOR($GUI_SHOW, $GUI_DISABLE))
+;~ 		GUICtrlSetState($TextApps_Text, $GUI_SHOW)
+;~ 		GUICtrlSetState($TextApps, $GUI_SHOW)
 		GUICtrlSetData($TextApps, $sApps)
 	Else
-		GUICtrlSetState($TextApps_Header, BitOR($GUI_HIDE, $GUI_DISABLE))
-		GUICtrlSetState($TextApps_Text, $GUI_HIDE)
-		GUICtrlSetState($TextApps, $GUI_HIDE)
-		GUICtrlSetData($TextApps, "")
+;~ 		GUICtrlSetState($TextApps_Header, BitOR($GUI_HIDE, $GUI_DISABLE))
+;~ 		GUICtrlSetState($TextApps_Text, $GUI_HIDE)
+;~ 		GUICtrlSetState($TextApps, $GUI_HIDE)
+		GUICtrlSetData($TextApps, "-")
 	EndIf
 
 	Local $sDossiersRecuperes = _ListeDeDossiersRecuperes() ;_ListeDeDossiersRecuperes($SearchMask = "??????", $RegEx = "([0-9]{6})")
@@ -1032,23 +1055,23 @@ Func _CreateGui()
 	$Top_Header = $GUI_HAUTEUR - 100 - $GUI_MARGE
 	$Left_Header = $GUI_MARGE
 	$WidthHeader = $GUI_LARGEUR_PARTIE - 2 * $GUI_MARGE
-
 	Global $TextApps_Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $TmpHeaderHauteur)
 	GUICtrlSetColor($TextApps_Header, 0x66c7fc)
-	GUICtrlSetState($TextApps_Header, BitOR($GUI_HIDE, $GUI_DISABLE))
+;~ 	GUICtrlSetState($TextApps_Header, BitOR($GUI_HIDE, $GUI_DISABLE))
+	GUICtrlSetState($TextApps_Header, BitOR($GUI_SHOW, $GUI_DISABLE))
 
 	Global $TextApps_Text = GUICtrlCreateLabel("Logiciels Ouverts", $Left_Header + $GUI_MARGE, $Top_Header + 3, $WidthHeader - 2 * $GUI_MARGE, $GUI_HEADER_HAUTEUR, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor($TextApps_Text, 0xFFFFFF)
 	GUICtrlSetBkColor($TextApps_Text, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 9.5, 500)
-	GUICtrlSetState($TextApps_Text, $GUI_HIDE)
+	GUICtrlSetState($TextApps_Text, $GUI_SHOW)
 	GUICtrlSetTip(-1, @CRLF & "Veuillez sauvegarder le travail et quitter ces applications." & @CRLF & @CRLF & "Certaines applications (VSCode, Sublime Text...) ne demandent pas de confirmation de fermeture," & @CRLF & "même si des fichiers ne sont pas encore enregistrés:", "Applications à fermer", 0,1)
 
 	Global $TextApps = GUICtrlCreateLabel("", $Left_Header + $GUI_MARGE, $Top_Header + $GUI_HEADER_HAUTEUR + $GUI_MARGE + 6, $WidthHeader - 2 * $GUI_MARGE, 100 - $GUI_HEADER_HAUTEUR - 2 * $GUI_MARGE)
 	GUICtrlSetColor(-1, 0xFFFFFF)
 	GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 9)
-	GUICtrlSetState($TextApps, $GUI_HIDE)
+	GUICtrlSetState($TextApps, $GUI_SHOW)
 	GUICtrlSetTip(-1, @CRLF & "Veuillez sauvegarder le travail et de quitter ces applications." & @CRLF & @CRLF & "Certaines applications (VSCode, Sublime Text...) ne demandent pas de confirmation de fermeture," & @CRLF & "même si des fichiers ne sont pas encore enregistrés:", "Applications à fermer", 0,1)
 	;;;Partie à gauche  - Fin=============================================================================================
 
@@ -1243,19 +1266,19 @@ Func Recuperer()
 		;;;_Logging($sText, $iSuccess = 1, $iGuiLog = 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>Info&Blanc, 5>Info&Red
 		_Logging("Récupération annulée", 5, 1)
 		_Logging("______", 2, 0)
-		GUICtrlSetState($TextApps_Header, BitOR($GUI_SHOW, $GUI_DISABLE))
-		GUICtrlSetState($TextApps_Text, $GUI_SHOW)
-		GUICtrlSetState($TextApps, $GUI_SHOW)
+;~ 		GUICtrlSetState($TextApps_Header, BitOR($GUI_SHOW, $GUI_DISABLE))
+;~ 		GUICtrlSetState($TextApps_Text, $GUI_SHOW)
+;~ 		GUICtrlSetState($TextApps, $GUI_SHOW)
 		GUICtrlSetData($TextApps, $sApps)
 		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
 		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Avant de ""Récupérer"" le travail du candidat, veuillez fermer ce(s) logiciel(s) : " & @CRLF & @CRLF & $sApps, 0)
 		Return 1
 	Else
 ;~ 		_Logging("Aucune application ouverte", 2, 0)
-		GUICtrlSetState($TextApps_Header, BitOR($GUI_HIDE, $GUI_DISABLE))
-		GUICtrlSetState($TextApps_Text, $GUI_HIDE)
-		GUICtrlSetState($TextApps, $GUI_HIDE)
-		GUICtrlSetData($TextApps, "")
+;~ 		GUICtrlSetState($TextApps_Header, BitOR($GUI_HIDE, $GUI_DISABLE))
+;~ 		GUICtrlSetState($TextApps_Text, $GUI_HIDE)
+;~ 		GUICtrlSetState($TextApps, $GUI_HIDE)
+		GUICtrlSetData($TextApps, "-")
 	EndIf
 ;~    Fin-Vérification de logiciels Ouverts
 
