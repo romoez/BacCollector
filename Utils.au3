@@ -534,3 +534,50 @@ Func _ExtractFolderPath($sFilePath)
 		Return "" ; Retourne vide si aucune barre oblique n'est trouvée
 	EndIf
 EndFunc   ;==>_ExtractFolderPath
+
+
+
+Func _CreerDossierNouvelleSession($Lecteur, $DossierSauvegardes)
+	; Création du dossier principal
+	If Not FileExists($Lecteur & $DossierSauvegardes) Then
+		DirCreate($Lecteur & $DossierSauvegardes)
+	EndIf
+	FileSetAttrib($Lecteur & $DossierSauvegardes, "+SH")
+
+	; Création du sous-dossier BacBackup
+	Local $sBacBackup = $Lecteur & $DossierSauvegardes & "\BacBackup"
+	If Not FileExists($sBacBackup) Then
+		_UnlockFolder($Lecteur & $DossierSauvegardes)
+		DirCreate($sBacBackup)
+	EndIf
+
+	; Écriture des paramètres dans l'INI
+	Local $sIniPath = $sBacBackup & "\BacBackup.ini"
+	IniWrite($sIniPath, "Params", "DossierSauvegardes", $DossierSauvegardes)
+	IniWrite($sIniPath, "Params", "Lecteur", StringUpper($Lecteur))
+	_LockFolder($Lecteur & $DossierSauvegardes)
+
+	; Gestion du dossier de session
+	Local $DossierSession = IniRead($sIniPath, "Params", "DossierSession", "")
+	Local $Tmp = StringLeft($DossierSession, 3)
+
+	; Logique d'incrémentation du numéro de session
+	If StringRegExp($Tmp, "([0-9]{3})", 0) = 0 Then
+		$Tmp = "001"
+	Else
+		$Tmp = Number($Tmp) + 1
+		$Tmp = $Tmp > 999 ? "001" : StringFormat("%03d", $Tmp)
+	EndIf
+
+	; Création du nom de dossier complet
+	$DossierSession = $Tmp & '___' & @MDAY & "_" & @MON & "_" & @YEAR & "___" & @HOUR & "h" & @MIN
+	IniWrite($sIniPath, "Params", "DossierSession", $DossierSession)
+
+	; Création du chemin complet et du dossier
+	Local $sCheminComplet = StringUpper($Lecteur) & $DossierSauvegardes & "\BacBackup\" & $DossierSession
+	If Not FileExists($sCheminComplet) Then
+		DirCreate($sCheminComplet)
+	EndIf
+
+	Return $sCheminComplet
+EndFunc   ;==>_CreerDossierNouvelleSession
