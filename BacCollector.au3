@@ -92,11 +92,9 @@ Global $sUserName = @UserName
 Global $g_bDragging = False, $g_iOffsetX, $g_iOffsetY
 
 If $CMDLINE[0] Then
+	Local $sPattern = '(?i)^/(?:unlock|deblo|clea|nett|deverr|déblo|déverr)'   ;/Debloquer /Deblocage /Unlock /Clean /CleanUp /Clear /Unlock Deverrouillage Deverrouiller Nettoyage Nettoyer...
 	Select
-		Case StringInStr(StringLower($CMDLINE[1]), "unlock") Or StringInStr(StringLower($CMDLINE[1]), "deblo") _
-				Or StringInStr(StringLower($CMDLINE[1]), "clea") Or StringInStr(StringLower($CMDLINE[1]), "nett") _
-				Or StringInStr(StringLower($CMDLINE[1]), "deverr") Or StringInStr(StringLower($CMDLINE[1]), "déverr") _
-				Or StringInStr(StringLower($CMDLINE[1]), "déblo") ;Debloquer Deblocage Unlock Clean CleanUp Clear Unlock Deverrouillage Deverrouiller Nettoyage Nettoyer...
+		Case StringRegExp($CMDLINE[1], $sPattern)
 			_UnLockAll()
 			Exit
 		Case StringInStr(StringLower($CMDLINE[1]), "help") Or StringInStr(StringLower($CMDLINE[1]), "aide") _
@@ -117,6 +115,19 @@ If $CMDLINE[0] Then
 			If $CMDLINE[0] > 1 Then
 				$sUserName = $CMDLINE[2]
 			EndIf
+		Case Else
+			MsgBox(262144, $PROG_TITLE & $PROG_VERSION, "Syntaxe de ligne de commande: " & @CRLF & @CRLF _
+					 & "» Aifficher l'aide : " & @CRLF _
+					 & @TAB & "- BacCollector /?, ou:" & @CRLF _
+					 & @TAB & "- BacCollector /help, ou:" & @CRLF _
+					 & @TAB & "- BacCollector /aide, ou:" & @CRLF _
+					 & "» Déverrouillage des dossiers ""X:\Sauvegardes\"" : " & @CRLF _
+					 & @TAB & "- BacCollector /déverrouiller, ou:" & @CRLF _
+					 & @TAB & "- BacCollector /unlock, ou encore:" & @CRLF _
+					 & @TAB & "- BacCollector /débloquer" & @CRLF & @CRLF _
+					 & "» Récupération automatique des dossiers de travail du candidat: " & @CRLF _
+					 & @TAB & "- [Cette fonctionnalité n'est pas encore implémentée.]") ; & @CRLF _
+			Exit
 
 	EndSelect
 EndIf
@@ -206,6 +217,11 @@ While 1
 		Case $cBac
 			_CheckBacCollectorExists()
 			_SaveData_Bacxx()
+		Case $bCreerDossierCandidatAbs
+			If _OpenDialogAbsent() Then
+				_AfficherDossierRecuperes()
+			EndIf
+
 
 		Case $cSeance
 			_CheckBacCollectorExists()
@@ -309,15 +325,7 @@ Func _InitialisationInfo($initNumeroCandidat = 1)
 	EndIf
 
 	Local $sDossiersRecuperes = _ListeDeDossiersRecuperes()
-	If $sDossiersRecuperes <> "" Then
-		GUICtrlSetData($TextDossiersRecuperes, $sDossiersRecuperes)
-		$TmpSpaces = "                         "
-		_Logging("Liste de dossiers de travail déjà récupérés : " & StringReplace($sDossiersRecuperes, @CRLF, @CRLF & $TmpSpaces), 2, 0)
-;~ 		_Logging("Liste : " & _ArrayToString($Liste, "", 1, -1, @CRLF & $TmpSpaces, 0, 0), 2, 0) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
-	Else
-		GUICtrlSetData($TextDossiersRecuperes, "-")
-	EndIf
-
+	_AfficherDossierRecuperes(1) ; $sLog = 0 / 1
 	_AfficherLeContenuDesDossiersBac()
 	_GUICtrlListView_HideColumn($GUI_AfficherLeContenuDesDossiersBac, 3) ;Hide FullPath column
 	_AfficherLeContenuDesAutresDossiers($sFiltreFichiersAChercher)
@@ -325,22 +333,7 @@ Func _InitialisationInfo($initNumeroCandidat = 1)
 
 	GUISetState(@SW_ENABLE, $hMainGUI) ;
 	WinActivate ($hMainGUI);
-	If $DossiersNonConformesPourCandidatsAbsents <> "" Then
-		If _NbOccurrences("»", $DossiersNonConformesPourCandidatsAbsents) = 1 Then
-			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-			_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "Pour le canditat absent suivant :" & @CRLF & @CRLF _
-					 & $DossiersNonConformesPourCandidatsAbsents & @CRLF _
-					 & "Veuillez créer dans son dossier, un sous-dossier vide intitulé :" & @CRLF & @CRLF _
-					 & @TAB & """Absent""", 0)
-		Else
-			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-			_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "Pour les canditats absents suivants :" & @CRLF & @CRLF _
-					 & $DossiersNonConformesPourCandidatsAbsents & @CRLF _
-					 & "Veuillez créer dans le dossier de chacun, un sous-dossier vide intitulé :" & @CRLF & @CRLF _
-					 & @TAB & """Absent""", 0)
-		EndIf
-	EndIf
-
+	_VerifierDossiersNonConformesPourCandidatsAbsents()
 EndFunc   ;==>_InitialisationInfo
 #EndRegion Function "_InitialisationInfo" ------------------------------------------------------------------------
 
@@ -393,34 +386,13 @@ Func _InitialisationTic($initNumeroCandidat = 1)
 		GUICtrlSetData($TextApps, "-")
 	EndIf
 
-	Local $sDossiersRecuperes = _ListeDeDossiersRecuperes() ;_ListeDeDossiersRecuperes($SearchMask = "??????", $RegEx = "([0-9]{6})")
-	If $sDossiersRecuperes <> "" Then
-		GUICtrlSetData($TextDossiersRecuperes, $sDossiersRecuperes)
-	Else
-		GUICtrlSetData($TextDossiersRecuperes, "-")
-	EndIf
-
+	_AfficherDossierRecuperes()
 	_AfficherLeContenuDesDossiersTic()
 	_GUICtrlListView_HideColumn($GUI_AfficherLeContenuDesDossiersBac, 3) ;Hide FullPath column
 	_GUICtrlListView_HideColumn($GUI_AfficherLeContenuDesAutresDossiers, 3) ;Hide FullPath column
 	GUISetState(@SW_ENABLE, $hMainGUI) ;
 	WinActivate ($hMainGUI);
-	If $DossiersNonConformesPourCandidatsAbsents <> "" Then
-		If _NbOccurrences("»", $DossiersNonConformesPourCandidatsAbsents) = 1 Then
-			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-			_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "Pour le canditat absent suivant :" & @CRLF & @CRLF _
-					 & $DossiersNonConformesPourCandidatsAbsents & @CRLF _
-					 & "Veuillez créer dans son dossier, un sous-dossier vide intitulé :" & @CRLF & @CRLF _
-					 & @TAB & """Absent""", 0)
-		Else
-			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-			_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, "Pour les canditats absents suivants :" & @CRLF & @CRLF _
-					 & $DossiersNonConformesPourCandidatsAbsents & @CRLF _
-					 & "Veuillez créer dans le dossier de chacun, un sous-dossier vide intitulé :" & @CRLF & @CRLF _
-					 & @TAB & """Absent""", 0)
-		EndIf
-	EndIf
-
+	_VerifierDossiersNonConformesPourCandidatsAbsents()
 EndFunc   ;==>_InitialisationTic
 #EndRegion Function "_InitialisationTic" ------------------------------------------------------------------------
 
@@ -774,7 +746,8 @@ Func _NouvelleSessionBacBackup()
 	Local $sProcessPath = _GetProcessPath($sProcessName, $sAppPath, $sAppId)
 	If $sProcessPath <> "" Then
 		; Si le chemin est trouvé, relancer BacBackup
-		Return _RunOrShellExecute($sProcessPath)
+;~ 		Return _RunOrShellExecute($sProcessPath)
+		Return _CreerDossierNouvelleSession($Lecteur, $DossierSauve)
 	Else
 		$sProcessName = "UsbCleaner.exe"
 		$sAppId = "{D50A90DE-3118-4B58-9ABE-FDF795C59970}_is1"
@@ -784,7 +757,8 @@ Func _NouvelleSessionBacBackup()
 		; Si aucun chemin n'est trouvé, retourner 0
 		If $sProcessPath <> "" Then
 			; Si le chemin est trouvé, relancer BacBackup
-			Return _RunOrShellExecute($sProcessPath)
+;~ 			Return _RunOrShellExecute($sProcessPath)
+			Return _CreerDossierNouvelleSession($Lecteur, $DossierSauve)
 		Else
 			Return 0
 		EndIf
@@ -1055,6 +1029,20 @@ Func _CreateGui()
 	$Top_Header = $GUI_HAUTEUR - 100 - $GUI_MARGE
 	$Left_Header = $GUI_MARGE
 	$WidthHeader = $GUI_LARGEUR_PARTIE - 2 * $GUI_MARGE
+
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[
+	Local $TmpButtonWidth = $GUI_LARGEUR_PARTIE - 4 * $GUI_MARGE ; * 2/3
+	Local $TmpButtonHeight = $GUI_HEADER_HAUTEUR * 2
+;~ 	$Top_Header = $GUI_HAUTEUR - 2 * $GUI_MARGE - 3 * $TmpButtonHeight
+
+	Global $bCreerDossierCandidatAbs = GUICtrlCreateButton("Ajouter Candidat Absent", $GUI_LARGEUR_PARTIE / 2 - $TmpButtonWidth / 2, $Top_Header - $TmpButtonHeight, $TmpButtonWidth, $TmpButtonHeight * 0.75)
+	GUICtrlSetColor(-1, 0xffffff)
+	GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
+	GUICtrlSetFont(-1, 9)
+	GUICtrlSetTip($bCreerDossierCandidatAbs, @CRLF & "Cette commande permet de:" & @CRLF 	& @CRLF & "1. Sauvegarder le travail du candidat vers un dossier verrouillé sur ce PC." & @CRLF & "2. Copier les dossiers & fichiers du candidat vers la clé USB." & @CRLF & "3. Supprimer les travaux du candidat, pour les matières Info & Prog.", "Copier les fichiers du candidat vers la clé USB", 0,1)
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[
 	Global $TextApps_Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $TmpHeaderHauteur)
 	GUICtrlSetColor($TextApps_Header, 0x66c7fc)
 ;~ 	GUICtrlSetState($TextApps_Header, BitOR($GUI_HIDE, $GUI_DISABLE))
@@ -1294,7 +1282,31 @@ EndFunc   ;==>Recuperer
 
 Func RecupererInfo($NumeroCandidat)
 
-	;===========================================================
+;===========================================================
+;~ //Début  Vérif l'existence du dossier dans le Flash
+	_Logging("Vérification si un dossier de même nom """ & $NumeroCandidat & """ existe déjà dans la Clé Usb", 2, 0) ;
+	SplashTextOn("Sans Titre", "Vérification si un dossier de même nom """ & $NumeroCandidat & """ existe déjà dans la Clé Usb. " & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	$ScriptDir = @ScriptDir
+	If StringRight($ScriptDir, 1) <> "\" Then
+		$ScriptDir = $ScriptDir & "\"
+	EndIf
+
+	Global $Dest1FlashUSB = $ScriptDir & $NumeroCandidat
+	Global $Dest2LocalFldr = $Lecteur & $DossierSauve & "\" & $DossierBacCollector & "\" & $NumeroCandidat
+	If FileExists($Dest1FlashUSB) Then
+		_Logging("Un dossier de même nom """ & $NumeroCandidat & """ existe déjà sur la Clé USB!!", 5, 1) ;
+		_Logging("Récupération annulée", 5, 1)
+		_Logging("______", 2, 0)
+		SplashOff()
+		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
+		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Un dossier de même nom """ & $NumeroCandidat & """ existe déjà sur la Clé USB!!", 0)
+		Return
+	EndIf
+;~ //Fin  Vérif l'existence du dossier dans le Flash
+
+	SplashTextOn("Sans Titre", "Création des dossiers de Sauvegarde." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+
+;===========================================================
 ;~    Début-Vérification de l'existence d'un Dossier Bac*20*
 	SplashTextOn("Sans Titre", "Recherche des dossiers ""Bac*20*"" sous la racine ""C:""." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	_Logging("Recherche des dossiers ""Bac*20*"" sous la racine ""C:""", 2, 0)
@@ -1329,51 +1341,55 @@ Func RecupererInfo($NumeroCandidat)
 ;~ 	WinActivate ($hMainGUI)
 	If Not $NbDossiersBacNonVides Then
 		_Logging("Aucun fichier trouvé dans le(s) dossier(s) : " & _ArrayToString($Bac, ",", 1), 5, 1) ;
-		_Logging("Récupération annulée", 5, 1)
-		_Logging("______", 2, 0)
 		SplashOff()
 		If $Bac[0] = 1 Then
-			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Le dossier " & $NomsDossiers & " ne contient aucun fichier à Récupérer !!!" & @CRLF _
-					 & "Si le candidat n'a rien fait, ou qu'il a enregistré sont travail en déhors de ce dossier," & @CRLF _
-					 & "veuillez y créer un fichier texte contenant la remarque suivante: " & @CRLF _
-					 & @TAB & """Le dossier est vide""" & @CRLF _
-					 & "puis cliquez à nouveau sur le bouton ""Récupérer""", 0)
+			Local $message = _
+				"Le dossier " & $NomsDossiers & " est vide !" & @CRLF & @CRLF & _
+				"Options disponibles :" & @CRLF & @CRLF & _
+				"1. Solutions manuelles :" & @CRLF & _
+				"   a) Déplacez les fichiers de travail du candidat vers le dossier '" & $NomsDossiers & "'." & @CRLF & _
+				"   b) Créer dans le dossier '" & $NomsDossiers & "' un fichier 'Remarque.txt'" & @CRLF & _
+				"       contenant le texte : ""Dossier vide""" & @CRLF & @CRLF & _
+				"2. Solution automatique :" & @CRLF & _
+				"   ► Cliquez sur [Générer et Continuer] pour : " & @CRLF & _
+				"     Créer automatiquement le fichier 'Remarque.txt', et continuer la récupération."
 		Else
-			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Les dossiers " & $NomsDossiers & " ne contiennent aucun fichier à Récupérer !!!" & @CRLF _
-					 & "Si le candidat n'a rien fait,  ou qu'il a enregistré sont travail en déhors de ces dossiers," & @CRLF _
-					 & "veuillez lui créer un fichier texte, dans l'un des dossiers ""Bac*20*"", contenant la remarque suivante: " & @CRLF _
-					 & @TAB & """Le dossier est vide""" & @CRLF _
-					 & "puis cliquez à nouveau sur le bouton ""Récupérer""", 0)
+			Local $message = _
+				"Tous les dossiers suivants sont vides : " & @CRLF & @CRLF & _
+				@TAB & $NomsDossiers & @CRLF & @CRLF & _
+				"Options disponibles :" & @CRLF & @CRLF & _
+				"1. Solutions manuelles :" & @CRLF & _
+				"   a) Déplacez les fichiers de travail du candidat vers l'un des dossiers listés ci-dessus." & @CRLF & _
+				"   b) Créer dans l'un des dossiers cités plus haut, un fichier 'Remarque.txt'" & @CRLF & _
+				"       contenant le texte : ""Dossier vide""" & @CRLF & @CRLF & _
+				"2. Solution automatique :" & @CRLF & _
+				"   ► Cliquez sur [Générer et Continuer] pour : " & @CRLF & _
+				"     Créer automatiquement le fichier 'Remarque.txt', et continuer la récupération."
 		EndIf
-		Return
+		_Logging("Message: Générer automatiquement le fichier 'Remarque.txt' et Continuer ou Annuler l'opération?")
+		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
+		Local $reponse = _ExtMsgBox(64, "        Générer et Continuer        |Annuler", $PROG_TITLE & $PROG_VERSION, $message, 0)
+		Switch $reponse
+			Case 1 ; Bouton "✓ Générer et Relancer"
+				; Créer le fichier texte avec le contenu spécifié
+				Local $Bac20xx = 'C:\Bac' & GUICtrlRead($cBac)
+				If not FileExists($Bac20xx) Then DirCreate($Bac20xx)
+				Local $sFichierRemarque = $Bac20xx & "\Remarque.txt"
+				If FileWrite($sFichierRemarque, "Le dossier est vide") Then
+					_Logging("Création du fichier: " & $sFichierRemarque)
+				Else
+					_Logging("Impossible de créer le fichier " & $sFichierRemarque, 5, 1)
+					_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Impossible de créer le fichier dans le dossier '" & $sFichierRemarque & "'.", 0)
+					_Logging("Récupération annulée", 5, 1)
+					Return
+				EndIf
+			Case 2 ; Bouton "Annuler"
+				_Logging("Choix: Annuler la récupération", 5, 1)
+				Return
+		EndSwitch
+		_Logging("______", 2, 0)
 	EndIf
 ;~    Fin-Vérification si au moins l'un des dossier Bac*20* n'est pas vide
-
-	;===========================================================
-;~ //Début  Vérif l'existence du dossier dans le Flash
-	_Logging("Vérification si un dossier de même nom """ & $NumeroCandidat & """ existe déjà dans la Clé Usb", 2, 0) ;
-	SplashTextOn("Sans Titre", "Vérification si un dossier de même nom """ & $NumeroCandidat & """ existe déjà dans la Clé Usb. " & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
-	$ScriptDir = @ScriptDir
-	If StringRight($ScriptDir, 1) <> "\" Then
-		$ScriptDir = $ScriptDir & "\"
-	EndIf
-
-	Global $Dest1FlashUSB = $ScriptDir & $NumeroCandidat
-	Global $Dest2LocalFldr = $Lecteur & $DossierSauve & "\" & $DossierBacCollector & "\" & $NumeroCandidat
-	If FileExists($Dest1FlashUSB) Then
-		_Logging("Un dossier de même nom """ & $NumeroCandidat & """ existe déjà sur la Clé USB!!", 5, 1) ;
-		_Logging("Récupération annulée", 5, 1)
-		_Logging("______", 2, 0)
-		SplashOff()
-		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Un dossier de même nom """ & $NumeroCandidat & """ existe déjà sur la Clé USB!!", 0)
-		Return
-	EndIf
-;~ //Fin  Vérif l'existence du dossier dans le Flash
-
-	SplashTextOn("Sans Titre", "Création des dossiers de Sauvegarde." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 
 	;===========================================================
 	Local $Error0_CreationDossier = 1 ;Création du dossier dans le flash 1:Success 0:Failure
@@ -1407,6 +1423,11 @@ Func RecupererInfo($NumeroCandidat)
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Copie des dossiers...", "", Default, Default, 1)
 
 	For $i = 1 To $Bac[0]
+		$sizefldr1 = DirGetSize($Bac[$i], 1)
+		If @error Or $sizefldr1[1] = 0 Then
+			_Logging("Ignorer le dossier vide """ & $Bac[$i] & """")
+			ContinueLoop
+		EndIf
 
 ;~ 		SplashTextOn("Sans Titre", "Copie du dossier """ & $Bac[$i] & """." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 		ProgressSet(Round($i / $Bac[0] * 100), "[" & Round($i / $Bac[0] * 100) & "%] " & "Vérif. du dossier : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
@@ -1684,8 +1705,8 @@ Func RecupererTic($NumeroCandidat)
 ;~ ;===========================================================
 
 ;~ //Début  Vérif l'existence du dossier dans le Flash
-	_Logging("Vérification si un dossier de même nom """ & $NumeroCandidat & """ existe déjà dans la Clé Usb", 2, 0) ;
-	SplashTextOn("Sans Titre", "Vérification si un dossier de même nom """ & $NumeroCandidat & """ existe déjà dans la Clé Usb. " & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
+	_Logging("Vérification si un dossier de même nom """ & $NumeroCandidat & """ existe déjà sur la Clé Usb", 2, 0) ;
+	SplashTextOn("Sans Titre", "Vérification si un dossier de même nom """ & $NumeroCandidat & """ existe déjà sur la Clé Usb. " & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	$ScriptDir = @ScriptDir
 	If StringRight($ScriptDir, 1) <> "\" Then
 		$ScriptDir = $ScriptDir & "\"
@@ -2604,6 +2625,11 @@ Func _CopierLeContenuDesAutresDossiersNoRemove($Mask)
 	Local $Bac = DossiersBac()
 	If IsArray($Bac) Then
 		For $i = 1 To $Bac[0]
+			$sizefldr1 = DirGetSize($Bac[$i], 1)
+			If @error Or $sizefldr1[1] = 0 Then
+				_Logging("Ignorer le dossier vide """ & $Bac[$i] & """")
+				ContinueLoop
+			EndIf
 
 			ProgressSet(Round($i / $Bac[0] * 100), "[" & Round($i / $Bac[0] * 100) & "%] " & "Copie de : " & $Bac[$i])
 			$Fldr_info = DirGetSize($Bac[$i], 1)
@@ -4075,6 +4101,146 @@ Func _CheckBacCollectorExists()
 EndFunc
 
 ;=========================================================
+Func _AfficherDossierRecuperes($sLog = 0)
+	Local $sDossiersRecuperes = _ListeDeDossiersRecuperes() ;_ListeDeDossiersRecuperes($SearchMask = "??????", $RegEx = "([0-9]{6})")
+	If $sDossiersRecuperes <> "" Then
+		GUICtrlSetData($TextDossiersRecuperes, $sDossiersRecuperes)
+		If $sLog = 1 Then
+			$TmpSpaces = "                         "
+			_Logging("Liste de dossiers de travail déjà récupérés : " & StringReplace($sDossiersRecuperes, @CRLF, @CRLF & $TmpSpaces), 2, 0)
+		EndIf
+	Else
+		GUICtrlSetData($TextDossiersRecuperes, "-")
+	EndIf
+EndFunc
+;=========================================================
+Func _OpenDialogAbsent()
+	Local Const $GUI_COLOR_ERROR = 0xFFFF00 ; Jaune vif
+    ; Création de la boîte de dialogue
+    Local $hDialog = GUICreate("Saisie", 350, 220, -1, -1, -1, $WS_EX_TOPMOST)
+    GUISetBkColor($GUI_COLOR_SIDES, $hDialog)
+
+    ; ===== Header =====
+    GUICtrlCreateGraphic(0, 0, 350, $GUI_HEADER_HAUTEUR)
+    GUICtrlSetBkColor(-1, $GUI_COLOR_SIDES)
+    GUICtrlSetState(-1, $GUI_DISABLE)
+
+    ; Titre centré
+    Local $HeaderText = GUICtrlCreateLabel("Numéro d'inscription du Candidat absent", 0, 3, 350, $GUI_HEADER_HAUTEUR-6, $SS_CENTER)
+    GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
+    GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
+    GUICtrlSetFont(-1, 11, 800) ; Texte plus grand et gras
+
+    ; ===== Zone de saisie =====
+    Local $InputWidth = 200
+    Local $InputX = (350 - $InputWidth)/2
+    Local $hInput = GUICtrlCreateInput("", $InputX, $GUI_HEADER_HAUTEUR + 30, $InputWidth, 40, BitOR($ES_NUMBER, $ES_CENTER))
+    GUICtrlSetFont(-1, 22, 900, 0, "Arial")
+    GUICtrlSetColor(-1, $GUI_COLOR_CENTER)
+    GUICtrlSetLimit(-1, 6)
+    GUICtrlSetTip(-1, "Numéro à 6 chiffres - Vérifiez l'existence du dossier avant validation", "Numéro d'Inscription", 1, 1)
+
+    ; ===== Label d'erreur =====
+    Local $hErrorLabel = GUICtrlCreateLabel("", $GUI_MARGE, $GUI_HEADER_HAUTEUR + 80, 350 - 2*$GUI_MARGE, 40, $SS_CENTER)
+    GUICtrlSetColor(-1, $GUI_COLOR_ERROR)
+    GUICtrlSetFont(-1, 10, 800) ; Texte agrandi et gras
+    GUICtrlSetState(-1, $GUI_HIDE)
+
+    ; ===== Boutons =====
+    Local $BtnWidth = 90
+    Local $BtnX = (350 - 2*$BtnWidth - $GUI_MARGE)/2
+    Local $hBtnValidate = GUICtrlCreateButton("Valider", $BtnX, 170, $BtnWidth, 35)
+    GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
+    GUICtrlSetColor(-1, 0xFFFFFF)
+    GUICtrlSetFont(-1, 10, 800)
+
+    Local $hBtnCancel = GUICtrlCreateButton("Annuler", $BtnX + $BtnWidth + $GUI_MARGE, 170, $BtnWidth, 35)
+    GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
+    GUICtrlSetColor(-1, 0xFFFFFF)
+    GUICtrlSetFont(-1, 10, 800)
+
+    GUISetState(@SW_SHOW, $hDialog)
+
+    While 1
+        Local $nMsg = GUIGetMsg()
+        Switch $nMsg
+            Case $GUI_EVENT_CLOSE, $hBtnCancel
+                GUIDelete($hDialog)
+                ExitLoop
+            Case $hBtnValidate
+                Local $sInput = GUICtrlRead($hInput)
+				Local $ScriptDir = @ScriptDir
+				If StringRight($ScriptDir, 1) <> "\" Then
+					$ScriptDir = $ScriptDir & "\"
+				EndIf
+
+                Local $Dest1FlashUSB = $ScriptDir & $sInput ; Chemin du dossier principal
+
+                ; Validation multi-critères
+                If StringLen($sInput) <> 6 Then
+                    GUICtrlSetData($hErrorLabel, "Le numéro doit contenir exactement 6 chiffres")
+                    GUICtrlSetState($hErrorLabel, $GUI_SHOW)
+                ElseIf $sInput = "000000" Then
+                    GUICtrlSetData($hErrorLabel, """" & $sInput & """ n'est pas un numéro d'inscription valide")
+                    GUICtrlSetState($hErrorLabel, $GUI_SHOW)
+                ElseIf FileExists($Dest1FlashUSB) Then
+                    GUICtrlSetData($hErrorLabel, "Un dossier avec le numéro " & $sInput & " existe déjà !")
+                    GUICtrlSetState($hErrorLabel, $GUI_SHOW)
+                Else
+                    GUICtrlSetState($hErrorLabel, $GUI_HIDE)
+                    GUIDelete($hDialog)
+                    Return _CreerDossierCandidatAbs($Dest1FlashUSB) ; Appel avec le chemin complet
+                    ExitLoop
+                EndIf
+        EndSwitch
+    WEnd
+EndFunc
+Func 	_VerifierDossiersNonConformesPourCandidatsAbsents()
+	If $DossiersNonConformesPourCandidatsAbsents <> "" Then
+		If _NbOccurrences("»", $DossiersNonConformesPourCandidatsAbsents) = 1 Then
+			; Cas d'un seul dossier
+			Local $sMessage = "Dossier non conforme détecté pour le candidat absent :" & @CRLF & @CRLF & _
+							  $DossiersNonConformesPourCandidatsAbsents & @CRLF & _
+							  "Action nécessaire :" & @CRLF & _
+							  "→ Créez un sous-dossier VIDE nommé « Absent » dans ce dossier."
+		Else
+			; Cas de plusieurs dossiers
+			Local $sMessage = "Dossiers non conformes détectés pour les candidats absents :" & @CRLF & @CRLF & _
+							  $DossiersNonConformesPourCandidatsAbsents & @CRLF & _
+							  "Action nécessaire :" & @CRLF & _
+							  "→ Créez un sous-dossier VIDE nommé « Absent » dans chaque dossier listé ci-dessus."
+		EndIf
+		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
+		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & $PROG_VERSION, $sMessage, 0)
+	EndIf
+EndFunc
+
+Func _CreerDossierCandidatAbs($sCheminDossier)
+    ; Création du dossier principal
+    If Not DirCreate($sCheminDossier) Then
+		_Logging("Candidat Absent: Échec de la création du dossier """ & $sCheminDossier & """", 5, 1)
+		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
+		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Échec de la création du dossier :" & @CRLF & $sCheminDossier, 0)
+        Return 0
+    EndIf
+
+    ; Création du sous-dossier "Absent"
+    Local $sSousDossier = $sCheminDossier & "\Absent"
+    If Not DirCreate($sSousDossier) Then
+		_Logging("Candidat Absent: Échec de la création du dossier : """ & $sSousDossier & """", 5, 1)
+		_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
+		_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Échec de la création du dossier :" & @CRLF & $sSousDossier, 0)
+        Return 0
+    EndIf
+
+    ; Confirmation de création
+	_Logging("Candidat Absent: Dossier créé avec succès """ & $sSousDossier & """", 3, 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
+	_ExtMsgBoxSet(1, 0, $GUI_COLOR_CENTER, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
+	_ExtMsgBox(64, "Ok", $PROG_TITLE & $PROG_VERSION, "Dossier créé avec succès :" & @CRLF & $sCheminDossier & _
+           @CRLF & @CRLF & "Avec le sous-dossier :" & @CRLF & $sSousDossier, 0)
+	Return 1
+EndFunc
+;=========================================================
 
 #Region "Générer Grille d'évaluation" -----------------------------------------------------------------------------------
 Func _GenererGrilleEvaluation($aNumCandiats)
@@ -4280,6 +4446,9 @@ Func _TmpGrilleVide()
 EndFunc   ;==>_TmpGrilleVide
 
 #EndRegion "Générer Grille d'évaluation" --------------------------------------------------------------------------------
+
+
+
 
 ;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
 ;¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦¦
