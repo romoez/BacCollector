@@ -20,8 +20,8 @@
 #pragma compile(Compression, 9)
 #pragma compile(FileDescription, Collecte des travaux lors des examens pratiques d'informatique.)
 #pragma compile(ProductName, BacCollector)
-#pragma compile(ProductVersion, 0.8.19.418)
-#pragma compile(FileVersion, 0.8.19.418)
+#pragma compile(ProductVersion, 0.8.20.505)
+#pragma compile(FileVersion, 0.8.20.505)
 #pragma compile(LegalCopyright, 2018-2025 © La Communauté Tunisienne des Enseignants d'Informatique)
 #pragma compile(Comments, BacCollector: Collecte des travaux lors des examens pratiques d'informatique.)
 #pragma compile(CompanyName, La Communauté Tunisienne des Enseignants d'Informatique)
@@ -690,78 +690,71 @@ Func _ShowAPropos()
     Local $sCompileDate = $aCompileDate[2] & " " & _MonthFullName($aCompileDate[1]) & " " & $aCompileDate[0] & " à " & _
                           $aCompileDate[3] & ":" & $aCompileDate[4] & ":" & $aCompileDate[5]
     Local $GithubLink = "https://github.com/romoez/BacCollector"
+    Local $LicenseLink = "https://github.com/romoez/BacCollector/blob/main/LICENSE"
+    Local $iGUIWidth = 480, $iGUIHeight = 230 ; Hauteur ajustée pour plus d'espace
 
     ; Création de la fenêtre GUI
-    Local $hGUI = GUICreate("À propos", 340, 170, -1, -1, BitOR($WS_CAPTION, $WS_SYSMENU), $WS_EX_TOPMOST)
-	GUISetBkColor($GUI_COLOR_CENTER)
+    Local $hGUI = GUICreate("À propos", $iGUIWidth, $iGUIHeight, -1, -1, BitOR($WS_CAPTION, $WS_SYSMENU), $WS_EX_TOPMOST)
+    GUISetBkColor($GUI_COLOR_CENTER)
+	GUISetFont ( 9, $FW_NORMAL , $GUI_FONTNORMAL , "Tahoma"); [, winhandle [, quality]]]]] )
 
-    ; Labels centrés
-    GUICtrlCreateLabel($PROG_TITLE & " v" & $PROG_VERSION, 20, 20, 300, 20, $SS_CENTER)
-    GUICtrlSetFont(-1, 16, 700)
-	GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
+    ; Titre
+    GUICtrlCreateLabel($PROG_TITLE & " v" & $PROG_VERSION, 20, 20, $iGUIWidth - 40, 25, $SS_CENTER)
+    GUICtrlSetFont(-1, 17, 200)
+    GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
 
-    GUICtrlCreateLabel("Compilé le " & $sCompileDate, 20, 50, 300, 20, $SS_CENTER)
-    GUICtrlSetFont(-1, 8, 300)
-	GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
+    ; Date de compilation
+    GUICtrlCreateLabel("Compilé le " & $sCompileDate, 20, 50, $iGUIWidth - 40, 20, $SS_CENTER)
+    GUICtrlSetFont(-1, 8, 300, $GUI_FONTNORMAL)
+    GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
 
-    GUICtrlCreateLabel("Site Web :", 20, 80, 280, 20, $SS_CENTER)
-    GUICtrlSetFont(-1, 9, 300)
-	GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
+    ; Copyright
+    GUICtrlCreateLabel("Copyright © " & $aCompileDate[0] & " La Communauté Tunisienne des Enseignants d'Informatique", 20, 80, $iGUIWidth - 40, 20, $SS_CENTER)
+    GUICtrlSetFont(-1, 9, 400, $GUI_FONTNORMAL)
+    GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
 
-    Local $idGitHubLink = GUICtrlCreateLabel($GithubLink, 20, 100, 300, 20, $SS_CENTER)
-    GUICtrlSetFont(-1, 10, 400, $GUI_FONTUNDER, "Consolas")
-    GUICtrlSetColor(-1, 0x63C2F5) ; Couleur bleue pour le lien
-    GUICtrlSetCursor(-1, 0) ; Curseur main
-;~     GUICtrlSetTip(-1, "Cliquez pour ouvrir")
+    ; Licence (ajout)
+    Local $idLicenseLink = GUICtrlCreateLabel("Licence GPL-3.0", 20, 110, $iGUIWidth - 40, 20, $SS_CENTER)
+    GUICtrlSetFont(-1, 9, 300, $GUI_FONTUNDER)
+    GUICtrlSetColor(-1, 0x63C2F5)
+    GUICtrlSetCursor(-1, 0)
+
+    ; Site Web
+;~     GUICtrlCreateLabel("Github :", 20, 140, $iGUIWidth - 40, 20, $SS_CENTER)
+;~     GUICtrlSetFont(-1, 9, 300)
+;~     GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
+
+    ; Lien GitHub
+    Local $idGitHubLink = GUICtrlCreateLabel($GithubLink, 20, 140, $iGUIWidth - 40, 20, $SS_CENTER)
+    GUICtrlSetFont(-1, 9, 400, $GUI_FONTUNDER)
+    GUICtrlSetColor(-1, 0x63C2F5)
+    GUICtrlSetCursor(-1, 0)
 
     ; Bouton OK centré
-    Local $idOK = GUICtrlCreateButton("OK", 130, 130, 80, 30)
-	GUICtrlSetCursor(-1, 0) ; Curseur main
+    Local $idOK = GUICtrlCreateButton("OK", ($iGUIWidth - 80)/2, 180, 80, 30)
+    GUICtrlSetCursor(-1, 0)
 
-    ; Affichage de la fenêtre
     GUISetState(@SW_SHOW, $hGUI)
 
-    ; Boucle des événements
     While 1
         Switch GUIGetMsg()
             Case $GUI_EVENT_CLOSE, $idOK
                 ExitLoop
             Case $idGitHubLink
-                ShellExecute($GitHubLink)
+                ShellExecute($GithubLink)
+            Case $idLicenseLink
+                ShellExecute($LicenseLink)
         EndSwitch
     WEnd
 
-    ; Nettoyage
     GUIDelete($hGUI)
 EndFunc
-
 ;=========================================================
 
 #Region Functions BB
 Func _NouvelleSessionBacBackup()
-	Local $sProcessName = "BacBackup.exe"
-	Local $sAppId = "{498AA8A4-2CBE-4368-BFA0-E0CF3F338536}_is1"
-	Local $sAppPath = @ProgramFilesDir & "\BacBackup\" & $sProcessName
-
-	Local $sProcessPath = _GetProcessPath($sProcessName, $sAppPath, $sAppId)
-	If $sProcessPath <> "" Then
-		; Si le chemin est trouvé, relancer BacBackup
-;~ 		Return _RunOrShellExecute($sProcessPath)
+	If (_IsRegistryExist("HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{498AA8A4-2CBE-4368-BFA0-E0CF3F338536}_is1", "DisplayName") And ProcessExists('BacBackup.exe')) Or (_IsRegistryExist("HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{D50A90DE-3118-4B58-9ABE-FDF795C59970}_is1", "DisplayName") And ProcessExists('UsbCleaner.exe')) Then
 		Return _CreerDossierNouvelleSession($Lecteur, $DossierSauve)
-	Else
-		$sProcessName = "UsbCleaner.exe"
-		$sAppId = "{D50A90DE-3118-4B58-9ABE-FDF795C59970}_is1"
-		$sAppPath = @ProgramFilesDir & "\UsbCleaner\" & $sProcessName
-
-		$sProcessPath = _GetProcessPath($sProcessName, $sAppPath, $sAppId)
-		; Si aucun chemin n'est trouvé, retourner 0
-		If $sProcessPath <> "" Then
-			; Si le chemin est trouvé, relancer BacBackup
-;~ 			Return _RunOrShellExecute($sProcessPath)
-			Return _CreerDossierNouvelleSession($Lecteur, $DossierSauve)
-		Else
-			Return 0
-		EndIf
 	EndIf
 EndFunc   ;==>_NouvelleSessionBacBackup
 
@@ -787,7 +780,7 @@ Func _OpenBacBackupInterface()
 EndFunc   ;==>_OpenBacBackupInterface
 
 Func _OpenUsbCleanerUrl()
-		_Logging("Ouverture de la page de télépchargement de UsbCleaner", 2, 0)
+		_Logging("Ouverture de la page de téléchargement de UsbCleaner", 2, 0)
 		ShellExecute("https://github.com/romoez/UsbCleaner", "", "", "open")
 EndFunc     ;==>_OpenUsbCleanerUrl
 #EndRegion Functions BB
@@ -830,7 +823,8 @@ Func _CreateGui()
 	GUICtrlSetBkColor(-1, $GUI_COLOR_SIDES)
 	_GUIExtender_Section_Create($hMainGUI, $GUI_LARGEUR - $GUI_LARGEUR_PARTIE, $GUI_LARGEUR_PARTIE)
 	_GUIExtender_Section_Activate($hMainGUI, 1)
-	GUICtrlSetTip($bTogglePart3, " ", "Cliquez pour afficher/masquer la partie droite de la fenêtre.", 0,1)
+	GUICtrlSetTip($bTogglePart3, " ", "Cliquez pour afficher/masquer la partie droite de la fenêtre.", 1,1)
+	GUICtrlSetCursor($bTogglePart3, $MCID_HAND )
 
 
 	_GUIExtender_Section_Action($hMainGUI, 1, 0) ;2ème paramètre (1) Numéro de la Section  -  3ème paramètre (0) to retract the Section
@@ -889,7 +883,7 @@ Func _CreateGui()
 	Global $lblMatiere = GUICtrlCreateLabel("Matière...", $TmpLeft, $TmpTop, $WidthHeader / 2 - 2 * $GUI_MARGE, $GUI_HEADER_HAUTEUR + 10, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor(-1, 0xFFFFFF)
 	GUICtrlSetFont(-1, 16, 100, 4, "Segoe UI Light")
-	GUICtrlSetTip($lblMatiere, "Cliquez pour Actualiser tout.", "Actualiser.", 0,1)
+	GUICtrlSetTip($lblMatiere, "Cliquez pour Actualiser tout.", "Actualiser.", 1,1)
 
 	;;;***** Matière Info || Prog
 	$TmpTop = $TmpTop + $GUI_HEADER_HAUTEUR + 2 * $GUI_MARGE
@@ -983,7 +977,7 @@ Func _CreateGui()
 	GUICtrlSetColor($lblComputerID, 0xFFFFFF)
 	GUICtrlSetBkColor($lblComputerID, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 8, 100, 0, "Segoe UI Light")
-	GUICtrlSetTip($lblComputerID, "L'Identifiant Unique de ce PC." & @CRLF & @CRLF & "Cliquez pour copier.", GUICtrlRead($lblComputerID), 0,1)
+	GUICtrlSetTip($lblComputerID, "L'Identifiant Unique de ce PC." & @CRLF & @CRLF & "Cliquez pour copier.", GUICtrlRead($lblComputerID), 1,1)
 
 	Local $TmpButtonWidth = $GUI_LARGEUR_PARTIE - 4 * $GUI_MARGE ; * 2/3
 	Local $TmpButtonHeight = $GUI_HEADER_HAUTEUR * 2
@@ -999,7 +993,7 @@ Func _CreateGui()
 	GUICtrlSetColor(-1, 0xffffff)
 	GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
 	GUICtrlSetFont(-1, 10)
-	GUICtrlSetTip($bRecuperer, @CRLF & "Cette commande permet de:" & @CRLF 	& @CRLF & "1. Sauvegarder le travail du candidat vers un dossier verrouillé sur ce PC." & @CRLF & "2. Copier les dossiers & fichiers du candidat vers la clé USB." & @CRLF & "3. Supprimer les travaux du candidat, pour les matières Info & Prog.", "Copier les fichiers du candidat vers la clé USB", 0,1)
+	GUICtrlSetTip($bRecuperer, @CRLF & "Cette commande permet de:" & @CRLF 	& @CRLF & "1. Sauvegarder le travail du candidat vers un dossier verrouillé sur ce PC." & @CRLF & "2. Copier les dossiers & fichiers du candidat vers la clé USB." & @CRLF & "3. Supprimer les travaux du candidat, pour les matières Info & Prog.", "Copier les fichiers du candidat vers la clé USB", 1,1)
 
 	$Top_Header = 4 * $GUI_MARGE + 2 * $TmpButtonHeight
 	$Left_Header = $GUI_MARGE
@@ -1017,14 +1011,13 @@ Func _CreateGui()
 	GUICtrlSetColor($Text, 0xFFFFFF)
 	GUICtrlSetBkColor($Text, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 9.5, 500)
-	Local $sMsgCandidatAbs = "Pour chaque candidat absent, veuillez :" & @CRLF & @TAB & "1. Créer un dossier portant son numéro d'inscription." & @CRLF & @TAB & "2. À l'intérieur, ajouter un sous-dossier vide nommé 'Absent'."
-	GUICtrlSetTip($Text, $sMsgCandidatAbs, "Dossiers récupérés", 0,1)
+	GUICtrlSetTip($Text, " ", "Dossiers récupérés", 1,1)
 
 	Global $TextDossiersRecuperes = GUICtrlCreateLabel("", $Left_Header + $GUI_MARGE, $Top_Header + $GUI_HEADER_HAUTEUR + $GUI_MARGE + 6, $WidthHeader - 2 * $GUI_MARGE, $GUI_HAUTEUR - 310)
 	GUICtrlSetColor(-1, 0xFFFFFF)
 	GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 10, 200)
-	GUICtrlSetTip($TextDossiersRecuperes, $sMsgCandidatAbs, "Dossiers récupérés", 0,1)
+	GUICtrlSetTip($TextDossiersRecuperes, " ", "Dossiers récupérés", 1,1)
 
 	$Top_Header = $GUI_HAUTEUR - 100 - $GUI_MARGE
 	$Left_Header = $GUI_MARGE
@@ -1040,7 +1033,7 @@ Func _CreateGui()
 	GUICtrlSetColor(-1, 0xffffff)
 	GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
 	GUICtrlSetFont(-1, 9)
-	GUICtrlSetTip($bCreerDossierCandidatAbs, @CRLF & "Cette commande permet de:" & @CRLF 	& @CRLF & "1. Sauvegarder le travail du candidat vers un dossier verrouillé sur ce PC." & @CRLF & "2. Copier les dossiers & fichiers du candidat vers la clé USB." & @CRLF & "3. Supprimer les travaux du candidat, pour les matières Info & Prog.", "Copier les fichiers du candidat vers la clé USB", 0,1)
+	GUICtrlSetTip($bCreerDossierCandidatAbs, @CRLF & "Ce bouton permet de :" & @CRLF  & @CRLF & @TAB & "1. Créer un dossier portant le numéro du candidat absent." & @CRLF & @TAB & "2. Ajouter à l'intérieur un sous-dossier vide nommé ""Absent""", "Ajouter un candidat absent", 1,1)
 ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[
 ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[
 	Global $TextApps_Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $TmpHeaderHauteur)
@@ -1053,14 +1046,17 @@ Func _CreateGui()
 	GUICtrlSetBkColor($TextApps_Text, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 9.5, 500)
 	GUICtrlSetState($TextApps_Text, $GUI_SHOW)
-	GUICtrlSetTip(-1, @CRLF & "Veuillez sauvegarder le travail et quitter ces applications." & @CRLF & @CRLF & "Certaines applications (VSCode, Sublime Text...) ne demandent pas de confirmation de fermeture," & @CRLF & "même si des fichiers ne sont pas encore enregistrés:", "Applications à fermer", 0,1)
+	Local $sTempMessage = @CRLF & "Enregistrer les travaux et fermer les applications listées." & @CRLF & @CRLF _
+						& "🛑  Attention : certaines applications, notamment VSCode et Sublime Text," & @CRLF _
+						& "peuvent se fermer sans confirmation, même si des fichiers sont encore non enregistrés."
+	GUICtrlSetTip(-1, $sTempMessage , "Fermeture d'applications requise", 2,1)
 
 	Global $TextApps = GUICtrlCreateLabel("", $Left_Header + $GUI_MARGE, $Top_Header + $GUI_HEADER_HAUTEUR + $GUI_MARGE + 6, $WidthHeader - 2 * $GUI_MARGE, 100 - $GUI_HEADER_HAUTEUR - 2 * $GUI_MARGE)
 	GUICtrlSetColor(-1, 0xFFFFFF)
 	GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 9)
 	GUICtrlSetState($TextApps, $GUI_SHOW)
-	GUICtrlSetTip(-1, @CRLF & "Veuillez sauvegarder le travail et de quitter ces applications." & @CRLF & @CRLF & "Certaines applications (VSCode, Sublime Text...) ne demandent pas de confirmation de fermeture," & @CRLF & "même si des fichiers ne sont pas encore enregistrés:", "Applications à fermer", 0,1)
+	GUICtrlSetTip(-1, $sTempMessage, "Fermeture d'applications requise", 2,1)
 	;;;Partie à gauche  - Fin=============================================================================================
 
 	;;;Partie à Droite  - Début=============================================================================================
@@ -1070,7 +1066,7 @@ Func _CreateGui()
 	GUICtrlSetColor($lblLabo, 0xFFFFFF)
 	GUICtrlSetBkColor($lblLabo, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 18, 100, 4, "Segoe UI Light")
-	GUICtrlSetTip($lblLabo, " ", "Laboratoire d'Informatique", 0,1)
+	GUICtrlSetTip($lblLabo, " ", "Laboratoire d'Informatique", 1,1)
 
 	$GuiTmpTop = $GuiTmpTop + $GUI_MARGE + $TmpButtonHeight
 	Global $lblSeance = GUICtrlCreateLabel("", $GuiTmpLeft + $GUI_LARGEUR_PARTIE / 2 - $TmpButtonWidth / 2, $GuiTmpTop, $TmpButtonWidth, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
@@ -1087,7 +1083,7 @@ Func _CreateGui()
 	GUICtrlSetColor(-1, 0xffffff)
 	GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
 	GUICtrlSetFont(-1, 10)
-	GUICtrlSetTip($bCreerSauvegarde, @CRLF & "Cette commande permet de:" & @CRLF & @CRLF & "1. Sauvegarder les travaux des candidats dans un dossier verrouillé." & @CRLF & "2. Générer un état sur les travaux des candidats." & @CRLF & "3. Générer la grille d'évaluation correspondante (Excel).", "Sauvegarder les travaux sur serveur/poste réserve", 0,1)
+	GUICtrlSetTip($bCreerSauvegarde, @CRLF & "Cette commande permet de:" & @CRLF & @CRLF & @TAB & "1. Sauvegarder les travaux des candidats dans un dossier verrouillé." & @CRLF & @TAB & "2. Générer un état sur les travaux des candidats." & @CRLF & @TAB & "3. Générer la grille d'évaluation correspondante (Excel).", "Sauvegarder les travaux sur serveur/poste réserve", 1,1)
 
 	$GuiTmpLeft = $GuiTmpLeft
 	$GuiTmpTop = $GuiTmpTop + $GUI_MARGE + $TmpButtonHeight
@@ -1095,7 +1091,7 @@ Func _CreateGui()
 	GUICtrlSetColor(-1, 0xffffff)
 	GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
 	GUICtrlSetFont(-1, 10)
-	GUICtrlSetTip($bOpenBackupFldr, @CRLF & " ", "Ouvrir le dossier de sauvegarde", 0,1)
+	GUICtrlSetTip($bOpenBackupFldr, @CRLF & " ", "Ouvrir le dossier de sauvegarde", 1,1)
 
 ;~ 	Global $bAide = GUICtrlCreateButton("Aide", $GuiTmpLeft, $GUI_HAUTEUR - $GUI_MARGE - $TmpButtonHeight, $TmpButtonWidth, $TmpButtonHeight)
 ;~ 	GUICtrlSetColor(-1, 0xffffff)
@@ -1124,7 +1120,7 @@ Func _CreateGui()
 	GUICtrlSetBkColor($lblBacBackup, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 11, 100, 0, "Segoe UI Light")
 ;~ 	GUICtrlSetState($lblBacBackup, $GUI_HIDE)
-	GUICtrlSetTip($lblBacBackup, "Cliquez pour ouvrir BacBackup", "BacBackup surveille le PC.", 0,1)
+	GUICtrlSetTip($lblBacBackup, "Cliquez pour ouvrir BacBackup", "BacBackup surveille le PC.", 1,1)
 	GUICtrlSetCursor(-1, 0) ; Curseur main
 
 	;;; Cadre USBCleaner
@@ -1139,7 +1135,7 @@ Func _CreateGui()
 	GUICtrlSetColor($lblUsbCleaner, 0xFF0000)
 	GUICtrlSetBkColor($lblUsbCleaner, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 10, 900, 0, "Segoe UI Light")
-	GUICtrlSetTip($lblUsbCleaner, "Cliquez pour aller à la page de téléchargement de UsbCleaner", "⚠️ Absence de surveillance UsbCleaner ⚠", 0,1)
+	GUICtrlSetTip($lblUsbCleaner, "Cliquez pour aller à la page de téléchargement de UsbCleaner", "⚠️ Absence de surveillance UsbCleaner ⚠", 2,1)
 	GUICtrlSetCursor(-1, 0) ; Curseur main
 	GUICtrlSetState($lblUsbCleaner, $GUI_HIDE)
 	GUICtrlSetState($CUsbCleaner, $GUI_HIDE)
@@ -1347,9 +1343,9 @@ Func RecupererInfo($NumeroCandidat)
 				"Le dossier " & $NomsDossiers & " est vide !" & @CRLF & @CRLF & _
 				"Options disponibles :" & @CRLF & @CRLF & _
 				"1. Solutions manuelles :" & @CRLF & _
-				"   a) Déplacez les fichiers de travail du candidat vers le dossier '" & $NomsDossiers & "'." & @CRLF & _
-				"   b) Créer dans le dossier '" & $NomsDossiers & "' un fichier 'Remarque.txt'" & @CRLF & _
-				"       contenant le texte : ""Dossier vide""" & @CRLF & @CRLF & _
+				"   a) Déplacez les fichiers de travail du candidat vers le dossier " & $NomsDossiers & "." & @CRLF & _
+				"   b) Créer dans le dossier " & $NomsDossiers & " un fichier 'Remarque.txt'" & @CRLF & _
+				"       contenant le texte : ""Le candidat n'a rien enregistré dans ce dossier""" & @CRLF & @CRLF & _
 				"2. Solution automatique :" & @CRLF & _
 				"   ► Cliquez sur [Générer et Continuer] pour : " & @CRLF & _
 				"     Créer automatiquement le fichier 'Remarque.txt', et continuer la récupération."
@@ -1361,7 +1357,7 @@ Func RecupererInfo($NumeroCandidat)
 				"1. Solutions manuelles :" & @CRLF & _
 				"   a) Déplacez les fichiers de travail du candidat vers l'un des dossiers listés ci-dessus." & @CRLF & _
 				"   b) Créer dans l'un des dossiers cités plus haut, un fichier 'Remarque.txt'" & @CRLF & _
-				"       contenant le texte : ""Dossier vide""" & @CRLF & @CRLF & _
+				"       contenant le texte : ""Le candidat n'a rien enregistré dans ce dossier""" & @CRLF & @CRLF & _
 				"2. Solution automatique :" & @CRLF & _
 				"   ► Cliquez sur [Générer et Continuer] pour : " & @CRLF & _
 				"     Créer automatiquement le fichier 'Remarque.txt', et continuer la récupération."
@@ -1375,7 +1371,7 @@ Func RecupererInfo($NumeroCandidat)
 				Local $Bac20xx = 'C:\Bac' & GUICtrlRead($cBac)
 				If not FileExists($Bac20xx) Then DirCreate($Bac20xx)
 				Local $sFichierRemarque = $Bac20xx & "\Remarque.txt"
-				If FileWrite($sFichierRemarque, "Le dossier est vide") Then
+				If FileWrite($sFichierRemarque, "Le candidat n'a rien enregistré dans ce dossier") Then
 					_Logging("Création du fichier: " & $sFichierRemarque)
 				Else
 					_Logging("Impossible de créer le fichier " & $sFichierRemarque, 5, 1)
@@ -1469,7 +1465,7 @@ Func RecupererInfo($NumeroCandidat)
 	Local $DossierSession = IniRead($Lecteur & $DossierSauve & "\BacBackup\BacBackup.ini", "Params", "DossierSession", "/^_^\")
 	If FileExists($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher") Then
 		Local $hInfoFile = FileOpen($Dest1FlashUSB & "\" & "possibilité_de_fraude.txt", 1)
-		_Logging("Fraude possible. Candidat N° " & $NumeroCandidat & ". Copie du dossier ""CapturesEcran"" vers le dossier du candidat", 5)
+		_Logging("⚠️ Fraude possible. Candidat N° " & $NumeroCandidat & ". Copie du dossier ""CapturesEcran"" vers le dossier du candidat", 4)
 		FileWriteLine($hInfoFile, 'Clé USB non autorisée détectée pendant l''examen. Captures d''écran et inventaire des fichiers dans le dossier "CapturesEcran".')
 		FileClose($hInfoFile)
 		$Error1_CopyBacFldr = _DirCopyWithProgress($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher", $Dest1FlashUSB & "\CapturesEcran", 1, "Copie des captures d'écran...")
@@ -1497,7 +1493,7 @@ Func RecupererInfo($NumeroCandidat)
 	_Initialisation()
 	SplashOff()
 	If $iNberreurs = 0 Then
-		;;;_Logging($sText, $iSuccess = 1, $iGuiLog = 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green
+		;;;_Logging($sText, $iSuccess = 1, $iGuiLog = 1) ;$iSuccess: 0>Fail&Red , 1>Success&Blanc, 2>Info&Blue , 3>Info&Green, 4>info&Blanc, 5>info&Red
 		_Logging("Récupération terminée  avec succès", 3, 1)
 		_Logging("______", 2, 0)
 		_ExtMsgBoxSet(1, 0, $GUI_COLOR_SUCCESS, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
@@ -1856,7 +1852,7 @@ Func RecupererTic($NumeroCandidat)
 	Local $DossierSession = IniRead($Lecteur & $DossierSauve & "\BacBackup\BacBackup.ini", "Params", "DossierSession", "/^_^\")
 	If FileExists($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher") Then
 		Local $hInfoFile = FileOpen($Dest1FlashUSB & "\" & "possibilité_de_fraude.txt", 1)
-		_Logging("Fraude possible. Candidat N° " & $NumeroCandidat & ". Copie du dossier ""CapturesEcran"" vers le dossier du candidat", 5)
+		_Logging("⚠️ Fraude possible. Candidat N° " & $NumeroCandidat & ". Copie du dossier ""CapturesEcran"" vers le dossier du candidat", 4)
 		FileWriteLine($hInfoFile, 'Clé USB non autorisée détectée pendant l''examen. Captures d''écran et inventaire des fichiers dans le dossier "CapturesEcran".')
 		FileClose($hInfoFile)
 		$Error1_CopyBacFldr = _DirCopyWithProgress($Lecteur & $DossierSauve & "\BacBackup\" & $DossierSession  & "\1-UsbWatcher", $Dest1FlashUSB & "\CapturesEcran", 1, "Copie des captures d'écran...")
@@ -4016,21 +4012,76 @@ EndFunc   ;==>_ShowInExplorer
 ;=========================================================
 
 Func _OpenTempLog()
-	Local $Text = _GUICtrlRichEdit_GetText($GUI_Log)
-	If StringLen($Text) = 0 Then Return
-	Local $FilePath = @TempDir & "\" & $PROG_TITLE & "_tmp_log.rtf"
-	Local $hTmpFile = FileOpen($FilePath, 2)
-	Local $Kes = _GUICtrlRichEdit_StreamToVar($GUI_Log)
-	$Kes = StringReplace($Kes, "\red255\green255\blue255", "\red0\green0\blue0")
-	$Kes = StringReplace($Kes, "MS Shell Dlg", "Segoe UI")
-	$Kes = StringReplace($Kes, "\fs17\", "\fs21\")
-
-	FileWriteLine($hTmpFile, $Kes)
-	FileClose($hTmpFile)
-	_RunDos('Start Wordpad "' & $FilePath & '"')
+	Local $Editeur = _EditeurFichierLog()
+	If $Editeur <> "" Then
+		Local $Text = _GUICtrlRichEdit_GetText($GUI_Log)
+		If StringLen($Text) = 0 Then Return
+		Local $sFilePath = @TempDir & "\" & $PROG_TITLE & "_tmp_log.rtf"
+		Local $hTmpFile = FileOpen($sFilePath, 2)
+		Local $Kes = _GUICtrlRichEdit_StreamToVar($GUI_Log)
+		$Kes = StringReplace($Kes, "\red255\green255\blue255", "\red0\green0\blue0")
+		$Kes = StringReplace($Kes, "MS Shell Dlg", "Segoe UI")
+		$Kes = StringReplace($Kes, "\fs17\", "\fs21\")
+		FileWriteLine($hTmpFile, $Kes)
+		FileClose($hTmpFile)
+		ShellExecute($Editeur, """" & $sFilePath & """")
+;~ 		_RunDos('Start Wordpad "' & $FilePath & '"')
+	Else
+		Local $sFilePath = @TempDir & "\" & $PROG_TITLE & "_tmp_log.txt"
+		Local $Text = _GUICtrlRichEdit_GetText($GUI_Log, True)
+		Local $hFileOpen = FileOpen($sFilePath, $FO_OVERWRITE )
+		FileWrite($hFileOpen, $Text)
+		FileClose($hFileOpen)
+		ShellExecute("""" & $sFilePath & """")
+	EndIf
 
 EndFunc   ;==>_OpenTempLog
 
+Func _EditeurFichierLog()
+    ; Recherche WordPad avec gestion de l'architecture
+    Local $sWordPadPath
+    If @OSArch = "X64" Then
+        $sWordPadPath = EnvGet("ProgramW6432") & "\Windows NT\Accessories\wordpad.exe"
+        If Not FileExists($sWordPadPath) Then
+            $sWordPadPath = @ProgramFilesDir & "\Windows NT\Accessories\wordpad.exe"
+        EndIf
+    Else
+        $sWordPadPath = @ProgramFilesDir & "\Windows NT\Accessories\wordpad.exe"
+    EndIf
+    If FileExists($sWordPadPath) Then Return $sWordPadPath
+
+    ; Recherche Word via les versions Office
+    Local $aVersions[] = ["16.0", "15.0", "14.0", "12.0", "11.0"]
+	Local $sPath
+    For $vVersion In $aVersions
+        $sRegKey = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Office\" & $vVersion & "\Word\InstallRoot"
+        $sPath = RegRead($sRegKey, "Path")
+        If Not @error Then
+            $sPath = StringRegExpReplace($sPath, "\\$", "") & "\WINWORD.EXE"
+            If FileExists($sPath) Then Return $sPath
+        EndIf
+    Next
+
+    ; Recherche dans les chemins standards
+    Local $aOfficePaths[] = [ _
+        "C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE", _
+        "C:\Program Files\Microsoft Office\Office16\WINWORD.EXE", _
+        "C:\Program Files (x86)\Microsoft Office\root\Office16\WINWORD.EXE", _
+        "C:\Program Files (x86)\Microsoft Office\Office16\WINWORD.EXE" _
+    ]
+    For $sPath In $aOfficePaths
+        If FileExists($sPath) Then Return $sPath
+    Next
+
+    ; Recherche via les App Paths
+    Local $aRegPaths[] = ["HKLM64\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\winword.exe", "HKLM32\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\winword.exe"]
+    For $i = 0 To UBound($aRegPaths) - 1
+        Local $sPath = RegRead($aRegPaths[$i], "")
+        If Not @error And FileExists($sPath) Then Return $sPath
+    Next
+
+    Return ""
+EndFunc
 
 Func _CheckRunningFromUsbDrive()
 	If FileExists(@ScriptDir & "\__dev.txt") Then Return
@@ -4088,9 +4139,9 @@ Func _CheckBacCollectorExists()
 		Local $sScriptDrive = StringLeft(@ScriptFullPath, StringLen(@ScriptFullPath) - StringLen(@ScriptName))
 		If StringLen($sScriptDrive) = 3 And StringRegExp($sScriptDrive, "^([a-zA-Z]{1,1}:)?(\\|\/)$", 0) = 1 And Not FileExists($sScriptDrive) Then
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
-			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Le lecteur """ & $sScriptDrive & """ où se trouve l'exécutable """ & @ScriptName & """ n'existe plus." & @CRLF _
-					 & "Il est très important de ne pas retirer la Clé USB avant de quitter " & $PROG_TITLE & ", car cela pourrait endommager les dossiers déjà récupérés." & @CRLF  & @CRLF _
-					 & $PROG_TITLE & " va se fermer immédiatement.", 0)
+			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "Le lecteur " & $sScriptDrive & " contenant l'exécutable de " & @ScriptName & " n'est plus accessible. " & @CRLF _
+								& "Ne retirez pas la clé USB avant la fermeture du programme pour éviter toute corruption des données." & @CRLF _
+								& $PROG_TITLE & " va se fermer immédiatement.", 0)
 		Else
 			_ExtMsgBoxSet(1, 0, 0x660000, 0xFFFFFF, 9, "Comic Sans MS", @DesktopWidth - 25, @DesktopWidth - 25)
 			_ExtMsgBox(16, "Ok", $PROG_TITLE & $PROG_VERSION, "L'exécutable """ & @ScriptName & """ n'existe plus dans son emplacement d'origine." & @CRLF _
@@ -4117,7 +4168,7 @@ EndFunc
 Func _OpenDialogAbsent()
 	Local Const $GUI_COLOR_ERROR = 0xFFFF00 ; Jaune vif
     ; Création de la boîte de dialogue
-    Local $hDialog = GUICreate("Saisie", 350, 220, -1, -1, -1, $WS_EX_TOPMOST)
+    Local $hDialog = GUICreate("Ajout d'un Candidat Absent", 350, 220, -1, -1, -1, $WS_EX_TOPMOST)
     GUISetBkColor($GUI_COLOR_SIDES, $hDialog)
 
     ; ===== Header =====
