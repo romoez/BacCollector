@@ -4,17 +4,19 @@
 #include <WinAPIFiles.au3>
 #include <Array.au3>
 #include <File.au3>
+#include <Date.au3>
+#include <WinAPIProc.au3>
+#include <Globals.au3>
 ;#NoTrayIcon
 
-;~ Global $DossierDest = IniRead(@ScriptDir & "\BacBackup.ini", "Params", "DossierDest", "")
-;~ Global $Lecteur = IniRead(@ScriptDir & "\BacBackup.ini", "Params", "Lecteur", "")
 
+; ============================================================================
 ;Nombre d'occurrences de $substring dans $string
 Func _NbOccurrences($substring, $string)
 	StringReplace($string, $substring, $substring)
 	Return @extended
 EndFunc   ;==>_NbOccurrences
-
+; ============================================================================
 Func _FineSize($iTaille) ;reçoit une taille en Octet >> retourne la taille en "multiple" approprié Ko ou Mo...
 	; Tableau des unités de mesure
 	Local $aUnits = ["oct.", "Ko", "Mo", "Go", "To", "Po", "Eo", "Zo", "Yo"]
@@ -31,140 +33,238 @@ Func _FineSize($iTaille) ;reçoit une taille en Octet >> retourne la taille en "
 	; Arrondir la taille à une décimale et retourner avec l'unité correspondante
 	Return Round($iTaille, 1) & " " & $aUnits[$iUnitIndex]
 EndFunc   ;==>_FineSize
+;#########################################################################################
+;#########################################################################################
+; ============================================================================
+Func DossiersBac($FullPath = 1) ; 1:Chemins complets, 0:Chemins relatifs
+    Local $aResult = _FileListToArray( _
+        StringLeft(@WindowsDir, 2), _
+        "bac*2*", _
+        $FLTAR_FOLDERS, _
+        $FullPath ? $FLTAR_FULLPATH : $FLTAR_RELPATH)
 
-Func DossiersBac($Path = 1) ; 1:Chemins complets, 0:Chemins relatifs
-;~ 	dans certain cas @HomeDrive retoune une chaîne vide --> remplacée par : StringLeft(@WindowsDir,2)
-	Local $Bac = _FileListToArray(StringLeft(@WindowsDir, 2), "bac*2*", 2, $Path)
-	Local $Liste[1] = [0] ;
+    If Not IsArray($aResult) Then Return _EmptyArray()
+    Return $aResult
+EndFunc
+; ============================================================================
+Func DossiersRessources($FullPath = 1) ; 1:Chemins complets, 0:Chemins relatifs
+    Local $aResult = _FileListToArray( _
+        StringLeft(@WindowsDir, 2), _
+        "Res*ource*", _
+        $FLTAR_FOLDERS, _
+        $FullPath ? $FLTAR_FULLPATH : $FLTAR_RELPATH)
 
-	If IsArray($Bac) Then
-		$Liste[0] += $Bac[0] ;
-		_ArrayDelete($Bac, 0)
-		_ArrayAdd($Liste, $Bac) ;
-	EndIf
-	Return $Liste
-EndFunc   ;==>DossiersBac
-;#########################################################################################
-;#########################################################################################
-;#########################################################################################
+    If Not IsArray($aResult) Then Return _EmptyArray()
+    Return $aResult
+EndFunc
+; ============================================================================
+Func _DossiersTravailEleves($FullPath = 1) ; 1:Chemins complets, 0:Chemins relatifs
+    Local $aResult = _FileListToArrayRec(StringLeft(@WindowsDir, 2), _
+        "1*;2*;3*;4*;7*;8*;9*;dc*;ds*", _
+        $FLTAR_FOLDERS + $FLTAR_NOHIDDEN + $FLTAR_NOSYSTEM + $FLTAR_NOLINK, _
+        $FLTAR_NORECUR, $FLTAR_FASTSORT, $FullPath ? $FLTAR_FULLPATH : $FLTAR_RELPATH)
+
+    If Not IsArray($aResult) Then Return _EmptyArray()
+    Return $aResult
+EndFunc
+
+; ============================================================================
+Func _DossiersSurBureau($FullPath = 1) ; 1:Chemins complets, 0:Chemins relatifs
+    Local $aResult = _FileListToArrayRec(@DesktopDir, _
+        "1*;2*;3*;4*;7*;8*;9*;bac*2*;dc*;ds*", _
+        $FLTAR_FOLDERS + $FLTAR_NOHIDDEN + $FLTAR_NOSYSTEM + $FLTAR_NOLINK, _
+        $FLTAR_NORECUR, $FLTAR_FASTSORT, $FullPath ? $FLTAR_FULLPATH : $FLTAR_RELPATH)
+
+    If Not IsArray($aResult) Then Return _EmptyArray()
+    Return $aResult
+EndFunc
+
+; ============================================================================
+; Initialise le cache des installations WAMP/XAMPP
 Func DossiersEasyPHPwww($FullPath = 1) ; 1:Chemins complets, 0:Chemins relatifs
-	Local $aEasyPHP[1] = [0]
+    Local $aEasyPHP
 
-	Local $aTmpEasyPHP = _FileListToArrayRec(StringLeft(@WindowsDir, 2), "EasyPHP*;wamp*;xampp*;apachefriends*", 30, 0, 2, $FullPath + 1)
+    ; Récupère depuis le cache ou effectue le scan
+    If IsArray($__g_aEasyPHPRootsCache) Then
+        $aEasyPHP = $__g_aEasyPHPRootsCache
+    Else
+        $aEasyPHP = _FileListToArrayRec( _
+            StringLeft(@WindowsDir, 2), _
+            "wamp*;xampp*", _
+            $FLTAR_FOLDERS + $FLTAR_NOHIDDEN + $FLTAR_NOSYSTEM + $FLTAR_NOLINK, _
+            $FLTAR_NORECUR, _
+            $FLTAR_FASTSORT, _
+            $FullPath ? $FLTAR_FULLPATH : $FLTAR_RELPATH)
 
-	If IsArray($aTmpEasyPHP) Then
-		$aEasyPHP[0] += $aTmpEasyPHP[0]
-		_ArrayDelete($aTmpEasyPHP, 0)
-		_ArrayAdd($aEasyPHP, $aTmpEasyPHP)
-	EndIf
+        ; Stocke dans le cache même si vide
+        If Not IsArray($aEasyPHP) Then
+            $__g_aEasyPHPRootsCache = _EmptyArray()
+            Return _EmptyArray()
+        EndIf
+        $__g_aEasyPHPRootsCache = $aEasyPHP
+    EndIf
 
-	Local $aTmpEasyPHP = _FileListToArray(@ProgramFilesDir, "EasyPHP*", 2, $FullPath)
+    If $aEasyPHP[0] = 0 Then Return _EmptyArray()
 
-	If IsArray($aTmpEasyPHP) Then
-		$aEasyPHP[0] += $aTmpEasyPHP[0]
-		_ArrayDelete($aTmpEasyPHP, 0)
-		_ArrayAdd($aEasyPHP, $aTmpEasyPHP)
-	EndIf
+    ; Construction du tableau résultat
+    Local $aResult[$aEasyPHP[0] + 1]
+    Local $iCount = 0
 
-	Local $Liste[1] = [0]
-	Local $Liste[1] = [0], $www
+    For $i = 1 To $aEasyPHP[0]
+        Local $sFolder = $aEasyPHP[$i]
 
+        If FileExists($sFolder & '\www') Then
+            $iCount += 1
+            $aResult[$iCount] = $sFolder & '\www'
+        ElseIf FileExists($sFolder & '\htdocs') Then
+            $iCount += 1
+            $aResult[$iCount] = $sFolder & '\htdocs'
+        EndIf
+    Next
 
-	If IsArray($aEasyPHP) Then
-		For $i = 1 To $aEasyPHP[0]
-			If (FileExists($aEasyPHP[$i] & '\www')) Then
-				$Liste[0] += 1     ;
-				_ArrayAdd($Liste, $aEasyPHP[$i] & '\www')     ;
-			ElseIf (FileExists($aEasyPHP[$i] & '\eds-www')) Then
-				$Liste[0] += 1         ;
-				_ArrayAdd($Liste, $aEasyPHP[$i] & '\eds-www')         ;
-			ElseIf (FileExists($aEasyPHP[$i] & '\data\localweb')) Then
-				$Liste[0] += 1             ;
-				_ArrayAdd($Liste, $aEasyPHP[$i] & '\data\localweb')
-			ElseIf (FileExists($aEasyPHP[$i] & '\htdocs')) Then
-				$Liste[0] += 1                 ;
-				_ArrayAdd($Liste, $aEasyPHP[$i] & '\htdocs')
-			ElseIf (FileExists($aEasyPHP[$i] & '\xampp\htdocs')) Then
-				$Liste[0] += 1                 ;
-				_ArrayAdd($Liste, $aEasyPHP[$i] & '\xampp\htdocs')
-			EndIf
-		Next
-	EndIf
+    If $iCount = 0 Then Return _EmptyArray()
 
-	Return $Liste
-EndFunc   ;==>DossiersEasyPHPwww
-;#########################################################################################
-;#########################################################################################
-;#########################################################################################
+    ReDim $aResult[$iCount + 1]
+    $aResult[0] = $iCount
+    Return $aResult
+EndFunc
+
+; ============================================================================
+; Utilise le cache et l'invalide après usage
 Func DossiersEasyPHPdata($FullPath = 1) ; 1:Chemins complets, 0:Chemins relatifs
-	Local $aEasyPHP[1] = [0]
+    Local $aEasyPHP
 
-	Local $aTmpEasyPHP = _FileListToArrayRec(StringLeft(@WindowsDir, 2), "EasyPHP*;wamp*;xampp*;apachefriends*", 30, 0, 2, $FullPath + 1)
+    ; Récupère le cache préparé par DossiersEasyPHPwww
+    If IsArray($__g_aEasyPHPRootsCache) Then
+        $aEasyPHP = $__g_aEasyPHPRootsCache
+        ; $__g_aEasyPHPRootsCache = 0 ; Invalidation immédiate
+    Else
+        ; Fallback si appelé sans DossiersEasyPHPwww
+        $aEasyPHP = _FileListToArrayRec( _
+            StringLeft(@WindowsDir, 2), _
+            "wamp*;xampp*", _
+            $FLTAR_FOLDERS + $FLTAR_NOHIDDEN + $FLTAR_NOSYSTEM + $FLTAR_NOLINK, _
+            $FLTAR_NORECUR, _
+            $FLTAR_FASTSORT, _
+            $FullPath ? $FLTAR_FULLPATH : $FLTAR_RELPATH)
 
-	If IsArray($aTmpEasyPHP) Then
-		$aEasyPHP[0] += $aTmpEasyPHP[0]
-		_ArrayDelete($aTmpEasyPHP, 0)
-		_ArrayAdd($aEasyPHP, $aTmpEasyPHP)
-	EndIf
+        If Not IsArray($aEasyPHP) Then Return _EmptyArray()
+    EndIf
 
-	Local $aTmpEasyPHP = _FileListToArray(@ProgramFilesDir, "EasyPHP*", 2, $FullPath)
+    If $aEasyPHP[0] = 0 Then Return _EmptyArray()
 
-	If IsArray($aTmpEasyPHP) Then
-		$aEasyPHP[0] += $aTmpEasyPHP[0]
-		_ArrayDelete($aTmpEasyPHP, 0)
-		_ArrayAdd($aEasyPHP, $aTmpEasyPHP)
-	EndIf
+    ; Pré-allocation pour MySQL + MariaDB par installation
+    Local $aResult[$aEasyPHP[0] * 2 + 1]
+    Local $iCount = 0
 
-	Local $Liste[1] = [0], $data
+    For $i = 1 To $aEasyPHP[0]
+        Local $sBase = $aEasyPHP[$i]
+        Local $sDataPath
 
-	If IsArray($aEasyPHP) Then
-		For $i = 1 To $aEasyPHP[0]
-			$data = $aEasyPHP[$i] & '\apps\mysql\data'  ;xampp-lite
-			If FileExists($data) Then
-				$Liste[0] += 1 ;
-				_ArrayAdd($Liste, $data) ;
-			ElseIf FileExists($aEasyPHP[$i] & '\binaries\mysql\data') Then ;EasyPHP 13.x & 14.x
-				$Liste[0] += 1 ;
-				_ArrayAdd($Liste, $aEasyPHP[$i] & '\binaries\mysql\data') ;
-			ElseIf FileExists($aEasyPHP[$i] & '\mysql\data') Then ;easyphp < 7 & xampp
-				$Liste[0] += 1 ;
-				_ArrayAdd($Liste, $aEasyPHP[$i] & '\mysql\data') ;
-			ElseIf FileExists($aEasyPHP[$i] & '\eds-binaries\dbserver') Then  ;EasyPHP 15.x & 16.x & 17.x
-				$data = _FindDataFldr($aEasyPHP[$i] & '\eds-binaries\dbserver')  ;EasyPHP 15.x & 16.x & 17.x
-				If FileExists($data) Then
-					$Liste[0] += 1 ;
-					_ArrayAdd($Liste, $data) ;
-				EndIf
-			ElseIf (FileExists($aEasyPHP[$i] & '\bin\mysql')) Then ;Wamp
-				$data = _FindDataFldr($aEasyPHP[$i] & '\bin\mysql')
-				If FileExists($data) Then
-					$Liste[0] += 1 ;
-					_ArrayAdd($Liste, $data) ;
-				EndIf
-			ElseIf (FileExists($aEasyPHP[$i] & '\bin\mariadb')) Then ;Wamp
-				$data = _FindDataFldr($aEasyPHP[$i] & '\bin\mariadb')
-				If FileExists($data) Then
-					$Liste[0] += 1 ;
-					_ArrayAdd($Liste, $data) ;
-				EndIf
-			EndIf
-		Next
-	EndIf
-	Return $Liste
-EndFunc   ;==>DossiersEasyPHPdata
-;#########################################################################################
-;#########################################################################################
-;#########################################################################################
+        ; XAMPP Lite
+        $sDataPath = $sBase & '\apps\mysql\data'
+        If FileExists($sDataPath) Then
+            $iCount += 1
+            $aResult[$iCount] = $sDataPath
+            ContinueLoop
+        EndIf
+
+        ; EasyPHP/XAMPP standard
+        $sDataPath = $sBase & '\mysql\data'
+        If FileExists($sDataPath) Then
+            $iCount += 1
+            $aResult[$iCount] = $sDataPath
+            ContinueLoop
+        EndIf
+
+        ; WampServer MySQL
+        If FileExists($sBase & '\bin\mysql') Then
+            $sDataPath = _FindDataFldr($sBase & '\bin\mysql')
+            If $sDataPath <> "" Then
+                $iCount += 1
+                $aResult[$iCount] = $sDataPath
+            EndIf
+        EndIf
+
+        ; WampServer MariaDB
+        If FileExists($sBase & '\bin\mariadb') Then
+            $sDataPath = _FindDataFldr($sBase & '\bin\mariadb')
+            If $sDataPath <> "" Then
+                $iCount += 1
+                $aResult[$iCount] = $sDataPath
+            EndIf
+        EndIf
+    Next
+
+    If $iCount = 0 Then Return _EmptyArray()
+
+    ReDim $aResult[$iCount + 1]
+    $aResult[0] = $iCount
+    Return $aResult
+EndFunc
+
+; ============================================================================
+; Recherche le dossier data dans les installations WampServer versionnées
+; Exemple: C:\wamp64\bin\mysql\mysql8.0.34\data
 Func _FindDataFldr($PathEasy)
-	Local $aSearch = _FileListToArrayRec($PathEasy, "data", 2, 1, 0, 2)
-	If IsArray($aSearch) Then Return $aSearch[1]
+    Local $hSearch = FileFindFirstFile($PathEasy & "\*")
+    If $hSearch = -1 Then Return ""
 
-	Return 0
-EndFunc   ;==>_FindDataFldr
+    Local $sEntry, $sCandidate
+    While 1
+        $sEntry = FileFindNextFile($hSearch)
+        If @error Then ExitLoop
 
+        ; Vérifie les dossiers versionnés (mysql*, mariadb*)
+        If StringRegExp($sEntry, "(?i)^(mysql|mariadb)", 0) Then
+            $sCandidate = $PathEasy & "\" & $sEntry & "\data"
+            If FileExists($sCandidate) Then
+                FileClose($hSearch)
+                Return $sCandidate
+            EndIf
+        EndIf
+    WEnd
 
+    FileClose($hSearch)
+    Return ""
+EndFunc
+
+; ============================================================================
+Func _EmptyArray()
+    Local $aEmpty[1] = [0]
+    Return $aEmpty
+EndFunc
 ;#########################################################################################
-;#########################################################################################
+Func LecteurSauvegarde()
+    Local $aDrives = DriveGetDrive('FIXED')
+    Local $sHomeDrive = StringLeft(@WindowsDir, 2) ; dans certains cas @HomeDrive retourne une chaîne vide
+
+    ; Si aucun lecteur fixe détecté, retourne le lecteur système
+    If Not IsArray($aDrives) Then Return StringUpper($sHomeDrive) & "\"
+
+    ; Vérifie d'abord si le lecteur système a assez d'espace
+    If DriveSpaceFree($sHomeDrive & "\") > $MINIMUM_WINDOWS_FREE_SPACE Then
+        Return StringUpper($sHomeDrive) & "\"
+    EndIf
+
+    ; Cherche un autre lecteur avec plus d'espace
+    For $i = 1 To $aDrives[0]
+        Local $sDrive = $aDrives[$i]
+
+        ; Ignore le lecteur système (déjà testé)
+        If $sDrive = $sHomeDrive Then ContinueLoop
+
+        ; Vérifie les critères : non-USB, accessible en écriture, espace suffisant
+        If DriveGetType($sDrive, $DT_BUSTYPE) <> "USB" _
+            And _WinAPI_IsWritable($sDrive) _
+            And DriveSpaceFree($sDrive & "\") > $FREE_SPACE_DRIVE_BACKUP Then
+            Return StringUpper($sDrive) & "\"
+        EndIf
+    Next
+
+    ; Aucun lecteur valide trouvé, retourne le lecteur système par défaut
+    Return StringUpper($sHomeDrive) & "\"
+EndFunc
 ;#########################################################################################
 Func _KillOtherScript()
 	Local $list = ProcessList()
@@ -200,22 +300,128 @@ Func AgeDuFichierEnMinutesCreation($cFichier)
 	Return $iMinutes
 EndFunc   ;==>AgeDuFichierEnMinutesCreation
 
-Func _LockFolder($sObj, $sUserName = @UserName)
-	If FileExists($sObj) = 0 Then Return SetError(1, 0, -1)
-	RunWait('"' & @ComSpec & '" /c cacls.exe "' & $sObj & '" /E /P "' & $sUserName & '":N', '', @SW_HIDE)
-	If $sUserName <> @UserName Then
-		RunWait('"' & @ComSpec & '" /c cacls.exe "' & $sObj & '" /E /P "' & @UserName & '":N', '', @SW_HIDE)
-	EndIf
-EndFunc   ;==>_LockFolder
+;#########################################################################################
 
-Func _UnlockFolder($sObj, $sUserName = @UserName)
-	If FileExists($sObj) = 0 Then Return SetError(1, 0, -1)
-	RunWait('"' & @ComSpec & '" /c cacls.exe "' & $sObj & '" /E /P "' & $sUserName & '":F', '', @SW_HIDE)
-	If $sUserName <> @UserName Then
-		RunWait('"' & @ComSpec & '" /c cacls.exe "' & $sObj & '" /E /P "' & @UserName & '":F', '', @SW_HIDE)
-	EndIf
-EndFunc   ;==>_UnlockFolder
+; ========== FONCTIONS UTILITAIRES ==========
+Func _IsLocked($Dossier)
+    ; Vérifie si verrouillé en testant la suppression du marqueur
+    Local $sMarker = $Dossier & "\.locked"
 
+    ; Si pas de marqueur, pas verrouillé
+    If Not FileExists($sMarker) Then Return False
+
+    ; Tenter de supprimer le marqueur
+    ; Si suppression réussit = pas vraiment verrouillé
+    ; Si suppression échoue = vraiment verrouillé
+
+    If FileDelete($sMarker) Then
+        ; Suppression réussie = le dossier n'est PAS verrouillé
+        ; Le marqueur était obsolète, il est maintenant supprimé
+        Return False
+    Else
+        ; Suppression échouée = le dossier EST verrouillé
+        Return True
+    EndIf
+EndFunc
+
+Func _CreateLockMarker($Dossier)
+    ; Créer le marqueur AVANT le verrouillage
+    Local $sMarker = $Dossier & "\.locked"
+    Local $sInfo = "Verrouillé le : " & @YEAR & "-" & @MON & "-" & @MDAY & " " & @HOUR & ":" & @MIN & @CRLF
+    $sInfo &= "Utilisateur : " & @UserName & @CRLF
+    $sInfo &= "Ordinateur : " & @ComputerName & @CRLF
+    $sInfo &= "Processus : " & @ScriptName
+
+    FileWrite($sMarker, $sInfo)
+    FileSetAttrib($sMarker, "+SH")
+EndFunc
+
+Func _RemoveLockMarker($Dossier)
+    ; Supprimer le marqueur (après déverrouillage)
+    Local $sMarker = $Dossier & "\.locked"
+    If FileExists($sMarker) Then
+        FileSetAttrib($sMarker, "-SH")
+        FileDelete($sMarker)
+    EndIf
+EndFunc
+
+; ========== VERROUILLAGE ==========
+Func _LockRootFolder($Dossier)
+    ; Verrouille l'accès au dossier racine uniquement
+    If Not FileExists($Dossier) Then Return SetError(1, 0, -1)
+
+    ; Vérifier si déjà verrouillé (teste la suppression du marqueur)
+    If _IsLocked($Dossier) Then
+        Return 0
+    EndIf
+
+    ; ÉTAPE 1 : Créer le marqueur AVANT le verrouillage
+    _CreateLockMarker($Dossier)
+
+    ; ÉTAPE 2 : Appliquer les attributs
+    FileSetAttrib($Dossier, "+SH")
+
+    ; ÉTAPE 3 : Verrouiller avec icacls
+    Local $sIcacls = @SystemDir & "\icacls.exe"
+    Local $sArgs = '"' & $Dossier & '" /deny *S-1-1-0:(F) /c'
+    Local $iPID = Run('"' & $sIcacls & '" ' & $sArgs, "", @SW_HIDE)
+    If @error Then
+        _RemoveLockMarker($Dossier)
+        Return SetError(2, 0, -1)
+    EndIf
+
+    ProcessWaitClose($iPID)
+
+    Return 0
+EndFunc
+
+Func _LockFolderContents($Dossier)
+    ; Verrouille contre la suppression (avec héritage)
+    If Not FileExists($Dossier) Then Return SetError(1, 0, -1)
+
+    ; Vérifier si déjà verrouillé
+    If _IsLocked($Dossier) Then
+        Return 0
+    EndIf
+
+    ; ÉTAPE 1 : Créer le marqueur AVANT le verrouillage
+    _CreateLockMarker($Dossier)
+
+    ; ÉTAPE 2 : Verrouiller avec icacls
+    Local $sIcacls = @SystemDir & "\icacls.exe"
+    Local $sArgs = '"' & $Dossier & '" /grant *S-1-1-0:(OI)(CI)M /deny *S-1-1-0:(OI)(CI)(DE,DC) /c'
+    Local $iPID = Run('"' & $sIcacls & '" ' & $sArgs, "", @SW_HIDE)
+    If @error Then
+        _RemoveLockMarker($Dossier)
+        Return SetError(2, 0, -1)
+    EndIf
+
+    ProcessWaitClose($iPID)
+
+    Return 0
+EndFunc
+
+; ========== DÉVERROUILLAGE ==========
+Func _UnlockFolder($Dossier, $bRecursive = False)
+    ; Déverrouille un dossier (et optionnellement son contenu)
+    If Not FileExists($Dossier) Then Return SetError(1, 0, -1)
+
+    ; ÉTAPE 1 : Déverrouiller avec icacls
+    Local $sIcacls = @SystemDir & "\icacls.exe"
+    Local $sArgs = '"' & $Dossier & '" /reset ' & ($bRecursive ? '/T ' : '') & '/c'
+    Local $iPID = Run('"' & $sIcacls & '" ' & $sArgs, "", @SW_HIDE)
+    If @error Then Return SetError(2, 0, -1)
+
+    ProcessWaitClose($iPID)
+
+    ; ÉTAPE 2 : Retirer les attributs
+    FileSetAttrib($Dossier, "-SH")
+
+    ; ÉTAPE 3 : Supprimer le marqueur APRÈS le déverrouillage
+    _RemoveLockMarker($Dossier)
+
+    Return 0
+EndFunc
 
 ;~ Find out current username when executed as admin
 ;~ https://www.autoitscript.com/forum/topic/183689-find-out-current-username-when-executed-as-admin/#comment-1319682
@@ -555,12 +761,17 @@ Func _CreerDossierNouvelleSession($Lecteur, $DossierSauvegardes)
 	Local $sIniPath = $sBacBackup & "\BacBackup.ini"
 	IniWrite($sIniPath, "Params", "DossierSauvegardes", $DossierSauvegardes)
 	IniWrite($sIniPath, "Params", "Lecteur", StringUpper($Lecteur))
-	_LockFolder($Lecteur & $DossierSauvegardes)
+	_LockRootFolder($Lecteur & $DossierSauvegardes)
 
 	; Gestion du dossier de session
 	Local $DossierSession = IniRead($sIniPath, "Params", "DossierSession", "")
+	IniWrite($sIniPath, "Params", "DossierSession", $DossierSession & "_BacCollector")
 	Local $Tmp = StringLeft($DossierSession, 3)
-
+	Return 1    ; <<<<<<<<<<<<<<<<<<<<<< RETURN
+	; ****************************************************************
+	; ****************************************************************
+	; ****************************************************************
+	; ****************************************************************
 	; Logique d'incrémentation du numéro de session
 	If StringRegExp($Tmp, "([0-9]{3})", 0) = 0 Then
 		$Tmp = "001"
@@ -581,3 +792,22 @@ Func _CreerDossierNouvelleSession($Lecteur, $DossierSauvegardes)
 
 	Return $sCheminComplet
 EndFunc   ;==>_CreerDossierNouvelleSession
+
+
+Func _Directory_Is_Accessible($sPath)
+    If Not StringInStr(FileGetAttrib($sPath), "D", 2) Then Return SetError(1, 0, 0)
+    Local $iEnum = 0
+    While FileExists($sPath & "\_bc_test_" & $iEnum)
+		If DirGetSize($sPath & "\_bc_test_" & $iEnum) = 0 Then
+			DirRemove($sPath & "\_bc_test_" & $iEnum)
+		EndIf
+        $iEnum += 1
+    WEnd
+    Local $iSuccess = DirCreate($sPath & "\_bc_test_" & $iEnum)
+    Switch $iSuccess
+        Case 1
+            Return DirRemove($sPath & "\_bc_test_" & $iEnum)
+        Case Else
+            Return False
+    EndSwitch
+EndFunc   ;==>_Directory_Is_Assesible
