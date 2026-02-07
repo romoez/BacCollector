@@ -18,14 +18,12 @@
 #Region ;**** pragma ****
 #pragma compile(Icon, BacCollector.ico)
 #pragma compile(Out, BacCollector.exe)
-;~ #pragma compile(UPX, False) ;
-;~ #pragma compile(Compression, 9)
-#pragma compile(FileDescription, Collecte des travaux lors des examens pratiques d'informatique.)
+#pragma compile(FileDescription, Collecte sécurisée et sauvegarde des travaux lors des épreuves pratiques du baccalauréat (Info/Prog et STI).)
 #pragma compile(ProductName, BacCollector)
 #pragma compile(ProductVersion, 1.0.26.205)
 #pragma compile(FileVersion, 1.0.26.205)
 #pragma compile(LegalCopyright, 2018-2026 © Communauté Tunisienne des Enseignants d'Informatique)
-#pragma compile(Comments, BacCollector: Collecte des travaux lors des examens pratiques d'informatique.)
+#pragma compile(Comments, BacCollector – Collecte sécurisée et sauvegarde des travaux lors des épreuves pratiques du baccalauréat (Info/Prog et STI).)
 #pragma compile(CompanyName, Communauté Tunisienne des Enseignants d'Informatique)
 #pragma compile(AutoItExecuteAllowed, False)
 #EndRegion ;**** pragma ****
@@ -554,7 +552,7 @@ Func _VerifierDossiersBac()
 
 		Switch $reponse
 			Case 1
-				Local $Bac20xx = 'C:\Bac' & GUICtrlRead($cBac)
+				Local $Bac20xx = $Bac[1]   ; Le premier dossier Bac___ dans le tableau
 				If Not FileExists($Bac20xx) Then DirCreate($Bac20xx)
 				Local $sFichierAlerte = $Bac20xx & "\_NOTE_AU_CORRECTEUR.txt"
 
@@ -564,7 +562,10 @@ Func _VerifierDossiersBac()
 										 " • Le(s) dossier(s) attendu(s) pour les travaux est/sont vide(s)." & @CRLF & _
 										 " • Aucun fichier rendu par le candidat n'a été trouvé à l'emplacement prévu." & @CRLF
 
-				If FileWrite($sFichierAlerte, $sContenuRapport) Then
+				Local $hFile1 = FileOpen($sFichierAlerte, $FO_OVERWRITE + $FO_UTF8) ; 2 = Mode écriture (écrase l'ancien)
+				If $hFile1 <> -1 Then
+					FileWrite($hFile1, $sContenuRapport)
+					FileClose($hFile1)
 					_Logging("Fichier d'alerte créé : " & $sFichierAlerte, 2, 1)
 				Else
 					_Logging("Échec création du fichier d'alerte : " & $sFichierAlerte, 5, 1)
@@ -3332,14 +3333,6 @@ EndFunc     ;==>_OpenUsbCleanerUrl
 
 ;=========================================================
 
-
-
-;=========================================================
-
-;=========================================================
-
-;=========================================================
-
 Func _ListeDeDossiersRecuperes($SearchMask = "??????", $RegEx = "([0-9]{6})")
 ;~ 	SplashTextOn("Sans Titre", "Préparation de la liste des dossiers récupérés." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Scan des dossiers récupérés:", "", Default, Default, 1)
@@ -3413,7 +3406,8 @@ Func _ListeDApplicationsOuvertes()
 	Local $App = "" ;
 
 	Local $SoftsToClose[][3] = [ _
-			  ["Atom", "atom.exe", 1] _
+			  ["7-Zip", "7zFM.exe", 1] _
+			, ["Atom", "atom.exe", 1] _
 			, ["Dreamweaver", "Dreamweaver.exe", 1] _
 			, ["LibreOffice/OpenOffice...", "soffice.bin", 2] _
 			, ["Microsoft Access", "MSAccess.exe", 1] _
@@ -3433,6 +3427,7 @@ Func _ListeDApplicationsOuvertes()
 			, ["VSCodium", "VSCodium.exe", 1] _
 			, ["Webuilder", "webuild.exe", 1] _
 			, ["Wing Python IDE", "wing", 0] _
+			, ["WinRAR", "WinRAR.exe", 0] _
 			]
 ;~ 			, ["Brackets", "Brackets.exe", 1] _
 ;~ 			, ["Geany", "geany.exe", 1] _
