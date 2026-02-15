@@ -22,10 +22,13 @@ Global Const $GUI_LARGEUR_PARTIE = $GUI_LARGEUR / 4
 ;~ GLOBAL Const $GUI_HEADER_LARGEUR = 20
 
 ;#GUI.Colors
-Global Const $GUI_COLOR_CENTER = 0x073b4c
-;~ Global Const $GUI_COLOR_CENTER = 0x073b4c ; 0x2E363F
-Global Const $GUI_COLOR_SIDES = 0x118ab2  ; 0x01A3FA
-Global Const $GUI_COLOR_CENTER_HEADERS_TEXT = 0xEEEEEE ;0x5EE505
+Global Const $GUI_COLOR_CENTER = 0x0F172A
+Global Const $GUI_COLOR_SIDES = 0x1E293B
+Global Const $GUI_COLOR_CENTER_HEADERS_TEXT = 0xF8FAFC
+Global Const $GUI_COLOR_BORDER = 0x777777
+
+;~ ===========================================
+
 Global Const $GUI_COLOR_SUCCESS = 0x007848
 Global Const $GUI_COLOR_ERROR = 0x660000
 Global Const $GUI_COLOR_WARNING = 0xFFB300

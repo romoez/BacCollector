@@ -48,7 +48,7 @@ Func _CreateGui()
 		$sMode = " [Administrateur]"
 	EndIf
 	Global $hMainGUI = GUICreate($PROG_TITLE & $PROG_VERSION & $sMode, $GUI_LARGEUR, $GUI_HAUTEUR, -1, -1, -1, 0)
-	GUISetFont(8, 400, 0, "Tahoma")
+	GUISetFont(8, 400, 0, "Segoe UI")
 	GUISetBkColor($GUI_COLOR_CENTER)
 	;;; Fenêtre principale  - Fin
 	;;; Partie 3 à droite + bouton Slider - Début===================================================================================
@@ -73,14 +73,14 @@ Func _CreateGui()
 	Local $Top_Header = $GUI_MARGE
 	Local $WidthHeader = 2 * ($GUI_LARGEUR_PARTIE - $GUI_MARGE)
 	$Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $GUI_HAUTEUR - 2 * $GUI_MARGE)
-	GUICtrlSetColor($Header, 0x696A65)
+	GUICtrlSetColor($Header, $GUI_COLOR_BORDER)
 	GUICtrlSetState($Header, $GUI_DISABLE)
 	;;;Grand Cadre - Fin==================================================================================
 	;;;Numéro du Candidat - Début==================================================================================
 	;;;========Header============
 	$Top_Header = $GUI_MARGE
 	$Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $GUI_HEADER_HAUTEUR)
-	GUICtrlSetColor($Header, 0x696A65)
+	GUICtrlSetColor($Header, $GUI_COLOR_BORDER)
 	GUICtrlSetState($Header, $GUI_DISABLE)
 	$Text = GUICtrlCreateLabel("Numéro d'Inscription du Candidat :", $Left_Header + $GUI_MARGE, $Top_Header + 3, ($WidthHeader - 2 * $GUI_MARGE)/2, $GUI_HEADER_HAUTEUR - 6)
 	GUICtrlSetColor($Text, $GUI_COLOR_CENTER_HEADERS_TEXT)
@@ -98,7 +98,7 @@ Func _CreateGui()
 	;;;========Header============
 	$Top_Header = $GUI_MARGE
 	$Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader / 2, $GUI_HEADER_HAUTEUR + 2 * $GUI_MARGE + $GUI_Hateur_Label + 2 * $GUI_MARGE + 1)
-	GUICtrlSetColor($Header, 0x696A65)
+	GUICtrlSetColor($Header, $GUI_COLOR_BORDER)
 	GUICtrlSetState($Header, $GUI_DISABLE)
 	$Text = GUICtrlCreateLabel("Matière :", $Left_Header + $WidthHeader / 2 + $GUI_MARGE, $Top_Header + 3, ($WidthHeader - 2 * $GUI_MARGE)/2, $GUI_HEADER_HAUTEUR - 6)
 	GUICtrlSetColor($Text, $GUI_COLOR_CENTER_HEADERS_TEXT)
@@ -133,7 +133,7 @@ Func _CreateGui()
 	;;;========Header============
 	$Top_Header = $Top_Header + $GUI_HEADER_HAUTEUR + 2 * $GUI_MARGE + $GUI_Hateur_Label + 2 * $GUI_MARGE
 	$Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $GUI_HEADER_HAUTEUR)
-	GUICtrlSetColor($Header, 0x696A65)
+	GUICtrlSetColor($Header, $GUI_COLOR_BORDER)
 	GUICtrlSetState($Header, $GUI_DISABLE)
 	Global $HeadContenuDossiersBac = GUICtrlCreateLabel("Contenu des Dossiers Bac*2* :", $Left_Header + $GUI_MARGE, $Top_Header + 3, $WidthHeader - 2 * $GUI_MARGE, $GUI_HEADER_HAUTEUR - 6)
 	GUICtrlSetColor($HeadContenuDossiersBac, $GUI_COLOR_CENTER_HEADERS_TEXT)
@@ -153,7 +153,7 @@ Func _CreateGui()
 	;;;========Header============
 	$Top_Header = $TmpListTop + $TmpListHeight + 1.5 * $GUI_MARGE
 	$Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $GUI_HEADER_HAUTEUR)
-	GUICtrlSetColor($Header, 0x696A65)
+	GUICtrlSetColor($Header, $GUI_COLOR_BORDER)
 	GUICtrlSetState($Header, $GUI_DISABLE)
 	Global $HeadContenuAutresDossiers = GUICtrlCreateLabel("Autres Fichiers dans ""Mes Documents"", ""Bureau"", ""C:\"" && ""D:\"":", $Left_Header + $GUI_MARGE, $Top_Header + 3, $WidthHeader - 2 * $GUI_MARGE, $GUI_HEADER_HAUTEUR - 6)
 	GUICtrlSetColor($HeadContenuAutresDossiers, $GUI_COLOR_CENTER_HEADERS_TEXT)
@@ -180,7 +180,7 @@ Func _CreateGui()
 	_GUICtrlRichEdit_SetEventMask($GUI_Log, $ENM_MOUSEEVENTS)
 	_GUICtrlRichEdit_SetBkColor($GUI_Log, 0x080808)
 	_GUICtrlRichEdit_SetSel($GUI_Log, 0, -1, True) ; select all
-	_GUICtrlRichEdit_SetFont($GUI_Log, 8, "Tahoma") ;, "Consolas")
+	_GUICtrlRichEdit_SetFont($GUI_Log, 8, "Segoe UI") ;, "Consolas")
 	_GUICtrlRichEdit_Deselect($GUI_Log) ; deselect all
 	;;;=======ContextMenu==========
 	;;;Log  - Fin=============================================================================================
@@ -208,11 +208,11 @@ Func _CreateGui()
 	$Left_Header = $GUI_MARGE
 	$WidthHeader = $GUI_LARGEUR_PARTIE - 2 * $GUI_MARGE
 	$Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $GUI_HAUTEUR - $Top_Header - $GUI_MARGE)
-	GUICtrlSetColor($Header, 0x66c7fc)
+	GUICtrlSetColor($Header, $GUI_COLOR_BORDER)
 	GUICtrlSetState($Header, $GUI_DISABLE)
 	Local $TmpHeaderHauteur = $GUI_HEADER_HAUTEUR + 6
 	$Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $TmpHeaderHauteur)
-	GUICtrlSetColor($Header, 0x66c7fc)
+	GUICtrlSetColor($Header, $GUI_COLOR_BORDER)
 	GUICtrlSetState($Header, $GUI_DISABLE)
 	$Text = GUICtrlCreateLabel("Dossiers Récupérés", $Left_Header + $GUI_MARGE, $Top_Header + 3, $WidthHeader - 2 * $GUI_MARGE, $GUI_HEADER_HAUTEUR, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor($Text, 0xFFFFFF)
@@ -240,7 +240,7 @@ Func _CreateGui()
 ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[
 ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[
 	Global $TextApps_Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $TmpHeaderHauteur)
-	GUICtrlSetColor($TextApps_Header, 0x66c7fc)
+	GUICtrlSetColor($TextApps_Header, $GUI_COLOR_BORDER)
 ;~ 	GUICtrlSetState($TextApps_Header, BitOR($GUI_HIDE, $GUI_DISABLE))
 	GUICtrlSetState($TextApps_Header, BitOR($GUI_SHOW, $GUI_DISABLE))
 	Global $TextApps_Text = GUICtrlCreateLabel("Logiciels Ouverts", $Left_Header + $GUI_MARGE, $Top_Header + 3, $WidthHeader - 2 * $GUI_MARGE, $GUI_HEADER_HAUTEUR, BitOR($SS_CENTER, $SS_CENTERIMAGE))
@@ -303,7 +303,7 @@ Func _CreateGui()
 	$Top_Header = $GUI_HAUTEUR - 2 * $GUI_MARGE - 2 * $TmpButtonHeight
 	$WidthHeader = $GUI_LARGEUR_PARTIE - 2 * $GUI_MARGE
 	Local $CBacBackup = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
-	GUICtrlSetColor($CBacBackup, 0x66c7fc)
+	GUICtrlSetColor($CBacBackup, $GUI_COLOR_BORDER)
 	GUICtrlSetState($CBacBackup, $GUI_DISABLE)
 ;~ 	Global $lblBacBackup = GUICtrlCreateLabel("BacBackup est installé", 3 * $GUI_LARGEUR_PARTIE + $GUI_LARGEUR_PARTIE / 2 - $TmpButtonWidth / 2, $GUI_HAUTEUR - 2 * $GUI_MARGE - 2 * $TmpButtonHeight, $TmpButtonWidth, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	Global $lblBacBackup = GUICtrlCreateLabel("BacBackup est installé", $Left_Header, $Top_Header, $WidthHeader, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
@@ -317,7 +317,7 @@ Func _CreateGui()
 	$Top_Header = $GUI_HAUTEUR - 2 * $GUI_MARGE - 3 * $TmpButtonHeight
 	$WidthHeader = $GUI_LARGEUR_PARTIE - 2 * $GUI_MARGE
 	Global $CUsbCleaner = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
-	GUICtrlSetColor($CUsbCleaner, 0x66c7fc)
+	GUICtrlSetColor($CUsbCleaner, $GUI_COLOR_BORDER)
 	GUICtrlSetState($CUsbCleaner, $GUI_DISABLE)
 	Global $lblUsbCleaner = GUICtrlCreateLabel($__g_sWarnIcon & " UsbCleaner", $Left_Header, $Top_Header, $WidthHeader, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor($lblUsbCleaner, 0xFF0000)
@@ -332,11 +332,11 @@ Func _CreateGui()
 	$Left_Header = $GUI_MARGE + 3 * $GUI_LARGEUR_PARTIE
 	$WidthHeader = $GUI_LARGEUR_PARTIE - 2 * $GUI_MARGE
 	$Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $GUI_HAUTEUR - $Top_Header - 2 * $GUI_MARGE - $TmpButtonHeight)
-	GUICtrlSetColor($Header, 0x66c7fc)
+	GUICtrlSetColor($Header, $GUI_COLOR_BORDER)
 	GUICtrlSetState($Header, $GUI_DISABLE)
 	;;; Paramètres
 	$Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $TmpHeaderHauteur)
-	GUICtrlSetColor($Header, 0x66c7fc)
+	GUICtrlSetColor($Header, $GUI_COLOR_BORDER)
 	GUICtrlSetState($Header, $GUI_DISABLE)
 	$Text = GUICtrlCreateLabel("Paramètres", $Left_Header + $GUI_MARGE, $Top_Header + 3, $WidthHeader - 2 * $GUI_MARGE, $GUI_HEADER_HAUTEUR, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor($Text, 0xFFFFFF)
