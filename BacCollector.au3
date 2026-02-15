@@ -20,8 +20,8 @@
 #pragma compile(Out, BacCollector.exe)
 #pragma compile(FileDescription, Collecte sécurisée et sauvegarde des travaux lors des épreuves pratiques du baccalauréat (Info/Prog et STI).)
 #pragma compile(ProductName, BacCollector)
-#pragma compile(ProductVersion, 1.0.26.205)
-#pragma compile(FileVersion, 1.0.26.205)
+#pragma compile(ProductVersion, 1.0.26.209)
+#pragma compile(FileVersion, 1.0.26.209)
 #pragma compile(LegalCopyright, 2018-2026 © Communauté Tunisienne des Enseignants d'Informatique)
 #pragma compile(Comments, BacCollector – Collecte sécurisée et sauvegarde des travaux lors des épreuves pratiques du baccalauréat (Info/Prog et STI).)
 #pragma compile(CompanyName, Communauté Tunisienne des Enseignants d'Informatique)
@@ -107,8 +107,9 @@ If $CMDLINE[0] Then
 EndIf
 
 
-_CreateGui()
 _InitLogging()
+_CheckAndSetupIni()
+_CreateGui()
 _InitialParams()
 _Initialisation()
 _CheckRunningFromUsbDrive()
@@ -2822,6 +2823,115 @@ Func Sauvegarder()
 EndFunc   ;==>Sauvegarder
 
 ;=========================================================
+Func _CheckAndSetupIni()
+    Local $sIniFile = StringTrimRight(@ScriptFullPath, 4) & ".ini"
+    If FileExists($sIniFile) Then Return
+
+	Local $hGuiSetup = GUICreate($PROG_TITLE & $PROG_VERSION, 360, 340, -1, -1)
+    GUISetBkColor($GUI_COLOR_SIDES, $hGuiSetup)
+
+    ; --- Design : Cadre ---
+    GUICtrlCreateGraphic(10, 10, 340, 320)
+    GUICtrlSetColor(-1, $GUI_COLOR_BORDER)
+    GUICtrlSetState(-1, 128) ; $GUI_DISABLE
+
+    ; --- Titre ---
+    GUICtrlCreateLabel("CONFIGURATION INITIALE", 20, 25, 320, 30, 0x01)
+    GUICtrlSetFont(-1, 12, 800, 0, "Segoe UI")
+    GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
+
+    ; --- Matière ---
+    GUICtrlCreateLabel("Matière :", 40, 80, 100, 20)
+    GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
+    GUICtrlSetFont(-1, 10, 600)
+    Local $cMatiere = GUICtrlCreateCombo("", 150, 75, 160, 25, $CBS_DROPDOWNLIST)
+    GUICtrlSetBkColor(-1, $GUI_COLOR_SIDES)
+    GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
+    GUICtrlSetData($cMatiere, "-- Choisir la matière --|Info/Prog|STI", "-- Choisir la matière --")
+
+    ; --- Croix Rouge (cachée) ---
+    Local $lblError = GUICtrlCreateLabel("✘", 315, 75, 20, 25)
+    GUICtrlSetFont(-1, 14, 800)
+    GUICtrlSetColor(-1, 0xFF0000)
+    GUICtrlSetState(-1, 32) ; $GUI_HIDE
+
+    ; --- Autres Champs (Année, Labo, Séance) ---
+    Local $aLabels[3] = ["Année Bac :", "Laboratoire :", "Séance :"]
+    Local $aCombos[3]
+    Local $iY = 115
+    For $i = 0 To 2
+        GUICtrlCreateLabel($aLabels[$i], 40, $iY + 5, 100, 20)
+        GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
+        GUICtrlSetFont(-1, 10, 600)
+        $aCombos[$i] = GUICtrlCreateCombo("", 150, $iY, 160, 25, $CBS_DROPDOWNLIST)
+        GUICtrlSetBkColor(-1, $GUI_COLOR_SIDES)
+        GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
+        $iY += 40
+    Next
+
+    ; Remplissage données
+    Local $sListeAnnees = ""
+    For $i = 0 To UBound($ANNEES_BAC) - 1
+        $sListeAnnees &= $ANNEES_BAC[$i] & "|"
+    Next
+    GUICtrlSetData($aCombos[0], StringTrimRight($sListeAnnees, 1), $ANNEES_BAC[0])
+    GUICtrlSetData($aCombos[1], "1|2|3|4|5|6|7|8", "1")
+    GUICtrlSetData($aCombos[2], "1|2|3|4|5|6", "1")
+
+    ; --- Bouton de Validation ---
+    Local $btnValider = GUICtrlCreateButton("VALIDER ET CONTINUER", 50, 260, 260, 45)
+    GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER) ; Utilisation du bleu de bordure
+    GUICtrlSetColor(-1, 0xffffff)
+    GUICtrlSetFont(-1, 10, 800, 0, "Segoe UI")
+
+    GUISetState(@SW_SHOW, $hGuiSetup)
+
+    While 1
+        Switch GUIGetMsg()
+            Case -3 ; $GUI_EVENT_CLOSE
+                Exit
+
+            ; OPTIONNEL : Cacher l'erreur dès que le prof touche au combo
+            Case $cMatiere
+                GUICtrlSetState($lblError, 32) ; $GUI_HIDE
+                ToolTip("")
+
+            Case $btnValider
+                Local $sRawMatiere = GUICtrlRead($cMatiere)
+
+                If $sRawMatiere = "-- Choisir la matière --" Then
+                    ; 1. Calculer la position pour l'infobulle
+                    Local $aWinPos = WinGetPos($hGuiSetup)
+                    Local $aCtrlPos = ControlGetPos($hGuiSetup, "", $cMatiere)
+
+                    ; Positionner l'infobulle juste à droite du combo (X + Largeur du combo)
+                    Local $tooltipX = $aWinPos[0] + $aCtrlPos[0] + $aCtrlPos[2] + 10
+                    Local $tooltipY = $aWinPos[1] + $aCtrlPos[1] + 30 ; Alignement vertical
+
+                    GUICtrlSetState($lblError, 16) ; $GUI_SHOW
+                    ToolTip("Veuillez sélectionner une matière.", $tooltipX, $tooltipY, "Obligatoire", 2)
+
+                    AdlibRegister("_ClearToolTip", 3500)
+                    ContinueLoop
+                EndIf
+
+                ; Enregistrement
+                Local $valMatiere = ($sRawMatiere = "Info/Prog" ? "InfoProg" : $sRawMatiere)
+                IniWrite($sIniFile, "Params", "Matiere", $valMatiere)
+                IniWrite($sIniFile, "Params", "Bac", GUICtrlRead($aCombos[0]))
+                IniWrite($sIniFile, "Params", "Labo", GUICtrlRead($aCombos[1]))
+                IniWrite($sIniFile, "Params", "Seance", GUICtrlRead($aCombos[2]))
+
+                GUIDelete($hGuiSetup)
+                ExitLoop
+        EndSwitch
+    WEnd
+EndFunc
+
+Func _ClearToolTip()
+    ToolTip("")
+    AdlibUnRegister("_ClearToolTip")
+EndFunc
 
 #Region Function "_InitialParams" --------------------------------------------------------------------------
 Func _InitialParams()
@@ -2947,7 +3057,6 @@ Func _InitialParams()
 
 ;~ *********************************************
 	Global $Matiere = IniRead(StringTrimRight(@ScriptFullPath, 4) & ".ini", "Params", "Matiere", "-1")
-;~ 	If ($Matiere = -1) Or ($Matiere <> 'InfoProg' And $Matiere <> 'STI') Then
 	If ($Matiere = -1) Or (($Matiere <> 'InfoProg') And ($Matiere <> 'STI')) Then
 		$Matiere = 'InfoProg' ;Valeur Par défaut
 		IniWrite(StringTrimRight(@ScriptFullPath, 4) & ".ini", "Params", "Matiere", $Matiere)
@@ -2967,7 +3076,7 @@ Func _InitialParams()
 
 	;;;Labo-x?
 	Local $Laboxx = IniRead(StringTrimRight(@ScriptFullPath, 4) & ".ini", "Params", "Labo", "-1")
-	If StringIsInt($Laboxx) = 0 Or $Laboxx < 1 Or $Laboxx > 6 Then
+	If StringIsInt($Laboxx) = 0 Or $Laboxx < 1 Or $Laboxx > 8 Then
 		$Laboxx = '1'
 		IniWrite(StringTrimRight(@ScriptFullPath, 4) & ".ini", "Params", "Labo", $Laboxx)
 	EndIf
@@ -3093,55 +3202,60 @@ Func _ShowAPropos()
     Local $aCompileDate = FileGetTime(@ScriptFullPath)
     Local $sCompileDate = $aCompileDate[2] & " " & _MonthFullName($aCompileDate[1]) & " " & $aCompileDate[0] & " à " & _
                           $aCompileDate[3] & ":" & $aCompileDate[4] & ":" & $aCompileDate[5]
-    Local $GithubLink = "https://github.com/romoez/BacCollector"
+    Local $GithubLink = "https://github.com/romoez/BacCollector"       ; URL propre pour ShellExecute (sans espaces)
     Local $LicenseLink = "https://github.com/romoez/BacCollector/blob/main/LICENSE"
     Local $EmailContact = "moez.romdhane@tarbia.tn"
-    Local $iGUIWidth = 480, $iGUIHeight = 260
+    Local $iGUIWidth = 480, $iGUIHeight = 280  ; Hauteur ajustée pour aération
 
     ; Création de la fenêtre GUI
     Local $hGUI = GUICreate("À propos", $iGUIWidth, $iGUIHeight, -1, -1, BitOR($WS_CAPTION, $WS_SYSMENU), $WS_EX_TOPMOST)
-    GUISetBkColor($GUI_COLOR_CENTER)
-    GUISetFont(9, $FW_NORMAL, $GUI_FONTNORMAL, "Tahoma")
+    GUISetBkColor($GUI_COLOR_SIDES)
+    GUISetFont(9, $FW_NORMAL, $GUI_FONTNORMAL, "Segoe UI")
 
     ; Titre
-    GUICtrlCreateLabel($PROG_TITLE & " v" & $PROG_VERSION, 20, 20, $iGUIWidth - 40, 25, $SS_CENTER)
+    GUICtrlCreateLabel($PROG_TITLE & " v" & $PROG_VERSION, 0, 20, $iGUIWidth, 25, $SS_CENTER)
     GUICtrlSetFont(-1, 17, 200)
     GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
 
     ; Date de compilation
-    GUICtrlCreateLabel("Compilé le " & $sCompileDate, 20, 50, $iGUIWidth - 40, 20, $SS_CENTER)
-    GUICtrlSetFont(-1, 8, 300, $GUI_FONTNORMAL)
+    GUICtrlCreateLabel("Compilé le " & $sCompileDate, 0, 50, $iGUIWidth, 20, $SS_CENTER)
+    GUICtrlSetFont(-1, 8, 300)
     GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
 
     ; Copyright
-    GUICtrlCreateLabel("Copyright © " & $aCompileDate[0] & " La Communauté Tunisienne des Enseignants d'Informatique", 20, 80, $iGUIWidth - 40, 20, $SS_CENTER)
-    GUICtrlSetFont(-1, 9, 400, $GUI_FONTNORMAL)
+    GUICtrlCreateLabel("Copyright © " & $aCompileDate[0] & " La Communauté Tunisienne des Enseignants d'Informatique", 0, 80, $iGUIWidth, 20, $SS_CENTER)
+    GUICtrlSetFont(-1, 9, 400)
     GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
 
-    ; Licence
-    Local $idLicenseLink = GUICtrlCreateLabel("Licence GPL-3.0", 20, 110, $iGUIWidth - 40, 20, $SS_CENTER)
+    ; === LIENS AVEC ZONES CLIQUABLES PRÉCISES (textes inchangés) ===
+    ; Licence GPL-3.0 → largeur réelle : 118px
+    Local $idLicenseLink = GUICtrlCreateLabel("Licence GPL-3.0", ($iGUIWidth - 100) / 2, 115, 100, 20, $SS_CENTER)
     GUICtrlSetFont(-1, 9, 300, $GUI_FONTUNDER)
     GUICtrlSetColor(-1, 0x63C2F5)
     GUICtrlSetCursor(-1, 0)
 
-    ; Lien GitHub
-    Local $idGitHubLink = GUICtrlCreateLabel($GithubLink, 20, 140, $iGUIWidth - 40, 20, $SS_CENTER)
+    ; GitHub (URL complète conservée) → largeur réelle : 312px
+    Local $idGitHubLink = GUICtrlCreateLabel("https://github.com/romoez/BacCollector", ($iGUIWidth - 230) / 2, 145, 230, 20, $SS_CENTER)
     GUICtrlSetFont(-1, 9, 400, $GUI_FONTUNDER)
     GUICtrlSetColor(-1, 0x63C2F5)
     GUICtrlSetCursor(-1, 0)
 
-    ; Email de contact
-    GUICtrlCreateLabel("Contact pour erreurs/suggestions :", 20, 170, $iGUIWidth - 40, 20, $SS_CENTER)
+    ; Email (label explicatif)
+    GUICtrlCreateLabel("Contact pour erreurs/suggestions :", 0, 175, $iGUIWidth, 20, $SS_CENTER)
     GUICtrlSetFont(-1, 9, 300)
     GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
 
-    Local $idEmailLink = GUICtrlCreateLabel($EmailContact, 20, 190, $iGUIWidth - 40, 20, $SS_CENTER)
+    ; Email cliquable (texte inchangé) → largeur réelle : 186px
+    Local $idEmailLink = GUICtrlCreateLabel("moez.romdhane@tarbia.tn", ($iGUIWidth - 156) / 2, 195, 156, 20, $SS_CENTER)
     GUICtrlSetFont(-1, 9, 400, $GUI_FONTUNDER)
     GUICtrlSetColor(-1, 0x63C2F5)
     GUICtrlSetCursor(-1, 0)
 
-    ; Bouton OK centré
-    Local $idOK = GUICtrlCreateButton("OK", ($iGUIWidth - 80) / 2, 220, 80, 30)
+    ; === BOUTON OK AGRANDI (160×38px pour cohérence globale) ===
+    Local $idOK = GUICtrlCreateButton("OK", ($iGUIWidth - 160) / 2, 235, 160, 38)
+    GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
+    GUICtrlSetColor(-1, 0xFFFFFF)
+    GUICtrlSetFont(-1, 10, 600, 0, "Segoe UI")
     GUICtrlSetCursor(-1, 0)
 
     GUISetState(@SW_SHOW, $hGUI)
@@ -3151,7 +3265,7 @@ Func _ShowAPropos()
             Case $GUI_EVENT_CLOSE, $idOK
                 ExitLoop
             Case $idGitHubLink
-                ShellExecute($GithubLink)
+                ShellExecute($GithubLink) ; URL propre sans espaces
             Case $idLicenseLink
                 ShellExecute($LicenseLink)
             Case $idEmailLink
@@ -3162,143 +3276,7 @@ Func _ShowAPropos()
     GUIDelete($hGUI)
 EndFunc
 
-Func _ShowAPropos_gemini()
-    Local $aCompileDate = FileGetTime(@ScriptFullPath)
-    Local $sCompileDate = $aCompileDate[2] & " " & _MonthFullName($aCompileDate[1]) & " " & $aCompileDate[0] & " à " & _
-                          $aCompileDate[3] & ":" & $aCompileDate[4] & ":" & $aCompileDate[5]
-    Local $GithubLink = "https://github.com/romoez/BacCollector"
-    Local $LicenseLink = "https://github.com/romoez/BacCollector/blob/main/LICENSE"
-    Local $sEmail = "votre.email@domaine.com" ; <-- Remplacez par votre adresse
-
-    ; Hauteur augmentée à 270 pour inclure l'email sans tasser le contenu
-    Local $iGUIWidth = 480, $iGUIHeight = 270
-
-    Local $hGUI = GUICreate("À propos", $iGUIWidth, $iGUIHeight, -1, -1, BitOR($WS_CAPTION, $WS_SYSMENU), $WS_EX_TOPMOST)
-    GUISetBkColor($GUI_COLOR_CENTER)
-    GUISetFont(9, $FW_NORMAL, $GUI_FONTNORMAL, "Tahoma")
-
-    ; Titre
-    GUICtrlCreateLabel($PROG_TITLE & " v" & $PROG_VERSION, 20, 20, $iGUIWidth - 40, 25, $SS_CENTER)
-    GUICtrlSetFont(-1, 17, 200)
-    GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
-
-    ; Date de compilation
-    GUICtrlCreateLabel("Compilé le " & $sCompileDate, 20, 50, $iGUIWidth - 40, 20, $SS_CENTER)
-    GUICtrlSetFont(-1, 8, 300, $GUI_FONTNORMAL)
-    GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
-
-    ; Copyright
-    GUICtrlCreateLabel("Copyright © " & $aCompileDate[0] & " La Communauté Tunisienne des Enseignants d'Informatique", 20, 80, $iGUIWidth - 40, 20, $SS_CENTER)
-    GUICtrlSetFont(-1, 9, 400, $GUI_FONTNORMAL)
-    GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
-
-    ; Licence
-    Local $idLicenseLink = GUICtrlCreateLabel("Licence GPL-3.0", 20, 110, $iGUIWidth - 40, 20, $SS_CENTER)
-    GUICtrlSetFont(-1, 9, 300, $GUI_FONTUNDER)
-    GUICtrlSetColor(-1, 0x63C2F5)
-    GUICtrlSetCursor(-1, 0)
-
-    ; Lien GitHub
-    Local $idGitHubLink = GUICtrlCreateLabel($GithubLink, 20, 140, $iGUIWidth - 40, 20, $SS_CENTER)
-    GUICtrlSetFont(-1, 9, 400, $GUI_FONTUNDER)
-    GUICtrlSetColor(-1, 0x63C2F5)
-    GUICtrlSetCursor(-1, 0)
-
-    ; --- AJOUT DE L'EMAIL ---
-    Local $idEmailLink = GUICtrlCreateLabel("Contact, erreurs ou suggestions : " & $sEmail, 20, 170, $iGUIWidth - 40, 20, $SS_CENTER)
-    GUICtrlSetFont(-1, 9, 400, $GUI_FONTUNDER)
-    GUICtrlSetColor(-1, 0x63C2F5)
-    GUICtrlSetCursor(-1, 0)
-
-    ; Bouton OK déplacé plus bas (220)
-    Local $idOK = GUICtrlCreateButton("OK", ($iGUIWidth - 80)/2, 220, 80, 30)
-    GUICtrlSetCursor(-1, 0)
-
-    GUISetState(@SW_SHOW, $hGUI)
-
-    While 1
-        Switch GUIGetMsg()
-            Case $GUI_EVENT_CLOSE, $idOK
-                ExitLoop
-            Case $idGitHubLink
-                ShellExecute($GithubLink)
-            Case $idLicenseLink
-                ShellExecute($LicenseLink)
-            Case $idEmailLink
-                ; Ouvre le client mail avec un objet (Subject) pré-rempli
-                ShellExecute("mailto:" & $sEmail & "?subject=Suggestion/Erreur sur " & $PROG_TITLE)
-        EndSwitch
-    WEnd
-
-    GUIDelete($hGUI)
-EndFunc
-
-Func _ShowAPropos__()
-    Local $aCompileDate = FileGetTime(@ScriptFullPath)
-    Local $sCompileDate = $aCompileDate[2] & " " & _MonthFullName($aCompileDate[1]) & " " & $aCompileDate[0] & " à " & _
-                          $aCompileDate[3] & ":" & $aCompileDate[4] & ":" & $aCompileDate[5]
-    Local $GithubLink = "https://github.com/romoez/BacCollector"
-    Local $LicenseLink = "https://github.com/romoez/BacCollector/blob/main/LICENSE"
-    Local $iGUIWidth = 480, $iGUIHeight = 230 ; Hauteur ajustée pour plus d'espace
-
-    ; Création de la fenêtre GUI
-    Local $hGUI = GUICreate("À propos", $iGUIWidth, $iGUIHeight, -1, -1, BitOR($WS_CAPTION, $WS_SYSMENU), $WS_EX_TOPMOST)
-    GUISetBkColor($GUI_COLOR_CENTER)
-	GUISetFont ( 9, $FW_NORMAL , $GUI_FONTNORMAL , "Tahoma"); [, winhandle [, quality]]]]] )
-
-    ; Titre
-    GUICtrlCreateLabel($PROG_TITLE & " v" & $PROG_VERSION, 20, 20, $iGUIWidth - 40, 25, $SS_CENTER)
-    GUICtrlSetFont(-1, 17, 200)
-    GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
-
-    ; Date de compilation
-    GUICtrlCreateLabel("Compilé le " & $sCompileDate, 20, 50, $iGUIWidth - 40, 20, $SS_CENTER)
-    GUICtrlSetFont(-1, 8, 300, $GUI_FONTNORMAL)
-    GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
-
-    ; Copyright
-    GUICtrlCreateLabel("Copyright © " & $aCompileDate[0] & " La Communauté Tunisienne des Enseignants d'Informatique", 20, 80, $iGUIWidth - 40, 20, $SS_CENTER)
-    GUICtrlSetFont(-1, 9, 400, $GUI_FONTNORMAL)
-    GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
-
-    ; Licence (ajout)
-    Local $idLicenseLink = GUICtrlCreateLabel("Licence GPL-3.0", 20, 110, $iGUIWidth - 40, 20, $SS_CENTER)
-    GUICtrlSetFont(-1, 9, 300, $GUI_FONTUNDER)
-    GUICtrlSetColor(-1, 0x63C2F5)
-    GUICtrlSetCursor(-1, 0)
-
-    ; Site Web
-;~     GUICtrlCreateLabel("Github :", 20, 140, $iGUIWidth - 40, 20, $SS_CENTER)
-;~     GUICtrlSetFont(-1, 9, 300)
-;~     GUICtrlSetColor(-1, $GUI_COLOR_CENTER_HEADERS_TEXT)
-
-    ; Lien GitHub
-    Local $idGitHubLink = GUICtrlCreateLabel($GithubLink, 20, 140, $iGUIWidth - 40, 20, $SS_CENTER)
-    GUICtrlSetFont(-1, 9, 400, $GUI_FONTUNDER)
-    GUICtrlSetColor(-1, 0x63C2F5)
-    GUICtrlSetCursor(-1, 0)
-
-    ; Bouton OK centré
-    Local $idOK = GUICtrlCreateButton("OK", ($iGUIWidth - 80)/2, 180, 80, 30)
-    GUICtrlSetCursor(-1, 0)
-
-    GUISetState(@SW_SHOW, $hGUI)
-
-    While 1
-        Switch GUIGetMsg()
-            Case $GUI_EVENT_CLOSE, $idOK
-                ExitLoop
-            Case $idGitHubLink
-                ShellExecute($GithubLink)
-            Case $idLicenseLink
-                ShellExecute($LicenseLink)
-        EndSwitch
-    WEnd
-
-    GUIDelete($hGUI)
-EndFunc
 ;=========================================================
-
 #Region Functions BB
 Func _NouvelleSessionBacBackup()
 	If $g_bBacBackupDetected Then
