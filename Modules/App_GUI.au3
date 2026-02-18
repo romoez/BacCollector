@@ -55,7 +55,8 @@ Func _CreateGui()
 	_GUIExtender_Init($hMainGUI, 1)
 	Global $bTogglePart3 = GUICtrlCreateButton(" ", $GUI_LARGEUR - $GUI_LARGEUR_PARTIE - 5, $GUI_HAUTEUR / 4, 5, $GUI_HAUTEUR / 2) ;"text", left, top [, width [, height
 	GUICtrlSetColor(-1, $GUI_COLOR_SIDES)
-	GUICtrlSetBkColor(-1, $GUI_COLOR_SIDES)
+;~ 	GUICtrlSetBkColor(-1, $GUI_COLOR_BORDER)
+	GUICtrlSetBkColor(-1, $GUI_COLOR_BTN_PANEL)
 	_GUIExtender_Section_Create($hMainGUI, $GUI_LARGEUR - $GUI_LARGEUR_PARTIE, $GUI_LARGEUR_PARTIE)
 	_GUIExtender_Section_Activate($hMainGUI, 1)
 	GUICtrlSetTip($bTogglePart3, " ", "Cliquez pour afficher/masquer la partie droite de la fenêtre.", 1,1)
@@ -115,15 +116,17 @@ Func _CreateGui()
 	$TmpTop = $TmpTop + $GUI_HEADER_HAUTEUR + 2 * $GUI_MARGE
 	$TmpLeft = $Left_Header + $WidthHeader / 2 + $GUI_MARGE + $GUI_MARGE + $GUI_MARGE
 	Global $rInfoProg = GUICtrlCreateRadio("", $TmpLeft, $TmpTop, 10, 20) ;Bouton Radio Sc./M./Tech.
-	Global $tInfoProg = GUICtrlCreateLabel("Info/Prog", $TmpLeft + 15, $TmpTop + 3, 65, 20)
+	Global $tInfoProg = GUICtrlCreateLabel("Info/Prog", $TmpLeft + 15, $TmpTop, 65, 20)
 	GUICtrlSetColor(-1, 0xEEEEEE)
+	GUICtrlSetFont(-1, 9.5, 100, 0, "Segoe UI")
 	GUICtrlSetTip($rInfoProg, "Informatique ou Algorithmique et Programmation.", "Matière", 1,1)
 	GUICtrlSetTip($tInfoProg, "Informatique ou Algorithmique et Programmation.", "Matière", 1,1)
 	;;;***** Matière STI
 	$TmpLeft = $TmpLeft + $WidthHeader / 4
 	Global $rSti = GUICtrlCreateRadio("", $TmpLeft, $TmpTop, 10, 20) ;Bouton Radio Sc./M./Tech.
-	Global $tSti = GUICtrlCreateLabel("STI", $TmpLeft + 15, $TmpTop + 3, 35, 20)
+	Global $tSti = GUICtrlCreateLabel("STI", $TmpLeft + 15, $TmpTop, 35, 20)
 	GUICtrlSetColor(-1, 0xEEEEEE)
+	GUICtrlSetFont(-1, 9.5, 100, 0, "Segoe UI")
 	GUICtrlSetTip($rSti, "STI - Systèmes & Technologies de l'Informatique", "Matière", 1,1)
 	GUICtrlSetTip($tSti, "STI - Systèmes & Technologies de l'Informatique", "Matière", 1,1)
 ;~ 	GUICtrlSetState($rSti, $GUI_DISABLE) ;Voir aussi _InitialParams
@@ -200,9 +203,9 @@ Func _CreateGui()
 	Local $TmpButtonWidth = $GUI_LARGEUR_PARTIE - 4 * $GUI_MARGE ; * 2/3
 	Local $TmpButtonHeight = $GUI_HEADER_HAUTEUR * 2
 	Global $bRecuperer = GUICtrlCreateButton("Récupérer", $GUI_LARGEUR_PARTIE / 2 - $TmpButtonWidth / 2, $TmpButtonHeight + 2 * $GUI_MARGE, $TmpButtonWidth, $TmpButtonHeight)
-	GUICtrlSetColor(-1, 0xffffff)
-	GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
-	GUICtrlSetFont(-1, 10)
+	GUICtrlSetColor(-1, $GUI_COLOR_SIDES)
+	GUICtrlSetBkColor(-1, $GUI_COLOR_BTN_MAIN)
+	GUICtrlSetFont(-1, 11, 800, 0, "Segoe UI")
 	GUICtrlSetTip($bRecuperer, @CRLF & "Cette commande permet de:" & @CRLF 	& @CRLF & "1. Sauvegarder le travail du candidat vers un dossier verrouillé sur ce PC." & @CRLF & "2. Copier les dossiers & fichiers du candidat vers la clé USB." & @CRLF & "3. Supprimer les travaux du candidat, pour les matières Info & Prog.", "Copier les fichiers du candidat vers la clé USB", 1,1)
 	$Top_Header = 4 * $GUI_MARGE + 2 * $TmpButtonHeight
 	$Left_Header = $GUI_MARGE
@@ -319,11 +322,11 @@ Func _CreateGui()
 	Global $CUsbCleaner = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor($CUsbCleaner, $GUI_COLOR_BORDER)
 	GUICtrlSetState($CUsbCleaner, $GUI_DISABLE)
-	Global $lblUsbCleaner = GUICtrlCreateLabel($__g_sWarnIcon & " UsbCleaner", $Left_Header, $Top_Header, $WidthHeader, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
+	Global $lblUsbCleaner = GUICtrlCreateLabel($__g_sWarnIcon & " USBCleaner", $Left_Header, $Top_Header, $WidthHeader, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor($lblUsbCleaner, 0xFF0000)
 	GUICtrlSetBkColor($lblUsbCleaner, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 10, 900, 0, "Segoe UI Light")
-	GUICtrlSetTip($lblUsbCleaner, "Cliquez pour accéder au téléchargement de UsbCleaner", "UsbCleaner - Protection inactive", 2, 1)
+	GUICtrlSetTip($lblUsbCleaner, "Cliquez pour accéder au téléchargement de USBCleaner", "USBCleaner - Protection absente", 2, 1)
 	GUICtrlSetCursor(-1, 0) ; Curseur main
 	GUICtrlSetState($lblUsbCleaner, $GUI_HIDE)
 	GUICtrlSetState($CUsbCleaner, $GUI_HIDE)

@@ -27,6 +27,8 @@ Global Const $GUI_COLOR_SIDES = 0x1E293B
 Global Const $GUI_COLOR_CENTER_HEADERS_TEXT = 0xF8FAFC
 Global Const $GUI_COLOR_BORDER = 0x777777
 
+Global Const $GUI_COLOR_BTN_MAIN = 0x10B981; 0xF59E0B ; 0x10B981  ; Vert Émeraude pour "Récupérer"
+Global Const $GUI_COLOR_BTN_PANEL = 0x475569 ; Gris-Bleu pour le petit bouton volet
 ;~ ===========================================
 
 Global Const $GUI_COLOR_SUCCESS = 0x007848

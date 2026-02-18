@@ -20,8 +20,8 @@
 #pragma compile(Out, BacCollector.exe)
 #pragma compile(FileDescription, Collecte sécurisée et sauvegarde des travaux lors des épreuves pratiques du baccalauréat (Info/Prog et STI).)
 #pragma compile(ProductName, BacCollector)
-#pragma compile(ProductVersion, 1.0.26.209)
-#pragma compile(FileVersion, 1.0.26.209)
+#pragma compile(ProductVersion, 1.0.26.218)
+#pragma compile(FileVersion, 1.0.26.218)
 #pragma compile(LegalCopyright, 2018-2026 © Communauté Tunisienne des Enseignants d'Informatique)
 #pragma compile(Comments, BacCollector – Collecte sécurisée et sauvegarde des travaux lors des épreuves pratiques du baccalauréat (Info/Prog et STI).)
 #pragma compile(CompanyName, Communauté Tunisienne des Enseignants d'Informatique)
@@ -2883,6 +2883,7 @@ Func _CheckAndSetupIni()
     GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER) ; Utilisation du bleu de bordure
     GUICtrlSetColor(-1, 0xffffff)
     GUICtrlSetFont(-1, 10, 800, 0, "Segoe UI")
+	GUICtrlSetCursor(-1, 0)
 
     GUISetState(@SW_SHOW, $hGuiSetup)
 
@@ -3031,7 +3032,7 @@ Func _InitialParams()
 	Else
 		GUICtrlSetBkColor($lblBacBackup, $GUI_BKCOLOR_TRANSPARENT)
 		GUICtrlSetFont($lblBacBackup, 10, 900, 0, "Segoe UI Light")
-		GUICtrlSetTip($lblBacBackup, "Cliquez pour aller à la page de téléchargement de BacBackup", "BacBackup - Protection inactive " & $__g_sWarnIcon, 0, 1)
+		GUICtrlSetTip($lblBacBackup, "Cliquez pour aller à la page de téléchargement de BacBackup", "BacBackup - Protection absente " & $__g_sWarnIcon, 0, 1)
 		GUICtrlSetData($lblBacBackup, $__g_sWarnIcon & " BacBackup " & $__g_sWarnIcon)
 		GUICtrlSetColor($lblBacBackup, 0xFF0000)
 ;~ 		_Logging("BacBackup n'est pas installé" & $Bac20xx, 2, 0)
@@ -3255,7 +3256,7 @@ Func _ShowAPropos()
     Local $idOK = GUICtrlCreateButton("OK", ($iGUIWidth - 160) / 2, 235, 160, 38)
     GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
     GUICtrlSetColor(-1, 0xFFFFFF)
-    GUICtrlSetFont(-1, 10, 600, 0, "Segoe UI")
+    GUICtrlSetFont(-1, 10, 100, 0, "Segoe UI")
     GUICtrlSetCursor(-1, 0)
 
     GUISetState(@SW_SHOW, $hGUI)
@@ -3738,62 +3739,6 @@ Func VersionWXY()
 	return $parts[1] & '.' & $parts[2] & '.' & $parts[3]
 EndFunc
 ;=========================================================
-;~ Func WM_COMMAND($hWnd, $iMsg, $wParam, $lParam)
-;~     #forceref $hWnd, $iMsg, $lParam
-
-;~     Local $iIDFrom = BitAND($wParam, 0xFFFF)
-;~     Local $iCode = BitShift($wParam, 16)
-
-;~     If $iIDFrom = $TextDossiersRecuperes And $iCode = 1 Then
-;~         Run("explorer.exe " & '"' & @ScriptDir & '"')
-;~     EndIf
-
-;~     Return $GUI_RUNDEFMSG
-;~ EndFunc
-
-;~ Func WM_NOTIFY($hWnd, $iMsg, $wParam, $lParam)
-;~ 	#forceref $iMsg, $wParam
-;~ 	Local $tMsgFilter
-
-;~ 	Local $tNMHDR = DllStructCreate($tagNMHDR, $lParam)
-;~ 	Local $hWndFrom = HWnd(DllStructGetData($tNMHDR, "hWndFrom"))
-;~ 	Local $iCode = DllStructGetData($tNMHDR, "Code")
-;~ 	;;;; Test
-;~ 	Local $tagNMHDR = DllStructCreate("int;int;int", $lParam)
-;~ 	Local $code = DllStructGetData($tagNMHDR, 3)
-;~ 	Local $hListViewItem, $aListLine
-
-;~ 	If $wParam = $GUI_AfficherLeContenuDesDossiersBac And $code = -3 Then
-;~ 		$hListViewItem = GUICtrlRead($GUI_AfficherLeContenuDesDossiersBac)
-;~ 		If $hListViewItem Then
-;~ 			$aListLine = StringSplit(GUICtrlRead($hListViewItem), "|")
-;~ 			_ShowInExplorer($aListLine[4])
-;~ 		EndIf
-
-;~ 	ElseIf $wParam = $GUI_AfficherLeContenuDesAutresDossiers And $code = -3 Then
-;~ 		$hListViewItem = GUICtrlRead($GUI_AfficherLeContenuDesAutresDossiers)
-;~ 		If $hListViewItem Then
-;~ 			$aListLine = StringSplit(GUICtrlRead($hListViewItem), "|")
-;~ 			_ShowInExplorer($aListLine[4])
-;~ 		EndIf
-;~ 	Else
-;~ 		;;;; Test
-;~ 		Switch $hWndFrom
-;~ 			Case $GUI_Log
-;~ 				Select
-;~ 					Case $iCode = $EN_MSGFILTER
-;~ 						$tMsgFilter = DllStructCreate($tagMSGFILTER, $lParam)
-;~ 						If DllStructGetData($tMsgFilter, "msg") = $WM_LBUTTONDBLCLK Then
-;~ 							_OpenTempLog()
-;~ 						EndIf
-
-;~ 				EndSelect
-;~ 		EndSwitch
-;~ 	EndIf
-
-;~ 	Return $GUI_RUNDEFMSG
-;~ EndFunc   ;==>WM_NOTIFY
-
 ;=========================================================
 
 Func _ShowInExplorer($sFileFolder)
@@ -4005,6 +3950,7 @@ Func _OpenDialogAbsent()
     GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
     GUICtrlSetColor(-1, 0xFFFFFF)
     GUICtrlSetFont(-1, 10, 800)
+	GUICtrlSetCursor(-1, 0)
 
     Local $hBtnCancel = GUICtrlCreateButton("Annuler", $BtnX + $BtnWidth + $GUI_MARGE, 170, $BtnWidth, 35)
     GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
