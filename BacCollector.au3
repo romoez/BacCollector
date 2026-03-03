@@ -20,8 +20,8 @@
 #pragma compile(Out, BacCollector.exe)
 #pragma compile(FileDescription, Collecte sécurisée et sauvegarde des travaux lors des épreuves pratiques du baccalauréat (Info/Prog et STI).)
 #pragma compile(ProductName, BacCollector)
-#pragma compile(ProductVersion, 1.0.26.218)
-#pragma compile(FileVersion, 1.0.26.218)
+#pragma compile(ProductVersion, 1.1.26.303)
+#pragma compile(FileVersion, 1.1.26.303)
 #pragma compile(LegalCopyright, 2018-2026 © Communauté Tunisienne des Enseignants d'Informatique)
 #pragma compile(Comments, BacCollector – Collecte sécurisée et sauvegarde des travaux lors des épreuves pratiques du baccalauréat (Info/Prog et STI).)
 #pragma compile(CompanyName, Communauté Tunisienne des Enseignants d'Informatique)
@@ -1420,7 +1420,7 @@ Func RecupererSti($NumeroCandidat, $bRemoveAfter = True)
             _Logging("Copie locale: """ & $ListeDataFolders[$i] & """", $iTmpError, 0, $iDurationLocal)
             $iNberreurs = $iNberreurs - ($iTmpError - 1)
         Next
-
+		_ResetWebServers($Data)
 		DirRemove($sTempDir, 1)
 		ProgressOff()
 
@@ -1497,6 +1497,105 @@ Func RecupererSti($NumeroCandidat, $bRemoveAfter = True)
 	EndIf
 	Return 0
 EndFunc   ;==>RecupererSti
+;=========================================================
+Func _ResetWebServers($aDirs)
+    Local $iRes = 0
+    If Not IsArray($aDirs) Then Return
+    Local $aProcs = ["httpd.exe", "mysqld.exe", "mariadbd.exe", "wampmanager.exe", "xampp-control.exe", "XL-Control-Panel.exe"]
+
+    ; --- ÉTAPE 1 : Arrêt des processus (Inchangé) ---
+    For $p In $aProcs
+        Local $iTries = 0
+        While ProcessExists($p) And $iTries < 10
+            ProcessClose($p)
+            Sleep(200)
+            $iTries += 1
+        WEnd
+    Next
+
+    _Logging("Début réinitialisation Serveurs Web (Mode Sécurisé).", 4, 0)
+
+    For $i = 1 To $aDirs[0]
+        Local $sPath = StringRegExpReplace($aDirs[$i], "\\?[^\\]+\\?$", "")
+        If StringRight($sPath, 5) <> "mysql" Then ContinueLoop
+
+        Local $sDataDir = $sPath & "\data"
+        Local $sTempDir = $sPath & "\data_old_tmp"
+        Local $bBackupMade = False
+
+        ; --- ÉTAPE 2 : Sécurisation des données existantes ---
+        ; Si le dossier data existe, on le renomme temporairement au lieu de le supprimer
+        If FileExists($sDataDir) Then
+            ; On s'assure que le dossier temporaire n'existe pas déjà (nettoyage résiduels)
+            If FileExists($sTempDir) Then DirRemove($sTempDir, 1)
+
+            If DirMove($sDataDir, $sTempDir, 1) Then
+                $bBackupMade = True
+            Else
+                _Logging("Erreur Critique : Impossible de renommer " & $sDataDir & ". Ignoré.", 0, 0)
+                ContinueLoop ; On ne touche pas si on ne peut pas sécuriser
+            EndIf
+        EndIf
+
+        ; --- ÉTAPE 3 : Restauration ---
+        Local $bSuccess = False
+
+        If StringInStr($sPath, "xampp_lite_") Then
+            ; Cas XAMPP Lite (ZIP)
+            _Logging("Traitement XAMPP Lite : " & $sPath, 2, 0)
+            Local $sZip = $sPath & "\data_backup.zip"
+
+            If FileExists($sZip) Then
+                If _UnZip($sZip, $sPath) Then
+                    $bSuccess = True
+                Else
+                    _Logging("Échec de la décompression ZIP.", 0, 0)
+                EndIf
+            Else
+                _Logging("Fichier Zip introuvable: " & $sZip, 0, 0)
+            EndIf
+
+        ElseIf StringInStr($sPath, "xampp") Then
+            ; Cas XAMPP Standard (Dossier Backup)
+            _Logging("Traitement XAMPP : " & $sPath, 2, 0)
+            Local $sBackup = $sPath & "\Backup"
+
+            If FileExists($sBackup) Then
+                ; Note: DirCopy crée le dossier destination s'il n'existe pas
+                If DirCopy($sBackup, $sDataDir, 1) Then
+                    $bSuccess = True
+                Else
+                    _Logging("Échec de la copie du dossier Backup.", 0, 0)
+                EndIf
+            Else
+                _Logging("Dossier Backup introuvable: " & $sBackup, 0, 0)
+            EndIf
+        EndIf
+
+        ; --- ÉTAPE 4 : Validation ou Rollback ---
+        If $bSuccess Then
+            _Logging("Réinitialisation réussie.", 1, 1)
+            $iRes += 1
+            ; Tout est OK, on peut supprimer l'ancien dossier sauvegardé
+            If $bBackupMade Then DirRemove($sTempDir, 1)
+        Else
+            _Logging("Restauration échouée -> Tentative de rollback.", 2, 0)
+            ; La restauration a échoué.
+            ; 1. On supprime le dossier 'data' potentiellement corrompu/vide créé par la tentative
+            If FileExists($sDataDir) Then DirRemove($sDataDir, 1)
+
+            ; 2. On remet l'ancien dossier à sa place
+            If $bBackupMade Then
+                If DirMove($sTempDir, $sDataDir, 1) Then
+                    _Logging("Rollback effectué : Données originales restaurées.", 1, 0)
+                Else
+                    _Logging("Erreur Critique : Échec du Rollback !", 0, 0)
+                EndIf
+            EndIf
+        EndIf
+    Next
+    Return $iRes
+EndFunc
 ;=========================================================
 
 Func _AfficherLeContenuDesDossiersBac()
@@ -3401,6 +3500,7 @@ Func _ListeDApplicationsOuvertes()
 			, ["Qt Designer", "designer.exe", 1] _
 			, ["Rapid PHP", "rapidphp.exe", 1] _
 			, ["Sublime Text", "sublime_text.exe", 1] _
+			, ["Thonny", "thonny.exe", 1] _
 			, ["UltraEdit", "uedit", 0] _
 			, ["Visual Studio Code", "Code.exe", 1] _
 			, ["VSCodium", "VSCodium.exe", 1] _
