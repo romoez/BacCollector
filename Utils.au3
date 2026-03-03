@@ -811,3 +811,19 @@ Func _Directory_Is_Accessible($sPath)
             Return False
     EndSwitch
 EndFunc   ;==>_Directory_Is_Assesible
+
+; Décompresse un ZIP via Shell.Application.
+Func _UnZip($sZipFile, $sDestFolder)
+    If Not FileExists($sDestFolder) Then DirCreate($sDestFolder)
+    Local $oShell = ObjCreate("Shell.Application")
+    If Not IsObj($oShell) Then
+        Return False
+    EndIf
+    Local $oDest = $oShell.NameSpace($sDestFolder)
+    Local $oZip  = $oShell.NameSpace($sZipFile)
+    If IsObj($oZip) And IsObj($oDest) Then
+        $oDest.CopyHere($oZip.Items, 20)
+        Return True
+    EndIf
+    Return False
+EndFunc
