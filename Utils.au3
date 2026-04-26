@@ -793,6 +793,36 @@ Func _CreerDossierNouvelleSession($Lecteur, $DossierSauvegardes)
 	Return $sCheminComplet
 EndFunc   ;==>_CreerDossierNouvelleSession
 
+; ============================================================================
+; Ferme les processus qui pourraient verrouiller les fichiers du dossier
+; www/htdocs avant suppression.
+; ============================================================================
+Func _LibererVerrousDossierWeb()
+    Local $aProcs = [ _
+        "httpd.exe", _
+        ; Navigateurs (cache localhost / onglet ouvert) ---
+        "chrome.exe", "firefox.exe", "msedge.exe", "iexplore.exe", _
+        "opera.exe", "brave.exe", "vivaldi.exe" _
+    ]
+
+    Local $iKilled = 0
+    For $p In $aProcs
+        Local $iTries = 0
+        While ProcessExists($p) And $iTries < 5
+            ProcessClose($p)
+            Sleep(150)
+            $iTries += 1
+        WEnd
+        If Not ProcessExists($p) And $iTries > 0 Then $iKilled += 1
+    Next
+
+    If $iKilled > 0 Then
+        _Logging("Libération des verrous web : " & $iKilled & " processus fermé(s).", 2, 0)
+        Sleep(400)
+    EndIf
+    Return $iKilled
+EndFunc   ;==>_LibererVerrousDossierWeb
+
 
 Func _Directory_Is_Accessible($sPath)
     If Not StringInStr(FileGetAttrib($sPath), "D", 2) Then Return SetError(1, 0, 0)

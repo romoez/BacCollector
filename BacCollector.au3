@@ -638,6 +638,128 @@ Func _CopierDossiersBac($Bac)
 	Return $iNberreurs
 EndFunc   ;==>_CopierDossiersBac
 
+
+; =========================================================
+; Fonction: _CopierUsbWatcherLimite
+; Description: Copie partielle d'_UsbWatcher : pour chaque sous-dossier,
+;              tous les .txt et les N premières captures .png (par ordre
+;              alphabétique = chronologique vu le format NNN_HHhMM_SS.png).
+;              Crée dans chaque sous-dossier une note _INFO_CAPTURES.txt
+;              renvoyant vers le dossier d'origine pour l'analyse complète.
+; Paramètres:
+;   $sSrc    - Dossier _UsbWatcher source
+;   $sDest   - Dossier _UsbWatcher destination
+;   $iMaxPng - Nombre max d'images à copier par sous-dossier (défaut 10)
+; Retour:    Nombre d'erreurs
+; Remarque:  _UsbWatcher ne contient pas de fichiers à la racine,
+;            uniquement des sous-dossiers (un par incident détecté).
+; =========================================================
+Func _CopierUsbWatcherLimite($sSrc, $sDest, $iMaxPng = 10)
+    If Not FileExists($sSrc) Then Return 0
+    DirCreate($sDest)
+
+    Local $iNberreurs = 0
+    Local $iTotalImagesIgnorees = 0
+
+    ; Lister les sous-dossiers de _UsbWatcher
+    Local $aSousDossiers = _FileListToArray($sSrc, "*", $FLTA_FOLDERS, False)
+    If Not IsArray($aSousDossiers) Or $aSousDossiers[0] = 0 Then
+        _Logging("_UsbWatcher vide ou inaccessible : """ & $sSrc & """", 2, 0)
+        Return 0
+    EndIf
+
+    ProgressOn($PROG_TITLE & $PROG_VERSION, "Copie sélective des preuves de fraude...", "", Default, Default, 1)
+
+    For $i = 1 To $aSousDossiers[0]
+        Local $sSubSrc  = $sSrc  & "\" & $aSousDossiers[$i]
+        Local $sSubDest = $sDest & "\" & $aSousDossiers[$i]
+        DirCreate($sSubDest)
+
+        ProgressSet(Round($i / $aSousDossiers[0] * 100), _
+            "[" & Round($i / $aSousDossiers[0] * 100) & "%] " & $aSousDossiers[$i])
+
+        ; --- 1. Copier TOUS les fichiers .txt ---
+        Local $aTxt = _FileListToArray($sSubSrc, "*.txt", $FLTA_FILES, False)
+        If IsArray($aTxt) Then
+            For $j = 1 To $aTxt[0]
+                If FileCopy($sSubSrc & "\" & $aTxt[$j], $sSubDest & "\" & $aTxt[$j], $FC_OVERWRITE) = 0 Then
+                    $iNberreurs += 1
+                    _Logging("Échec copie : " & $sSubSrc & "\" & $aTxt[$j], 5, 0)
+                EndIf
+            Next
+        EndIf
+
+        ; --- 2. Copier les N premières .png (ordre alphabétique = chronologique) ---
+        Local $aPng = _FileListToArray($sSubSrc, "*.png", $FLTA_FILES, False)
+        Local $iNbPngTotal = 0, $iNbPngCopies = 0
+        Local $sHeureDebut = "", $sHeureFin = ""
+
+        If IsArray($aPng) And $aPng[0] > 0 Then
+            $iNbPngTotal = $aPng[0]
+            _ArraySort($aPng, 0, 1)  ; tri alphabétique en sautant l'index 0
+
+            Local $iLimite = ($aPng[0] < $iMaxPng) ? $aPng[0] : $iMaxPng
+            For $j = 1 To $iLimite
+                If FileCopy($sSubSrc & "\" & $aPng[$j], $sSubDest & "\" & $aPng[$j], $FC_OVERWRITE) = 0 Then
+                    $iNberreurs += 1
+                    _Logging("Échec copie : " & $sSubSrc & "\" & $aPng[$j], 5, 0)
+                Else
+                    $iNbPngCopies += 1
+                EndIf
+            Next
+
+            ; Extraire la plage horaire (format attendu : NNN_HHhMM_SS.png)
+            $sHeureDebut = StringRegExpReplace($aPng[1], "^[0-9]+_([0-9]+h[0-9]+_[0-9]+).*", "$1")
+            If $sHeureDebut = $aPng[1] Then $sHeureDebut = ""  ; regex non matchée
+            Local $sDernier = $aPng[$iLimite]
+            $sHeureFin = StringRegExpReplace($sDernier, "^[0-9]+_([0-9]+h[0-9]+_[0-9]+).*", "$1")
+            If $sHeureFin = $sDernier Then $sHeureFin = ""
+        EndIf
+
+        $iTotalImagesIgnorees += ($iNbPngTotal - $iNbPngCopies)
+
+        ; --- 3. Note d'information vers le dossier d'origine ---
+        Local $sNote = _
+            "===========================================================" & @CRLF & _
+            "  CAPTURES D'ÉCRAN — _UsbWatcher\" & $aSousDossiers[$i] & @CRLF & _
+            "===========================================================" & @CRLF & @CRLF & _
+            "Branchement USB détecté pendant l'épreuve." & @CRLF & _
+            "Les captures d'écran ci-jointes peuvent aider à apprécier" & @CRLF & _
+            "un éventuel risque de tentative de fraude." & @CRLF & @CRLF & _
+            "STATISTIQUES :" & @CRLF & _
+            "  • Captures totales détectées : " & $iNbPngTotal & @CRLF & _
+            "  • Captures copiées ici       : " & $iNbPngCopies & @CRLF & _
+            "  • Captures non copiées       : " & ($iNbPngTotal - $iNbPngCopies) & @CRLF
+        If $sHeureDebut <> "" Then
+            $sNote &= "  • Plage horaire copiée      : " & $sHeureDebut & "  →  " & $sHeureFin & @CRLF
+        EndIf
+        $sNote &= @CRLF & _
+            "EMPLACEMENT D'ORIGINE (sur le poste du candidat) :" & @CRLF & _
+            "  " & $sSubSrc & @CRLF & @CRLF & _
+            "→ Pour vérifier l'intégralité des captures et confirmer (ou" & @CRLF & _
+            "  infirmer) la tentative de fraude, consulter le dossier" & @CRLF & _
+            "  d'origine ci-dessus sur le poste du candidat." & @CRLF & @CRLF & _
+            "===========================================================" & @CRLF & _
+            "Généré automatiquement par " & $PROG_TITLE & $PROG_VERSION & @CRLF & _
+            "Date : " & @YEAR & "-" & @MON & "-" & @MDAY & " " & @HOUR & ":" & @MIN
+
+        Local $hNote = FileOpen($sSubDest & "\_INFO_CAPTURES.txt", $FO_OVERWRITE + $FO_UTF8)
+        If $hNote <> -1 Then
+            FileWrite($hNote, $sNote)
+            FileClose($hNote)
+        Else
+            _Logging("Échec création de la note dans : " & $sSubDest, 5, 0)
+            $iNberreurs += 1
+        EndIf
+    Next
+
+    ProgressOff()
+    _Logging("Copie sélective _UsbWatcher : " & $aSousDossiers[0] & " sous-dossier(s), " _
+             & $iTotalImagesIgnorees & " image(s) non copiée(s) (voir _INFO_CAPTURES.txt)", 2, 0)
+    Return $iNberreurs
+EndFunc   ;==>_CopierUsbWatcherLimite
+
+
 ; =========================================================
 ; Fonction: _CopierCapturesEcranFraude
 ; Description: Copie les captures d'écran en cas de détection de fraude
@@ -690,8 +812,11 @@ Func _CopierCapturesEcranFraude()
         EndIf
 
         ; --- Copie des dossiers de preuves ---
-        _DirCopyWithProgress($DossierBase & "\BacBackup\" & $DossierSession & "\_UsbWatcher", $Dest1FlashUSB & "\_UsbWatcher", 1, "Copie des preuves de fraude...")
-        _DirCopyWithProgress($DossierBase & "\BacBackup\" & $DossierSession & "\_UsbWatcher", $Dest2LocalFldr & "\_UsbWatcher", 1, "Copie des preuves de fraude...")
+;~         _DirCopyWithProgress($DossierBase & "\BacBackup\" & $DossierSession & "\_UsbWatcher", $Dest1FlashUSB & "\_UsbWatcher", 1, "Copie des preuves de fraude...")
+;~         _DirCopyWithProgress($DossierBase & "\BacBackup\" & $DossierSession & "\_UsbWatcher", $Dest2LocalFldr & "\_UsbWatcher", 1, "Copie des preuves de fraude...")
+		Local $sUsbWatcherSrc = $DossierBase & "\BacBackup\" & $DossierSession & "\_UsbWatcher"
+		_CopierUsbWatcherLimite($sUsbWatcherSrc, $Dest1FlashUSB & "\_UsbWatcher", 10)
+		_CopierUsbWatcherLimite($sUsbWatcherSrc, $Dest2LocalFldr & "\_UsbWatcher", 10)
     EndIf
 EndFunc   ;==>_CopierCapturesEcranFraude
 
@@ -929,6 +1054,7 @@ Func _TraiterDossierWww($sWwwPath, $bRemoveAfter = True)
     If $bRemoveAfter Then
         _Logging("Suppression et recréation de """ & $sWwwPath & """", 2, 0)
 
+		_LibererVerrousDossierWeb()
         ; Supprimer le dossier source
         Local $iDel = DirRemove($sWwwPath, 1)
         If $iDel = 0 Then
@@ -1190,11 +1316,26 @@ Func RecupererSti($NumeroCandidat, $bRemoveAfter = True)
         Local $ListeDataFolders[1] = [0]
         For $i = 1 To $Data[0]
             ProgressSet(Round($i / $Data[0] * 100), "[" & Round($i / $Data[0] * 100) & "%] ")
-            $TmpBD = _FileListToArrayRec($Data[$i], "*|phpmyadmin;mysql;performance_schema;sys;cdcol;webauth|", 2, 0, 2, 2)
-            If IsArray($TmpBD) Then
-                $ListeDataFolders[0] += 1
-                _ArrayAdd($ListeDataFolders, $Data[$i])
-            EndIf
+			$TmpBD = _FileListToArrayRec($Data[$i], "*|phpmyadmin;mysql;performance_schema;sys;cdcol;webauth|", 2, 0, 2, 2)
+			If IsArray($TmpBD) Then
+				For $j = $TmpBD[0] To 1 Step -1
+					If StringLower($TmpBD[$j]) = "test" Then
+						Local $sTestPath = $Data[$i] & "\" & $TmpBD[$j]
+						Local $aTestInfo = DirGetSize($sTestPath, 1) ; [0]=size, [1]=files, [2]=folders
+						If Not @error And $aTestInfo[1] = 0 Then
+							_Logging("Base de données 'test' vide ignorée : """ & $sTestPath & """", 2, 0)
+							_ArrayDelete($TmpBD, $j)
+							$TmpBD[0] -= 1
+						Else
+							_Logging("Base de données 'test' non vide → conservée (" & $aTestInfo[1] & " fichier(s))", 2, 0)
+						EndIf
+					EndIf
+				Next
+				If $TmpBD[0] > 0 Then
+					$ListeDataFolders[0] += 1
+					_ArrayAdd($ListeDataFolders, $Data[$i])
+				EndIf
+			EndIf
         Next
         ProgressOff()
 		_Logging("Recherche complétée.", 2, 0, TimerDiff($iStart))
@@ -2217,7 +2358,7 @@ Func _CopierLeContenuDesAutresDossiers($Mask, $bRemoveAfter = True, $iAgeMinutes
 	For $i = 1 To $aDrive[0]
 		$MaskExclude = ""
 		If $aDrive[$i] = "C:" Then
-			$MaskExclude = "Program Files*;Users;Windows;Intel;PerfLogs;EasyPhp*;xampp*;wamp*;Bac*2*;Documents and Settings;Config.Msi;Recovery;PySchool"
+			$MaskExclude = "Program Files*;Users;Windows;Intel;PerfLogs;EasyPhp*;xampp*;wamp*;Bac*2*;Res*ource*;Documents and Settings;Config.Msi;Recovery;PySchool"
 		EndIf
 
 		If (DriveGetType($aDrive[$i], $DT_BUSTYPE) <> "USB") _
@@ -2533,7 +2674,7 @@ Func _ScannerLecteursFixes($sMask)
         Local $sMaskExclude = ""
 
         If $aDrives[$i] = "C:" Then
-            $sMaskExclude = "Program Files*;Users;Windows;Intel;PerfLogs;EasyPhp*;xampp*;wamp*;Bac*2*;Documents and Settings"
+            $sMaskExclude = "Program Files*;Users;Windows;Intel;PerfLogs;EasyPhp*;xampp*;wamp*;Bac*2*;Res*ource*;Documents and Settings"
         EndIf
 
         _ScannerDossiersLecteur($sDrivePath, $sMaskExclude)
@@ -2571,7 +2712,6 @@ Func _ScannerDossiersLecteur($sDossier, $sMaskExclude)
         EndIf
 
         Local $sCheminComplet = StringTrimRight($aListeDossiers[$i], 1)
-
         If StringRegExp($sCheminComplet, "^(?i)bac\s*\d*2\d*\s*$", $STR_REGEXPMATCH, 1) Or _
            AgeDuFichierEnMinutesCreation($sCheminComplet) < $AGE_MAX_FICHIERS_A_COPIER__EN_MINUTES Then
             _AjouterDossierAuListView($sCheminComplet, $sCheminComplet & "\", $sCheminComplet & "\", $sTmpMsgForLogging)
