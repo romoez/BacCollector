@@ -230,6 +230,221 @@ Func _FindDataFldr($PathEasy)
 EndFunc
 
 ; ============================================================================
+; Détermine si un dossier de base de données MySQL/MariaDB est "vide"
+; (c.-à-d. ne contient aucune table utilisateur).
+; Les fichiers techniques (db.opt, et fichiers cachés/système) sont ignorés.
+; Renvoie True si vide, False sinon.
+; ============================================================================
+Func _IsMySqlDbEmpty($sDbFolder)
+    If Not FileExists($sDbFolder) Then Return True
+
+    ; Liste des fichiers "techniques" à ignorer (créés automatiquement par le SGBD)
+    Local Const $aIgnoredFiles[] = ["db.opt"]
+
+    Local $hSearch = FileFindFirstFile($sDbFolder & "\*")
+    If $hSearch = -1 Then Return True
+
+    Local $sFileName, $bIsTechnical
+    While 1
+        $sFileName = FileFindNextFile($hSearch)
+        If @error Then ExitLoop
+        If $sFileName = "." Or $sFileName = ".." Then ContinueLoop
+
+        ; Ignorer les fichiers techniques connus (insensible à la casse)
+        $bIsTechnical = False
+        For $sIgnored In $aIgnoredFiles
+            If StringLower($sFileName) = StringLower($sIgnored) Then
+                $bIsTechnical = True
+                ExitLoop
+            EndIf
+        Next
+        If $bIsTechnical Then ContinueLoop
+
+        ; Trouvé un fichier qui n'est pas technique => la base n'est pas vide
+        FileClose($hSearch)
+        Return False
+    WEnd
+
+    FileClose($hSearch)
+    Return True
+EndFunc   ;==>_IsMySqlDbEmpty
+
+
+; #FUNCTION# ;===============================================================================
+;
+; Name...........: _MD5ForFile
+; Description ...: Calculates MD5 value for the specific file.
+; Syntax.........: _MD5ForFile ($sFile)
+; Parameters ....: $sFile - Full path to the file to process.
+; Return values .: Success - Returns MD5 value in form of hex string
+;                          - Sets @error to 0
+;                  Failure - Returns empty string and sets @error:
+;                  |1 - CreateFile function or call to it failed.
+;                  |2 - CreateFileMapping function or call to it failed.
+;                  |3 - MapViewOfFile function or call to it failed.
+;                  |4 - MD5Init function or call to it failed.
+;                  |5 - MD5Update function or call to it failed.
+;                  |6 - MD5Final function or call to it failed.
+; Author ........: trancexx
+; Link ..........: https://www.autoitscript.com/forum/topic/95558-crc32-md4-md5-sha1-for-files/
+;==========================================================================================
+Func _MD5ForFile($sFile)
+
+	Local $a_hCall = DllCall("kernel32.dll", "hwnd", "CreateFileW", _
+			"wstr", $sFile, _
+			"dword", 0x80000000, _ ; GENERIC_READ
+			"dword", 3, _ ; FILE_SHARE_READ|FILE_SHARE_WRITE
+			"ptr", 0, _
+			"dword", 3, _ ; OPEN_EXISTING
+			"dword", 0, _ ; SECURITY_ANONYMOUS
+			"ptr", 0)
+
+	If @error Or $a_hCall[0] = -1 Then
+		Return SetError(1, 0, "")
+	EndIf
+
+	Local $hFile = $a_hCall[0]
+
+	$a_hCall = DllCall("kernel32.dll", "ptr", "CreateFileMappingW", _
+			"hwnd", $hFile, _
+			"dword", 0, _ ; default security descriptor
+			"dword", 2, _ ; PAGE_READONLY
+			"dword", 0, _
+			"dword", 0, _
+			"ptr", 0)
+
+	If @error Or Not $a_hCall[0] Then
+		DllCall("kernel32.dll", "int", "CloseHandle", "hwnd", $hFile)
+		Return SetError(2, 0, "")
+	EndIf
+
+	DllCall("kernel32.dll", "int", "CloseHandle", "hwnd", $hFile)
+
+	Local $hFileMappingObject = $a_hCall[0]
+
+	$a_hCall = DllCall("kernel32.dll", "ptr", "MapViewOfFile", _
+			"hwnd", $hFileMappingObject, _
+			"dword", 4, _ ; FILE_MAP_READ
+			"dword", 0, _
+			"dword", 0, _
+			"dword", 0)
+
+	If @error Or Not $a_hCall[0] Then
+		DllCall("kernel32.dll", "int", "CloseHandle", "hwnd", $hFileMappingObject)
+		Return SetError(3, 0, "")
+	EndIf
+
+	Local $pFile = $a_hCall[0]
+	Local $iBufferSize = FileGetSize($sFile)
+
+	Local $tMD5_CTX = DllStructCreate("dword i[2];" & _
+			"dword buf[4];" & _
+			"ubyte in[64];" & _
+			"ubyte digest[16]")
+
+	DllCall("advapi32.dll", "none", "MD5Init", "ptr", DllStructGetPtr($tMD5_CTX))
+
+	If @error Then
+		DllCall("kernel32.dll", "int", "UnmapViewOfFile", "ptr", $pFile)
+		DllCall("kernel32.dll", "int", "CloseHandle", "hwnd", $hFileMappingObject)
+		Return SetError(4, 0, "")
+	EndIf
+
+	DllCall("advapi32.dll", "none", "MD5Update", _
+			"ptr", DllStructGetPtr($tMD5_CTX), _
+			"ptr", $pFile, _
+			"dword", $iBufferSize)
+
+	If @error Then
+		DllCall("kernel32.dll", "int", "UnmapViewOfFile", "ptr", $pFile)
+		DllCall("kernel32.dll", "int", "CloseHandle", "hwnd", $hFileMappingObject)
+		Return SetError(5, 0, "")
+	EndIf
+
+	DllCall("advapi32.dll", "none", "MD5Final", "ptr", DllStructGetPtr($tMD5_CTX))
+
+	If @error Then
+		DllCall("kernel32.dll", "int", "UnmapViewOfFile", "ptr", $pFile)
+		DllCall("kernel32.dll", "int", "CloseHandle", "hwnd", $hFileMappingObject)
+		Return SetError(6, 0, "")
+	EndIf
+
+	DllCall("kernel32.dll", "int", "UnmapViewOfFile", "ptr", $pFile)
+	DllCall("kernel32.dll", "int", "CloseHandle", "hwnd", $hFileMappingObject)
+
+	Local $sMD5 = Hex(DllStructGetData($tMD5_CTX, "digest"))
+
+	Return SetError(0, 0, $sMD5)
+
+EndFunc   ;==>_MD5ForFile
+
+; ============================================================================
+; Vérifie qu'un dossier copié est intègre par rapport à sa source.
+; - Compare nombre de fichiers et taille totale (rapide)
+; - Compare le MD5 de CHAQUE fichier (volumes faibles : <1s pour 10 Mo)
+; Retour : 1 si intégrité parfaite, 0 sinon (avec log détaillé du 1er écart)
+; ============================================================================
+Func _VerifierIntegriteCopieDossier($sSrc, $sDest)
+    If Not FileExists($sSrc) Or Not FileExists($sDest) Then
+        _Logging("Vérif intégrité : src ou dest manquante", 5, 0)
+        Return 0
+    EndIf
+
+    ; --- Comparaison rapide : nb fichiers et taille ---
+    Local $aSrcInfo = DirGetSize($sSrc, 1)
+    Local $aDstInfo = DirGetSize($sDest, 1)
+    If @error Then Return 0
+    If $aSrcInfo[1] <> $aDstInfo[1] Then
+        _Logging("Intégrité ÉCHEC : nb fichiers src=" & $aSrcInfo[1] & " dst=" & $aDstInfo[1], 5, 0)
+        Return 0
+    EndIf
+    If $aSrcInfo[0] <> $aDstInfo[0] Then
+        _Logging("Intégrité ÉCHEC : taille src=" & $aSrcInfo[0] & " dst=" & $aDstInfo[0], 5, 0)
+        Return 0
+    EndIf
+
+    ; --- Comparaison MD5 fichier par fichier ---
+    Local $aFiles = _FileListToArrayRec($sSrc, "*", $FLTAR_FILES, $FLTAR_RECUR, $FLTAR_NOSORT, $FLTAR_RELPATH)
+    If Not IsArray($aFiles) Then Return 1 ; aucun fichier (dossier vide cohérent)
+
+    For $i = 1 To $aFiles[0]
+        Local $sHashSrc = _MD5ForFile($sSrc & "\" & $aFiles[$i])
+        Local $sHashDst = _MD5ForFile($sDest & "\" & $aFiles[$i])
+        If $sHashSrc = "" Or $sHashDst = "" Or $sHashSrc <> $sHashDst Then
+            _Logging("Intégrité ÉCHEC sur : " & $aFiles[$i], 5, 0)
+            Return 0
+        EndIf
+    Next
+
+    Return 1
+EndFunc   ;==>_VerifierIntegriteCopieDossier
+
+; ============================================================================
+; Copie un dossier avec vérification d'intégrité MD5 et retry automatique.
+; Adapté aux volumes faibles (≤ 10 Mo) : pause courte, 3 essais.
+; Retour : 1 si copie ET intégrité OK, 0 sinon.
+; ============================================================================
+Func _CopierDossierFiable($sSrc, $sDest, $iMaxTry = 3)
+    For $iTry = 1 To $iMaxTry
+        ; Tentative de copie
+        Local $iCopy = DirCopy($sSrc, $sDest, $FC_OVERWRITE)
+        If $iCopy = 1 Then
+            ; Vérification d'intégrité (taille + nb + MD5 par fichier)
+            If _VerifierIntegriteCopieDossier($sSrc, $sDest) = 1 Then
+                If $iTry > 1 Then _Logging("Copie réussie au " & $iTry & "ème essai : " & $sDest, 2, 0)
+                Return 1
+            EndIf
+            _Logging("Copie OK mais intégrité ÉCHEC (essai " & $iTry & "/" & $iMaxTry & ") : " & $sDest, 5, 0)
+        Else
+            _Logging("Copie ÉCHEC (essai " & $iTry & "/" & $iMaxTry & ") : " & $sDest, 5, 0)
+        EndIf
+        ; Pause courte avant retry (volumes faibles, erreurs USB transitoires)
+        If $iTry < $iMaxTry Then Sleep(300)
+    Next
+    Return 0
+EndFunc   ;==>_CopierDossierFiable
+
+; ============================================================================
 Func _EmptyArray()
     Local $aEmpty[1] = [0]
     Return $aEmpty
@@ -823,6 +1038,47 @@ Func _LibererVerrousDossierWeb()
     Return $iKilled
 EndFunc   ;==>_LibererVerrousDossierWeb
 
+; ============================================================================
+; Suppression robuste d'un dossier web (www/htdocs).
+; - Retire l'attribut Lecture-seule (et autres) sur tous les fichiers.
+; - Utilise DirRemove récursif.
+; - En cas d'échec partiel, libère à nouveau les verrous et réessaie.
+; - Vérifie post-suppression : log la liste des fichiers résiduels si présent.
+; Retour : 1 si tout est supprimé, 0 si des fichiers résistent.
+; ============================================================================
+Func _SuppressionRobusteDossierWeb($sFolder)
+    If Not FileExists($sFolder) Then Return 1
+
+    ; Étape 1 : retirer les attributs R/A/S/H récursivement
+    ; (-RASH supprime Read-only, Archive, System, Hidden)
+    FileSetAttrib($sFolder & "\*.*", "-RASH", 1) ; 1 = récursif
+
+    ; Étape 2 : 1ère tentative de suppression
+    Local $iDel = DirRemove($sFolder, 1)
+
+    ; Étape 3 : si le dossier existe encore, retenter après une courte pause
+    If FileExists($sFolder) Then
+        _LibererVerrousDossierWeb()
+        Sleep(500)
+        FileSetAttrib($sFolder & "\*.*", "-RASH", 1)
+        $iDel = DirRemove($sFolder, 1)
+    EndIf
+
+    ; Étape 4 : vérification finale et log des fichiers résiduels
+    If FileExists($sFolder) Then
+        Local $aRest = _FileListToArrayRec($sFolder, "*", $FLTAR_FILES, $FLTAR_RECUR, $FLTAR_NOSORT, $FLTAR_FULLPATH)
+        If IsArray($aRest) And $aRest[0] > 0 Then
+            _Logging("Fichiers résiduels non supprimés (" & $aRest[0] & ") :", 5, 0)
+            For $k = 1 To ($aRest[0] > 10 ? 10 : $aRest[0])
+                _Logging("    » " & $aRest[$k], 5, 0)
+            Next
+            If $aRest[0] > 10 Then _Logging("    » ... (+ " & ($aRest[0] - 10) & " autres)", 5, 0)
+        EndIf
+        Return 0
+    EndIf
+
+    Return 1
+EndFunc   ;==>_SuppressionRobusteDossierWeb
 
 Func _Directory_Is_Accessible($sPath)
     If Not StringInStr(FileGetAttrib($sPath), "D", 2) Then Return SetError(1, 0, 0)

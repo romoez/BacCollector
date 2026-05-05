@@ -20,8 +20,8 @@
 #pragma compile(Out, BacCollector.exe)
 #pragma compile(FileDescription, Collecte sécurisée et sauvegarde des travaux lors des épreuves pratiques du baccalauréat (Info/Prog et STI).)
 #pragma compile(ProductName, BacCollector)
-#pragma compile(ProductVersion, 1.1.26.303)
-#pragma compile(FileVersion, 1.1.26.303)
+#pragma compile(ProductVersion, 1.2.26.505)
+#pragma compile(FileVersion, 1.2.26.505)
 #pragma compile(LegalCopyright, 2018-2026 © Communauté Tunisienne des Enseignants d'Informatique)
 #pragma compile(Comments, BacCollector – Collecte sécurisée et sauvegarde des travaux lors des épreuves pratiques du baccalauréat (Info/Prog et STI).)
 #pragma compile(CompanyName, Communauté Tunisienne des Enseignants d'Informatique)
@@ -598,7 +598,7 @@ Func _CopierDossiersBac($Bac)
 	ProgressOn($PROG_TITLE & $PROG_VERSION, "Copie des dossiers...", "", Default, Default, 1)
 
 	For $i = 1 To $Bac[0]
-		$sizefldr1 = DirGetSize($Bac[$i], 1)
+		Local $sizefldr1 = DirGetSize($Bac[$i], 1)
 		If @error Or $sizefldr1[1] = 0 Then
 			_Logging("Ignorer le dossier vide """ & $Bac[$i] & """")
 			Local $ErrorEmptyFolderRemove = DirRemove($Bac[$i], 1)
@@ -606,32 +606,40 @@ Func _CopierDossiersBac($Bac)
 			ContinueLoop
 		EndIf
 
-		ProgressSet(Round($i / $Bac[0] * 100), "[" & Round($i / $Bac[0] * 100) & "%] " & "Vérif. du dossier : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
-		$Error1_CopyBacFldr = DirCopy($Bac[$i], $Dest1FlashUSB & StringTrimLeft($Bac[$i], 2), $FC_OVERWRITE)
-		$TmpError = DirCopy($Bac[$i], $Dest2LocalFldr & StringTrimLeft($Bac[$i], 2), $FC_OVERWRITE)
+		Local $sDest1Path = $Dest1FlashUSB & StringTrimLeft($Bac[$i], 2)
+		Local $sDest2Path = $Dest2LocalFldr & StringTrimLeft($Bac[$i], 2)
 
-		If $Error1_CopyBacFldr = 0 Then
+		; ===== Copie USB (avec vérification d'intégrité MD5 + retry) =====
+		ProgressSet(Round($i / $Bac[0] * 100), "[" & Round($i / $Bac[0] * 100) & "%] Copie USB : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
+		Local $bUsbOK = _CopierDossierFiable($Bac[$i], $sDest1Path)
+
+		; ===== Copie locale (avec vérification d'intégrité MD5 + retry) =====
+		ProgressSet(Round($i / $Bac[0] * 100), "[" & Round($i / $Bac[0] * 100) & "%] Copie locale : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
+		Local $bLocalOK = _CopierDossierFiable($Bac[$i], $sDest2Path)
+
+		_Logging("Copie USB    """ & $Bac[$i] & """", $bUsbOK)
+		_Logging("Copie locale """ & $Bac[$i] & """", $bLocalOK)
+		$iNberreurs += (1 - $bLocalOK)
+
+		; ===== Échec USB = arrêt critique (la sauvegarde de référence est perdue) =====
+		If Not $bUsbOK Then
 			ProgressOff()
-			_Logging("Copie de """ & $Bac[$i] & """ vers " & $Dest2LocalFldr, $Error1_CopyBacFldr)
-			_Logging("Récupération annulée", 5, 1)
+			_Logging("Récupération annulée (échec copie USB de """ & $Bac[$i] & """)", 5, 1)
 			_Logging("______", 2, 0)
 			_ExtMsgBoxSet(1, 0, $GUI_COLOR_ERROR, 0xFFFFFF, 9, "Segoe UI", @DesktopWidth - 25, @DesktopWidth - 25)
-			_ExtMsgBox(16, "Ok", $PROG_TITLE & " - Erreur", "Échec lors de la copie du dossier """ & $Bac[$i] & """" & @CRLF _
-					 & "L'opération de sauvegarde est annulée", 0)
+			_ExtMsgBox(16, "Ok", $PROG_TITLE & " - Erreur", _
+					"Échec lors de la copie USB de :" & @CRLF & _
+					"""" & $Bac[$i] & """" & @CRLF & @CRLF & _
+					"L'intégrité de la copie n'a pas pu être vérifiée." & @CRLF & _
+					"La source est CONSERVÉE. L'opération est annulée.", 0)
 			Return -1
 		EndIf
 
-		_Logging("Copie de """ & $Bac[$i] & """ vers " & $Dest1FlashUSB)
-		_Logging("Copie de """ & $Bac[$i] & """ vers " & $Dest2LocalFldr, $TmpError)
-		$iNberreurs = $iNberreurs - ($TmpError - 1)
-
-		ProgressSet(Round($i / $Bac[0] * 100), "[" & Round($i / $Bac[0] * 100) & "%] " & "Suppression du dossier : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
-
-		If $Error1_CopyBacFldr = 1 Then
-			$Error2_DirRemove = DirRemove($Bac[$i], 1)
-			_Logging("Suppression du dossier """ & $Bac[$i] & """", $Error2_DirRemove)
-			$iNberreurs = $iNberreurs - ($Error2_DirRemove - 1)
-		EndIf
+		; ===== Suppression de la source : USB OK suffit (USB = sauvegarde de référence) =====
+		ProgressSet(Round($i / $Bac[0] * 100), "[" & Round($i / $Bac[0] * 100) & "%] Suppression : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
+		Local $Error2_DirRemove = DirRemove($Bac[$i], 1)
+		_Logging("Suppression du dossier """ & $Bac[$i] & """", $Error2_DirRemove)
+		$iNberreurs = $iNberreurs - ($Error2_DirRemove - 1)
 	Next
 
 	ProgressOff()
@@ -1032,53 +1040,57 @@ Func _TraiterDossierWww($sWwwPath, $bRemoveAfter = True)
     Local $sDest1 = $Dest1FlashUSB & "\" & $sDestRelative
     Local $sDest2 = $Dest2LocalFldr & "\" & $sDestRelative
 
-    Local $iError1 = DirCopy($sWwwPath, $sDest1, $FC_OVERWRITE)
-    Local $iError2 = DirCopy($sWwwPath, $sDest2, $FC_OVERWRITE)
+    ; Copie USB et locale avec vérification d'intégrité MD5 + retry
+    Local $bUsbOK   = _CopierDossierFiable($sWwwPath, $sDest1)
+    Local $bLocalOK = _CopierDossierFiable($sWwwPath, $sDest2)
 
-    ; Gestion des erreurs critiques
-    If $iError1 = 0 Then
-        _Logging("Échec de copie vers """ & $sDest1 & """", 5, 1, TimerDiff($hTimer))
+    ; Échec USB = arrêt critique (USB = sauvegarde de référence)
+    If Not $bUsbOK Then
+        _Logging("Échec de copie/intégrité vers """ & $sDest1 & """", 5, 1, TimerDiff($hTimer))
         _ExtMsgBoxSet(1, 0, $GUI_COLOR_ERROR, 0xFFFFFF, 9, "Segoe UI", @DesktopWidth - 25, @DesktopWidth - 25)
         _ExtMsgBox(16, "Ok", $PROG_TITLE & " - Erreur", "Échec lors de la copie du dossier """ & $sWwwPath & """" & @CRLF & _
+                "L'intégrité n'a pas pu être vérifiée. La source est CONSERVÉE." & @CRLF & _
                 "L'opération de sauvegarde est annulée.", 0)
         _Logging("Récupération annulée", 5, 1)
         _Logging("______", 2, 0)
         Return -1
     EndIf
 
-    _Logging("Copie réussie vers """ & $sDest1 & """", 1, 0)
-    _Logging("Copie vers """ & $sDest2 & """", $iError2, 0)
-    $iNberreurs += (1 - $iError2)  ; Incrémente si erreur
+    _Logging("Copie USB    """ & $sDest1 & """", $bUsbOK, 0)
+    _Logging("Copie locale """ & $sDest2 & """", $bLocalOK, 0)
+    $iNberreurs += (1 - $bLocalOK)
 
-    ; Suppression et recréation du dossier source si demandé
-    If $bRemoveAfter Then
-        _Logging("Suppression et recréation de """ & $sWwwPath & """", 2, 0)
+	; Suppression et recréation du dossier source si demandé
+	If $bRemoveAfter Then
+		_Logging("Suppression et recréation de """ & $sWwwPath & """", 2, 0)
 
 		_LibererVerrousDossierWeb()
-        ; Supprimer le dossier source
-        Local $iDel = DirRemove($sWwwPath, 1)
-        If $iDel = 0 Then
-            _Logging("Échec suppression de """ & $sWwwPath & """", 5, 1)
-            $iNberreurs += 1
-        EndIf
+		; Suppression robuste avec gestion des attributs et nouvelle tentative
+		Local $iDel = _SuppressionRobusteDossierWeb($sWwwPath)
+		If $iDel = 0 Then
+			_Logging("Échec suppression de """ & $sWwwPath & """ (certains fichiers résistent)", 5, 1)
+			$iNberreurs += 1
+		EndIf
 
-        ; Recréer le dossier
-        Local $iCreate = DirCreate($sWwwPath)
-        If $iCreate = "" Then
-            _Logging("Échec recréation de """ & $sWwwPath & """", 5, 1)
-            $iNberreurs += 1
-        EndIf
+		; Recréer le dossier (uniquement si la suppression a entièrement réussi)
+		Local $iCreate = 0
+		If $iDel = 1 Then
+			$iCreate = DirCreate($sWwwPath)
+			If $iCreate = "" Then
+				_Logging("Échec recréation de """ & $sWwwPath & """", 5, 1)
+				$iNberreurs += 1
+			EndIf
+		EndIf
 
-        ; Restaurer index.php si spécial
-        If $bIndexPhpSpecial And $iDel And $iCreate Then
-            ; Utiliser une des destinations comme source pour restaurer
-            Local $sIndexSrc = $sDest1 & "\index.php"
-            ; Vérifier si le fichier existe toujours (il a pu être supprimé par d'autres processus)
-            If Not FileExists($sIndexSrc) Then $sIndexSrc = $sDest2 & "\index.php"
-            Local $iRestore = FileCopy($sIndexSrc, $sIndexPhpPath, $FC_OVERWRITE)
-        EndIf
-    EndIf
-    ; Supprimer index.php des destinations si spécial (TOUJOURS, indépendamment de $bRemoveAfter)
+		; Restaurer index.php si spécial
+		If $bIndexPhpSpecial And $iDel And $iCreate Then
+			Local $sIndexSrc = $sDest1 & "\index.php"
+			If Not FileExists($sIndexSrc) Then $sIndexSrc = $sDest2 & "\index.php"
+			Local $iRestore = FileCopy($sIndexSrc, $sIndexPhpPath, $FC_OVERWRITE)
+		EndIf
+	EndIf
+
+	; Supprimer index.php des destinations si spécial (TOUJOURS, indépendamment de $bRemoveAfter)
     If $bIndexPhpSpecial Then
         ; Supprimer index.php des destinations
 		FileSetAttrib($sDest1 & "\index.php", "-RASH")
@@ -1145,42 +1157,36 @@ Func _CopierEtSupprimerDossiers($aDossiers, $sMsgTypeDossiers, $bRemoveAfter = T
             Local $sizefldr1 = DirGetSize($aDossiers[$i], 1)
             If @error Or $sizefldr1[1] = 0 Then
                 _Logging("Ignorer le dossier vide """ & $aDossiers[$i] & """")
-            Else
-                ; Mise à jour de la barre de progression
-                ProgressSet(Round($i / $aDossiers[0] * 100), "[" & Round($i / $aDossiers[0] * 100) & "%] " & "Copie de : " & $aDossiers[$i])
-
-                ; Récupération des informations sur le dossier
-                Local $Fldr_info = DirGetSize($aDossiers[$i], 1)
-                Local $Fldr_size = $Fldr_info[0]
-                Local $FldrFilesCount = $Fldr_info[1]
-
-                ; Copie uniquement si le dossier contient des fichiers
-                If $Fldr_size > 0 Or $FldrFilesCount > 0 Then
-                    ; Construction des chemins de destination
-                    Local $sDestPath1 = $Dest1FlashUSB & StringTrimLeft($aDossiers[$i], 2)
-                    Local $sDestPath2 = $Dest2LocalFldr & StringTrimLeft($aDossiers[$i], 2)
-
-                    ; Création des dossiers parents si nécessaire
-                    DirCreate(StringLeft($sDestPath1, StringInStr($sDestPath1, "\", 0, -1) - 1))
-                    DirCreate(StringLeft($sDestPath2, StringInStr($sDestPath2, "\", 0, -1) - 1))
-
-                    ; Copie vers les destinations globales
-                    Local $Error1_CopyFldr = DirCopy($aDossiers[$i], $sDestPath1, $FC_OVERWRITE)
-                    Local $TmpError = DirCopy($aDossiers[$i], $sDestPath2, $FC_OVERWRITE)
-
-                    ; Journalisation et comptage des erreurs
-                    $iNberreurs += (1 - $Error1_CopyFldr)
-                    _Logging("Copie de """ & $aDossiers[$i] & """ vers " & $sDestPath1, $Error1_CopyFldr)
-                    _Logging("Copie de """ & $aDossiers[$i] & """ vers " & $sDestPath2, $TmpError)
-                    $iNberreurs += (1 - $TmpError)
-                EndIf
+                ContinueLoop
             EndIf
 
-            ; Suppression du dossier source si demandé
-            If $bRemoveAfter Then
+            ; Mise à jour de la barre de progression
+            ProgressSet(Round($i / $aDossiers[0] * 100), "[" & Round($i / $aDossiers[0] * 100) & "%] " & "Copie de : " & $aDossiers[$i])
+
+            ; Construction des chemins de destination
+            Local $sDestPath1 = $Dest1FlashUSB & StringTrimLeft($aDossiers[$i], 2)
+            Local $sDestPath2 = $Dest2LocalFldr & StringTrimLeft($aDossiers[$i], 2)
+
+            ; Création des dossiers parents si nécessaire
+            DirCreate(StringLeft($sDestPath1, StringInStr($sDestPath1, "\", 0, -1) - 1))
+            DirCreate(StringLeft($sDestPath2, StringInStr($sDestPath2, "\", 0, -1) - 1))
+
+            ; Copie fiable (vérification d'intégrité MD5 + retry) vers les deux destinations
+            Local $bUsbOK   = _CopierDossierFiable($aDossiers[$i], $sDestPath1)
+            Local $bLocalOK = _CopierDossierFiable($aDossiers[$i], $sDestPath2)
+
+            _Logging("Copie USB    """ & $aDossiers[$i] & """", $bUsbOK)
+            _Logging("Copie locale """ & $aDossiers[$i] & """", $bLocalOK)
+            $iNberreurs += (1 - $bUsbOK)
+            $iNberreurs += (1 - $bLocalOK)
+
+            ; Suppression du dossier source : USB OK suffit (USB = sauvegarde de référence)
+            If $bRemoveAfter And $bUsbOK Then
                 Local $Error2_DirRemove = DirRemove($aDossiers[$i], 1)
                 _Logging("Suppression du dossier """ & $aDossiers[$i] & """", $Error2_DirRemove)
                 $iNberreurs += (1 - $Error2_DirRemove)
+            ElseIf $bRemoveAfter Then
+                _Logging("Source CONSERVÉE : """ & $aDossiers[$i] & """ (copie USB non vérifiée)", 5, 0)
             EndIf
         Next
     Else
@@ -1319,15 +1325,17 @@ Func RecupererSti($NumeroCandidat, $bRemoveAfter = True)
 			$TmpBD = _FileListToArrayRec($Data[$i], "*|phpmyadmin;mysql;performance_schema;sys;cdcol;webauth|", 2, 0, 2, 2)
 			If IsArray($TmpBD) Then
 				For $j = $TmpBD[0] To 1 Step -1
-					If StringLower($TmpBD[$j]) = "test" Then
-						Local $sTestPath = $Data[$i] & "\" & $TmpBD[$j]
-						Local $aTestInfo = DirGetSize($sTestPath, 1) ; [0]=size, [1]=files, [2]=folders
-						If Not @error And $aTestInfo[1] = 0 Then
-							_Logging("Base de données 'test' vide ignorée : """ & $sTestPath & """", 2, 0)
+					; $TmpBD[$j] contient le chemin COMPLET (ex: C:\xampp\mysql\data\test)
+					; → on extrait le nom du dossier pour comparer avec "test"
+					Local $sDbName = StringRegExpReplace($TmpBD[$j], "^.*\\", "")
+					If StringLower($sDbName) = "test" Then
+						; Vérifier si la base 'test' contient des tables utilisateur (autre que db.opt)
+						If _IsMySqlDbEmpty($TmpBD[$j]) Then
+							_Logging("Base de données 'test' vide ignorée : """ & $TmpBD[$j] & """", 2, 0)
 							_ArrayDelete($TmpBD, $j)
 							$TmpBD[0] -= 1
 						Else
-							_Logging("Base de données 'test' non vide → conservée (" & $aTestInfo[1] & " fichier(s))", 2, 0)
+							_Logging("Base de données 'test' non vide → conservée : """ & $TmpBD[$j] & """", 2, 0)
 						EndIf
 					EndIf
 				Next
@@ -1336,7 +1344,7 @@ Func RecupererSti($NumeroCandidat, $bRemoveAfter = True)
 					_ArrayAdd($ListeDataFolders, $Data[$i])
 				EndIf
 			EndIf
-        Next
+		Next
         ProgressOff()
 		_Logging("Recherche complétée.", 2, 0, TimerDiff($iStart))
         If $ListeDataFolders[0] = 0 Then
@@ -1902,10 +1910,26 @@ Func _AfficherLeContenuDesDossiersSti()
             Local $aDossiersBD = _FileListToArrayRec($aData[$i], "*|phpmyadmin;mysql;performance_schema;sys;cdcol;webauth", 2, 0, 2, 2)
 
             If IsArray($aDossiersBD) Then
-                $aDossiersBD[0] = UBound($aDossiersBD) - 1
-                $aListeBD[0] += $aDossiersBD[0]
-                _ArrayDelete($aDossiersBD, 0)
-                _ArrayAdd($aListeBD, $aDossiersBD)
+                ; Filtrer UNIQUEMENT la base "test" si elle est vide
+                ; (pré-installée par certaines versions de XAMPP, sans tables utilisateur)
+                ; Les autres bases vides sont conservées : elles indiquent que le candidat
+                ; a su créer une base mais n'a pas créé de tables.
+                ; NB: $aDossiersBD[$k] contient un chemin COMPLET (ex: C:\xampp\mysql\data\test)
+                For $k = $aDossiersBD[0] To 1 Step -1
+                    Local $sDbName = StringRegExpReplace($aDossiersBD[$k], "^.*\\", "")
+                    If StringLower($sDbName) = "test" Then
+                        If _IsMySqlDbEmpty($aDossiersBD[$k]) Then
+                            _Logging("Affichage : base 'test' vide ignorée """ & $aDossiersBD[$k] & """", 2, 0)
+                            _ArrayDelete($aDossiersBD, $k)
+                            $aDossiersBD[0] -= 1
+                        EndIf
+                    EndIf
+                Next
+                If $aDossiersBD[0] > 0 Then
+                    $aListeBD[0] += $aDossiersBD[0]
+                    _ArrayDelete($aDossiersBD, 0)
+                    _ArrayAdd($aListeBD, $aDossiersBD)
+                EndIf
             EndIf
         Next
     EndIf
