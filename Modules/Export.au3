@@ -21,7 +21,7 @@ Func _GenererGrilleEvaluation($aNumCandiats)
 		WEnd
 		return _GenererFichiersExcel($aNumCandiats, $sSeance, $sLabo, $KesNomGrille)
 	EndIf
-
+	Local $sLastFile = ""
 	For $i = 0 To $fileCount - 1
 		Local $start = $i * $chunkSize
 		Local $end = $start + $chunkSize - 1
@@ -36,8 +36,9 @@ Func _GenererGrilleEvaluation($aNumCandiats)
 		WEnd
 		Local $result = _GenererFichiersExcel($chunk, $sSeance, $sLabo, $KesNomGrille)
 		If Not $result Then Return 0
+		$sLastFile = $result
 	Next
-	Return $result
+	Return $sLastFile
 EndFunc
 
 Func _GenererFichiersExcel($aNumCandiats, $sSeance, $sLabo, $NomGrille)
