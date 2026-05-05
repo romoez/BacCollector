@@ -113,7 +113,7 @@ _Interface principale de BacCollector_
 
 ### a. Suppression sécurisée des sources
 
-Les dossiers sources (travaux des candidats) ne sont supprimés qu'après une copie réussie vers la clé USB, garantissant qu'aucune donnée n'est perdue en cas d'échec intermédiaire.
+Les dossiers sources (travaux des candidats) ne sont supprimés qu'après une copie réussie vers la clé USB (vérification par empreinte MD5), garantissant qu'aucune donnée n'est perdue en cas d'échec intermédiaire.
 
 ### b. Protection du dossier de sauvegarde local
 
