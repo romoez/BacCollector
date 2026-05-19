@@ -20,6 +20,7 @@ rapport*.txt
 grille*.xlsx
 
 Tests/
+prep_env_tests/
 BackUp/
 __dev.txt
 todo.txt

@@ -22,7 +22,7 @@
 ; Global variables used in GUI
 Global $hMainGUI, $GUI_Log, $aMsg
 Global $GUI_NumeroCandidat, $bRecuperer, $bCreerSauvegarde, $bOpenBackupFldr, $bTogglePart3, $bAPropos
-Global $TextApps, $bCreerDossierCandidatAbs, $lblBacBackup, $lblUsbCleaner
+Global $TextApps, $bCreerDossierCandidatAbs, $lblBacBackup, $bForcerFermeture
 Global $cBac, $cSeance, $cLabo, $lblBac, $lblSeance, $lblLabo, $lblMatiere
 Global $rInfoProg, $tInfoProg, $rSti, $tSti
 Global $HeadContenuDossiersBac, $HeadContenuAutresDossiers
@@ -244,9 +244,9 @@ Func _CreateGui()
 ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[
 	Global $TextApps_Header = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $TmpHeaderHauteur)
 	GUICtrlSetColor($TextApps_Header, $GUI_COLOR_BORDER)
-;~ 	GUICtrlSetState($TextApps_Header, BitOR($GUI_HIDE, $GUI_DISABLE))
 	GUICtrlSetState($TextApps_Header, BitOR($GUI_SHOW, $GUI_DISABLE))
-	Global $TextApps_Text = GUICtrlCreateLabel("Logiciels Ouverts", $Left_Header + $GUI_MARGE, $Top_Header + 3, $WidthHeader - 2 * $GUI_MARGE, $GUI_HEADER_HAUTEUR, BitOR($SS_CENTER, $SS_CENTERIMAGE))
+	; Label "Logiciels Ouverts" — réduit de 22px à droite pour laisser place au bouton ⌧
+	Global $TextApps_Text = GUICtrlCreateLabel("Logiciels Ouverts", $Left_Header + $GUI_MARGE, $Top_Header + 3, $WidthHeader - 2 * $GUI_MARGE - 22, $GUI_HEADER_HAUTEUR, BitOR($SS_CENTER, $SS_CENTERIMAGE))
 	GUICtrlSetColor($TextApps_Text, 0xFFFFFF)
 	GUICtrlSetBkColor($TextApps_Text, $GUI_BKCOLOR_TRANSPARENT)
 	GUICtrlSetFont(-1, 9.5, 500)
@@ -255,6 +255,19 @@ Func _CreateGui()
 					& "🛑  Attention : certaines applications, notamment VSCode et Sublime Text," & @CRLF _
 					& "peuvent se fermer sans confirmation, même si des fichiers sont encore non enregistrés."
 	GUICtrlSetTip(-1, $sTempMessage , "Fermeture d'applications requise", 2,1)
+	; Icône de fermeture forcée — label cliquable (pas de bouton = pas de cadre natif Windows)
+	; Visible uniquement si des processus sont détectés ($GUI_HIDE par défaut)
+	Global $bForcerFermeture = GUICtrlCreateLabel($__g_sKillIcon, $Left_Header + $WidthHeader - 22, $Top_Header + 2, 20, $TmpHeaderHauteur - 4, BitOR($SS_CENTER, $SS_CENTERIMAGE, $SS_NOTIFY))
+	GUICtrlSetFont($bForcerFermeture, 11, 700, 0, "Segoe UI")
+	GUICtrlSetColor($bForcerFermeture, 0xFF4444)
+	GUICtrlSetBkColor($bForcerFermeture, $GUI_BKCOLOR_TRANSPARENT)
+	GUICtrlSetTip($bForcerFermeture, _
+		"Fermer de force tous les processus listés." & @CRLF & @CRLF & _
+		"Préférez fermer manuellement les applications" & @CRLF & _
+		"pour éviter toute perte de données.", _
+		"Fermeture forcée des applications", 2, 1)
+	GUICtrlSetState($bForcerFermeture, $GUI_HIDE)
+	GUICtrlSetCursor($bForcerFermeture, $MCID_HAND)
 	Global $TextApps = GUICtrlCreateLabel("", $Left_Header + $GUI_MARGE, $Top_Header + $GUI_HEADER_HAUTEUR + $GUI_MARGE + 6, $WidthHeader - 2 * $GUI_MARGE, 100 - $GUI_HEADER_HAUTEUR - 2 * $GUI_MARGE)
 	GUICtrlSetColor(-1, 0xFFFFFF)
 	GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
@@ -316,20 +329,6 @@ Func _CreateGui()
 ;~ 	GUICtrlSetState($lblBacBackup, $GUI_HIDE)
 	GUICtrlSetTip($lblBacBackup, "Cliquez pour ouvrir BacBackup", "BacBackup surveille le PC.", 1,1)
 	GUICtrlSetCursor(-1, 0) ; Curseur main
-	;;; Cadre USBCleaner
-	$Top_Header = $GUI_HAUTEUR - 2 * $GUI_MARGE - 3 * $TmpButtonHeight
-	$WidthHeader = $GUI_LARGEUR_PARTIE - 2 * $GUI_MARGE
-	Global $CUsbCleaner = GUICtrlCreateGraphic($Left_Header, $Top_Header, $WidthHeader, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
-	GUICtrlSetColor($CUsbCleaner, $GUI_COLOR_BORDER)
-	GUICtrlSetState($CUsbCleaner, $GUI_DISABLE)
-	Global $lblUsbCleaner = GUICtrlCreateLabel($__g_sWarnIcon & " USBCleaner", $Left_Header, $Top_Header, $WidthHeader, $TmpButtonHeight, BitOR($SS_CENTER, $SS_CENTERIMAGE))
-	GUICtrlSetColor($lblUsbCleaner, 0xFF0000)
-	GUICtrlSetBkColor($lblUsbCleaner, $GUI_BKCOLOR_TRANSPARENT)
-	GUICtrlSetFont(-1, 10, 900, 0, "Segoe UI Light")
-	GUICtrlSetTip($lblUsbCleaner, "Cliquez pour accéder au téléchargement de USBCleaner", "USBCleaner - Protection absente", 2, 1)
-	GUICtrlSetCursor(-1, 0) ; Curseur main
-	GUICtrlSetState($lblUsbCleaner, $GUI_HIDE)
-	GUICtrlSetState($CUsbCleaner, $GUI_HIDE)
 	;;; Cadre
 	$Top_Header = $GuiTmpTop + $TmpButtonHeight + 2 * $GUI_MARGE
 	$Left_Header = $GUI_MARGE + 3 * $GUI_LARGEUR_PARTIE
@@ -461,6 +460,7 @@ Func WM_COMMAND($hWnd, $iMsg, $wParam, $lParam)
     Local $iIDFrom = BitAND($wParam, 0xFFFF)
     Local $iCode = BitShift($wParam, 16)
 
+    ; Double-clic sur le dossier récupéré → ouvre l'explorateur
     If $iIDFrom = $TextDossiersRecuperes And $iCode = 1 Then
         Run("explorer.exe " & '"' & @ScriptDir & '"')
     EndIf

@@ -20,8 +20,8 @@
 #pragma compile(Out, BacCollector.exe)
 #pragma compile(FileDescription, Collecte sécurisée et sauvegarde des travaux lors des épreuves pratiques du baccalauréat (Info/Prog et STI).)
 #pragma compile(ProductName, BacCollector)
-#pragma compile(ProductVersion, 1.2.26.505)
-#pragma compile(FileVersion, 1.2.26.505)
+#pragma compile(ProductVersion, 1.3.26.519)
+#pragma compile(FileVersion, 1.3.26.519)
 #pragma compile(LegalCopyright, 2018-2026 © Communauté Tunisienne des Enseignants d'Informatique)
 #pragma compile(Comments, BacCollector – Collecte sécurisée et sauvegarde des travaux lors des épreuves pratiques du baccalauréat (Info/Prog et STI).)
 #pragma compile(CompanyName, Communauté Tunisienne des Enseignants d'Informatique)
@@ -158,9 +158,8 @@ While 1
 		Case $lblBacBackup
 			_CheckBacCollectorExists()
 			_OpenBacBackupInterface()
-		Case $lblUsbCleaner
-			_CheckBacCollectorExists()
-			_OpenUsbCleanerUrl()
+		Case $bForcerFermeture
+			_ForcerFermetureProcessus()
 		Case $bAPropos
 			_CheckBacCollectorExists()
 			_ShowAPropos()
@@ -291,11 +290,10 @@ Func _InitialisationInfo($initNumeroCandidat = 1)
 	$sApps = _ListeDApplicationsOuvertes()
 	If $sApps <> "" Then
 		_Logging("Applications ouvertes: " & StringReplace(@CRLF & $sApps, @CRLF, @CRLF & $sTmpSpaces), 2, 0, TimerDiff($iStart))
-		GUICtrlSetData($TextApps, $sApps)
 	Else
 		_Logging("Aucune application ouverte.", 2, 0, TimerDiff($iStart))
-		GUICtrlSetData($TextApps, "-")
 	EndIf
+	_MajTextApps($sApps)
 
 	Local $sDossiersRecuperes = _ListeDeDossiersRecuperes()
 	_AfficherDossierRecuperes(1) ; $sLog = 0 / 1
@@ -350,11 +348,10 @@ Func _InitialisationSti($initNumeroCandidat = 1)
 	If $sApps <> "" Then
 		Local $sTmpSpaces = "                            "
 		_Logging("Applications ouvertes: " & StringReplace(@CRLF & $sApps, @CRLF, @CRLF & $sTmpSpaces), 2, 0, TimerDiff($iStart))
-		GUICtrlSetData($TextApps, $sApps)
 	Else
 		_Logging("Aucune application ouverte.", 2, 0, TimerDiff($iStart))
-		GUICtrlSetData($TextApps, "-")
 	EndIf
+	_MajTextApps($sApps)
 
 	_AfficherDossierRecuperes()
 	_AfficherLeContenuDesDossiersSti()
@@ -402,13 +399,13 @@ Func Recuperer()
 		_Logging("Applications ouvertes: " & StringReplace(@CRLF & $sApps, @CRLF, @CRLF & $sTmpSpaces), 5, 1, TimerDiff($iStart))
 		_Logging("Récupération annulée", 5, 1)
 		_Logging("______", 2, 0)
-		GUICtrlSetData($TextApps, $sApps)
+		_MajTextApps($sApps)
 		_ExtMsgBoxSet(1, 0, $GUI_COLOR_ERROR, 0xFFFFFF, 9, "Segoe UI", @DesktopWidth - 25, @DesktopWidth - 25)
 		_ExtMsgBox(16, "Ok", $PROG_TITLE & " - Erreur", "Avant de ""Récupérer"" le travail du candidat, veuillez fermer ce(s) logiciel(s) : " & @CRLF & @CRLF & $sApps, 0)
 		Return 1
 	Else
 		_Logging("Aucune application.", 2, 0, TimerDiff($iStart))
-		GUICtrlSetData($TextApps, "-")
+		_MajTextApps("")
 	EndIf
 
 	If $Matiere = "InfoProg" Then
@@ -514,8 +511,8 @@ Func _VerifierDossiersBac()
 	Local $NomsDossiers = ""
 	For $i = 1 To $Bac[0]
 		$NomsDossiers = $NomsDossiers & " """ & $Bac[$i] & """"
-		$sizefldr1 = DirGetSize($Bac[$i], 1)
-		If Not @error And $sizefldr1[1] Then
+		$sizefldr1 = _DirGetSizeSafe($Bac[$i])
+		If $sizefldr1[1] Then
 			$NbDossiersBacNonVides += 1
 		EndIf
 	Next
@@ -593,57 +590,55 @@ EndFunc   ;==>_VerifierDossiersBac
 ;   $Bac - Array des dossiers Bac à copier
 ; Retour: Nombre d'erreurs rencontrées
 ; =========================================================
-Func _CopierDossiersBac($Bac)
-	Local $iNberreurs = 0
-	ProgressOn($PROG_TITLE & $PROG_VERSION, "Copie des dossiers...", "", Default, Default, 1)
+Func _CopierDossiersBac($Bac, $NumeroCandidat)
+    Local $iNberreurs = 0
+    Local $aErreurs[1] = [0]
+    ProgressOn($PROG_TITLE & $PROG_VERSION, "Copie des dossiers...", "", Default, Default, 1)
 
-	For $i = 1 To $Bac[0]
-		Local $sizefldr1 = DirGetSize($Bac[$i], 1)
-		If @error Or $sizefldr1[1] = 0 Then
-			_Logging("Ignorer le dossier vide """ & $Bac[$i] & """")
-			Local $ErrorEmptyFolderRemove = DirRemove($Bac[$i], 1)
-			_Logging("Suppression du dossier vide """ & $Bac[$i] & """", $ErrorEmptyFolderRemove)
-			ContinueLoop
-		EndIf
+    For $i = 1 To $Bac[0]
+        Local $sizefldr1 = _DirGetSizeSafe($Bac[$i])
+        If $sizefldr1[1] = 0 Then
+            _Logging("Ignorer le dossier vide """ & $Bac[$i] & """")
+            Local $ErrorEmptyFolderRemove = DirRemove($Bac[$i], 1)
+            _Logging("Suppression du dossier vide """ & $Bac[$i] & """", $ErrorEmptyFolderRemove)
+            ContinueLoop
+        EndIf
 
-		Local $sDest1Path = $Dest1FlashUSB & StringTrimLeft($Bac[$i], 2)
-		Local $sDest2Path = $Dest2LocalFldr & StringTrimLeft($Bac[$i], 2)
+        Local $sDest1Path = $Dest1FlashUSB & StringTrimLeft($Bac[$i], 2)
+        Local $sDest2Path = $Dest2LocalFldr & StringTrimLeft($Bac[$i], 2)
 
-		; ===== Copie USB (avec vérification d'intégrité MD5 + retry) =====
-		ProgressSet(Round($i / $Bac[0] * 100), "[" & Round($i / $Bac[0] * 100) & "%] Copie USB : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
-		Local $bUsbOK = _CopierDossierFiable($Bac[$i], $sDest1Path)
+        ProgressSet(Round($i / $Bac[0] * 100), "[" & Round($i / $Bac[0] * 100) & "%] Copie USB : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
+        Local $bUsbOK = _CopierDossierFiable($Bac[$i], $sDest1Path)
 
-		; ===== Copie locale (avec vérification d'intégrité MD5 + retry) =====
-		ProgressSet(Round($i / $Bac[0] * 100), "[" & Round($i / $Bac[0] * 100) & "%] Copie locale : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
-		Local $bLocalOK = _CopierDossierFiable($Bac[$i], $sDest2Path)
+        ProgressSet(Round($i / $Bac[0] * 100), "[" & Round($i / $Bac[0] * 100) & "%] Copie locale : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
+        Local $bLocalOK = _CopierDossierFiable($Bac[$i], $sDest2Path)
 
-		_Logging("Copie USB    """ & $Bac[$i] & """", $bUsbOK)
-		_Logging("Copie locale """ & $Bac[$i] & """", $bLocalOK)
-		$iNberreurs += (1 - $bLocalOK)
+        _Logging("Copie USB    """ & $Bac[$i] & """", $bUsbOK)
+        _Logging("Copie locale """ & $Bac[$i] & """", $bLocalOK)
+        $iNberreurs += (1 - $bLocalOK)
 
-		; ===== Échec USB = arrêt critique (la sauvegarde de référence est perdue) =====
-		If Not $bUsbOK Then
-			ProgressOff()
-			_Logging("Récupération annulée (échec copie USB de """ & $Bac[$i] & """)", 5, 1)
-			_Logging("______", 2, 0)
-			_ExtMsgBoxSet(1, 0, $GUI_COLOR_ERROR, 0xFFFFFF, 9, "Segoe UI", @DesktopWidth - 25, @DesktopWidth - 25)
-			_ExtMsgBox(16, "Ok", $PROG_TITLE & " - Erreur", _
-					"Échec lors de la copie USB de :" & @CRLF & _
-					"""" & $Bac[$i] & """" & @CRLF & @CRLF & _
-					"L'intégrité de la copie n'a pas pu être vérifiée." & @CRLF & _
-					"La source est CONSERVÉE. L'opération est annulée.", 0)
-			Return -1
-		EndIf
+        If $bUsbOK Then
+            ProgressSet(Round($i / $Bac[0] * 100), "[" & Round($i / $Bac[0] * 100) & "%] Suppression : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
+            Local $Error2_DirRemove = DirRemove($Bac[$i], 1)
+            _Logging("Suppression du dossier """ & $Bac[$i] & """", $Error2_DirRemove)
+            $iNberreurs += (1 - $Error2_DirRemove)
+        Else
+            $iNberreurs += 1
+            $aErreurs[0] += 1
+            ReDim $aErreurs[$aErreurs[0] + 1]
+            $aErreurs[$aErreurs[0]] = $Bac[$i] & "|Copie USB non vérifiée après 3 essais"
+            _Logging("Source CONSERVÉE (USB KO) : """ & $Bac[$i] & """ — récupération continue", 5, 1)
+        EndIf
+    Next
 
-		; ===== Suppression de la source : USB OK suffit (USB = sauvegarde de référence) =====
-		ProgressSet(Round($i / $Bac[0] * 100), "[" & Round($i / $Bac[0] * 100) & "%] Suppression : " & StringRegExpReplace($Bac[$i], "^.*\\", ""))
-		Local $Error2_DirRemove = DirRemove($Bac[$i], 1)
-		_Logging("Suppression du dossier """ & $Bac[$i] & """", $Error2_DirRemove)
-		$iNberreurs = $iNberreurs - ($Error2_DirRemove - 1)
-	Next
+    ProgressOff()
 
-	ProgressOff()
-	Return $iNberreurs
+    If $aErreurs[0] > 0 Then
+        Local $aDests[2] = [$Dest1FlashUSB, $Dest2LocalFldr]
+        _EcrireFichierErreursCopie($aDests, $aErreurs, $NumeroCandidat)
+    EndIf
+
+    Return $iNberreurs
 EndFunc   ;==>_CopierDossiersBac
 
 
@@ -863,26 +858,41 @@ EndFunc   ;==>_FinaliserRecuperation
 ; Retour: Aucun
 ; =========================================================
 Func _AfficherMessageFinal($NumeroCandidat, $iNberreurs)
-	If $iNberreurs = 0 Then
-		_Logging("Récupération terminée avec succès", 3, 1)
-		_Logging("______", 2, 0)
-		_ExtMsgBoxSet(1, 0, $GUI_COLOR_SUCCESS, 0xFFFFFF, 9, "Segoe UI", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox($EMB_ICONINFO, "Ok", $PROG_TITLE & " - Succès", "La récupération du travail du candidat N° " & $NumeroCandidat & " a été effectuée avec succès!", 0)
-	ElseIf $iNberreurs = 1 Then
-		_Logging("Récupération terminée, avec une erreur non critique", 2, 1)
-		_Logging("______", 2, 0)
-		_ExtMsgBoxSet(1, 0, $GUI_COLOR_ERROR, 0xFFFFFF, 9, "Segoe UI", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & " - Avertissement", "La récupération du travail du candidat N° " & $NumeroCandidat & " est terminée." & @CRLF _
-				 & "Une erreur non critique est produite lors de cette opération." & @CRLF _
-				 & "Veuillez lire le log et prendre les mesures nécessaires.", 0)
-	Else
-		_Logging("Récupération terminée, avec " & $iNberreurs & " erreurs non critiques", 2, 1)
-		_Logging("______", 2, 0)
-		_ExtMsgBoxSet(1, 0, $GUI_COLOR_ERROR, 0xFFFFFF, 9, "Segoe UI", @DesktopWidth - 25, @DesktopWidth - 25)
-		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & " - Avertissement", "La récupération du travail du candidat N° " & $NumeroCandidat & " est terminée." & @CRLF _
-				 & $iNberreurs & " erreurs non critiques sont produites lors de cette opération." & @CRLF _
-				 & "Veuillez lire le log et prendre les mesures nécessaires.", 0)
-	EndIf
+    ; Renommer NNNNNN → NNNNNN_ si _ERREURS_COPIE.txt existe (une seule fois, ici)
+    Local $bErreursCopie = _FinaliserErreursCopie($Dest1FlashUSB, $Dest2LocalFldr)
+
+    If $bErreursCopie Then
+        _Logging("Récupération terminée — dossier renommé """ & $NumeroCandidat & "_"" : vérification manuelle requise", 5, 1)
+        _Logging("______", 2, 0)
+        _ExtMsgBoxSet(1, 0, $GUI_COLOR_ERROR, 0xFFFFFF, 9, "Segoe UI", @DesktopWidth - 25, @DesktopWidth - 25)
+        _ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & " - Action requise", _
+                "La récupération du candidat N° " & $NumeroCandidat & " est terminée." & @CRLF & @CRLF & _
+                "Certains fichiers n'ont pas pu être copiés/vérifiés." & @CRLF & @CRLF & _
+                "Le dossier du candidat a été renommé :" & @CRLF & _
+                "   " & $NumeroCandidat & "  →  " & $NumeroCandidat & "_" & @CRLF & @CRLF & _
+                "Consulter _ERREURS_COPIE.txt dans ce dossier," & @CRLF & _
+                "copier manuellement les fichiers manquants," & @CRLF & _
+                "puis renommer le dossier de """ & $NumeroCandidat & "_"" en """ & $NumeroCandidat & """.", 0)
+    ElseIf $iNberreurs = 0 Then
+        _Logging("Récupération terminée avec succès", 3, 1)
+        _Logging("______", 2, 0)
+        _ExtMsgBoxSet(1, 0, $GUI_COLOR_SUCCESS, 0xFFFFFF, 9, "Segoe UI", @DesktopWidth - 25, @DesktopWidth - 25)
+        _ExtMsgBox($EMB_ICONINFO, "Ok", $PROG_TITLE & " - Succès", "La récupération du travail du candidat N° " & $NumeroCandidat & " a été effectuée avec succès!", 0)
+    ElseIf $iNberreurs = 1 Then
+        _Logging("Récupération terminée, avec une erreur non critique", 2, 1)
+        _Logging("______", 2, 0)
+        _ExtMsgBoxSet(1, 0, $GUI_COLOR_ERROR, 0xFFFFFF, 9, "Segoe UI", @DesktopWidth - 25, @DesktopWidth - 25)
+        _ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & " - Avertissement", "La récupération du travail du candidat N° " & $NumeroCandidat & " est terminée." & @CRLF _
+                 & "Une erreur non critique est produite lors de cette opération." & @CRLF _
+                 & "Veuillez lire le log et prendre les mesures nécessaires.", 0)
+    Else
+        _Logging("Récupération terminée, avec " & $iNberreurs & " erreurs non critiques", 2, 1)
+        _Logging("______", 2, 0)
+        _ExtMsgBoxSet(1, 0, $GUI_COLOR_ERROR, 0xFFFFFF, 9, "Segoe UI", @DesktopWidth - 25, @DesktopWidth - 25)
+        _ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & " - Avertissement", "La récupération du travail du candidat N° " & $NumeroCandidat & " est terminée." & @CRLF _
+                 & $iNberreurs & " erreurs non critiques sont produites lors de cette opération." & @CRLF _
+                 & "Veuillez lire le log et prendre les mesures nécessaires.", 0)
+    EndIf
 EndFunc   ;==>_AfficherMessageFinal
 
 ; =========================================================
@@ -905,19 +915,18 @@ Func RecupererInfo($NumeroCandidat)
 	If $iNberreurs = -1 Then Return 5
 
 	; Copie des dossiers Bac
-	Local $iErreursCopie = _CopierDossiersBac($Bac)
+	Local $iErreursCopie = _CopierDossiersBac($Bac, $NumeroCandidat)
 	If $iErreursCopie = -1 Then Return 6
 	$iNberreurs += $iErreursCopie
 
 	; Copie des captures d'écran en cas de fraude
 	_CopierCapturesEcranFraude()
 
-	; Copie des autres fichiers (Bureau, Documents, etc.)
 	Local $sMaskAutresFichiers = "*"
-	$iNberreurs += _CopierLeContenuDesAutresDossiers($sMaskAutresFichiers)
+	$iNberreurs += _CopierLeContenuDesAutresDossiers($sMaskAutresFichiers, True, $AGE_MAX_FICHIERS_A_COPIER__EN_MINUTES, $NumeroCandidat)
 
 	Local $aDossiers = DossiersRessources()
-	$iNberreurs += _CopierEtSupprimerDossiers($aDossiers, "Res*ource*")
+	$iNberreurs += _CopierEtSupprimerDossiers($aDossiers, "Res*ource*", True, $NumeroCandidat)
 
 	; Finalisation
 	$iNberreurs += _FinaliserRecuperation()
@@ -1001,7 +1010,7 @@ EndFunc   ;==>_WwwFolderHasContent
 ;                  4. Si $bRemoveAfter = True : supprime/recrée le dossier source
 ;                  5. Si $bRemoveAfter = True ET index.php spécial : restaure index.php depuis une destination
 ; ===============================================================================================================================
-Func _TraiterDossierWww($sWwwPath, $bRemoveAfter = True)
+Func _TraiterDossierWww($sWwwPath, $bRemoveAfter = True, $NumeroCandidat = "")
     Local $hTimer = TimerInit()
     Local $iNberreurs = 0
 
@@ -1044,23 +1053,25 @@ Func _TraiterDossierWww($sWwwPath, $bRemoveAfter = True)
     Local $bUsbOK   = _CopierDossierFiable($sWwwPath, $sDest1)
     Local $bLocalOK = _CopierDossierFiable($sWwwPath, $sDest2)
 
-    ; Échec USB = arrêt critique (USB = sauvegarde de référence)
-    If Not $bUsbOK Then
-        _Logging("Échec de copie/intégrité vers """ & $sDest1 & """", 5, 1, TimerDiff($hTimer))
-        _ExtMsgBoxSet(1, 0, $GUI_COLOR_ERROR, 0xFFFFFF, 9, "Segoe UI", @DesktopWidth - 25, @DesktopWidth - 25)
-        _ExtMsgBox(16, "Ok", $PROG_TITLE & " - Erreur", "Échec lors de la copie du dossier """ & $sWwwPath & """" & @CRLF & _
-                "L'intégrité n'a pas pu être vérifiée. La source est CONSERVÉE." & @CRLF & _
-                "L'opération de sauvegarde est annulée.", 0)
-        _Logging("Récupération annulée", 5, 1)
-        _Logging("______", 2, 0)
-        Return -1
-    EndIf
-
     _Logging("Copie USB    """ & $sDest1 & """", $bUsbOK, 0)
     _Logging("Copie locale """ & $sDest2 & """", $bLocalOK, 0)
     $iNberreurs += (1 - $bLocalOK)
 
+    If Not $bUsbOK Then
+        ; USB KO → source conservée, on signale mais on ne bloque pas
+        $iNberreurs += 1
+        _Logging("Source CONSERVÉE (USB KO) : """ & $sWwwPath & """ — récupération continue", 5, 1)
+        ; Créer _ERREURS_COPIE.txt dans les destinations (USB et locale)
+        ; _EcrireFichierErreursCopie crée le dossier s'il n'existe pas encore
+        Local $aDestsWww[2] = [$Dest1FlashUSB, $Dest2LocalFldr]
+        Local $aErrWww[2] = [1, $sWwwPath & "|Copie USB du dossier web non vérifiée après 3 essais"]
+        _EcrireFichierErreursCopie($aDestsWww, $aErrWww, $NumeroCandidat)
+        ; Source non supprimée : on sort sans toucher au dossier web source
+        Return $iNberreurs
+    EndIf
+
 	; Suppression et recréation du dossier source si demandé
+	; (uniquement si la copie USB est confirmée intègre)
 	If $bRemoveAfter Then
 		_Logging("Suppression et recréation de """ & $sWwwPath & """", 2, 0)
 
@@ -1099,7 +1110,7 @@ Func _TraiterDossierWww($sWwwPath, $bRemoveAfter = True)
         FileDelete($sDest2 & "\index.php")
     EndIf
 
-	Local $aFolderInfo = DirGetSize($sDest1, 1)
+	Local $aFolderInfo = _DirGetSizeSafe($sDest1)
 	If ($aFolderInfo[1] = 0) And ($aFolderInfo[0] = 0) Then ;Nb Fichiers =0 & Taille =0
 
 		Local $sNoteCorrecteur = $PROG_TITLE & $PROG_VERSION & " [" & @YEAR & "-" & @MON & "-" & @MDAY & " " & @HOUR & ":" & @MIN & ":" & @SEC & "]" & @CRLF & _
@@ -1143,50 +1154,47 @@ EndFunc   ;==>_TraiterDossierWww
 ; Remarks........: Utilise les variables globales $Dest1FlashUSB et $Dest2LocalFldr pour les destinations
 ; Example........: $nbErreurs = _CopierEtSupprimerDossiers($aDossiersBac, "Bac*2*")
 ; ===============================================================================================================================
-Func _CopierEtSupprimerDossiers($aDossiers, $sMsgTypeDossiers, $bRemoveAfter = True)
+Func _CopierEtSupprimerDossiers($aDossiers, $sMsgTypeDossiers, $bRemoveAfter = True, $NumeroCandidat = "")
     Local $iNberreurs = 0
+    Local $aErreurs[1] = [0] ; [0]=nb, [1..n]="src|raison"
 
-    ; Affichage de la barre de progression avec le type de dossier personnalisé
     ProgressOn($PROG_TITLE & $PROG_VERSION, "Copie des dossiers " & $sMsgTypeDossiers & "...", "", Default, Default, 1)
 
-    ; Vérification que le paramètre est bien un tableau valide
     If IsArray($aDossiers) And $aDossiers[0] > 0 Then
-        ; Boucle sur chaque dossier du tableau
         For $i = 1 To $aDossiers[0]
-            ; Vérification que le dossier existe et n'est pas vide
-            Local $sizefldr1 = DirGetSize($aDossiers[$i], 1)
-            If @error Or $sizefldr1[1] = 0 Then
+            Local $sizefldr1 = _DirGetSizeSafe($aDossiers[$i])
+            If $sizefldr1[1] = 0 Then
                 _Logging("Ignorer le dossier vide """ & $aDossiers[$i] & """")
                 ContinueLoop
             EndIf
 
-            ; Mise à jour de la barre de progression
-            ProgressSet(Round($i / $aDossiers[0] * 100), "[" & Round($i / $aDossiers[0] * 100) & "%] " & "Copie de : " & $aDossiers[$i])
+            ProgressSet(Round($i / $aDossiers[0] * 100), "[" & Round($i / $aDossiers[0] * 100) & "%] Copie de : " & $aDossiers[$i])
 
-            ; Construction des chemins de destination
             Local $sDestPath1 = $Dest1FlashUSB & StringTrimLeft($aDossiers[$i], 2)
             Local $sDestPath2 = $Dest2LocalFldr & StringTrimLeft($aDossiers[$i], 2)
 
-            ; Création des dossiers parents si nécessaire
             DirCreate(StringLeft($sDestPath1, StringInStr($sDestPath1, "\", 0, -1) - 1))
             DirCreate(StringLeft($sDestPath2, StringInStr($sDestPath2, "\", 0, -1) - 1))
 
-            ; Copie fiable (vérification d'intégrité MD5 + retry) vers les deux destinations
             Local $bUsbOK   = _CopierDossierFiable($aDossiers[$i], $sDestPath1)
             Local $bLocalOK = _CopierDossierFiable($aDossiers[$i], $sDestPath2)
 
             _Logging("Copie USB    """ & $aDossiers[$i] & """", $bUsbOK)
             _Logging("Copie locale """ & $aDossiers[$i] & """", $bLocalOK)
-            $iNberreurs += (1 - $bUsbOK)
             $iNberreurs += (1 - $bLocalOK)
 
-            ; Suppression du dossier source : USB OK suffit (USB = sauvegarde de référence)
             If $bRemoveAfter And $bUsbOK Then
+                ; USB OK → supprimer la source
                 Local $Error2_DirRemove = DirRemove($aDossiers[$i], 1)
                 _Logging("Suppression du dossier """ & $aDossiers[$i] & """", $Error2_DirRemove)
                 $iNberreurs += (1 - $Error2_DirRemove)
             ElseIf $bRemoveAfter Then
-                _Logging("Source CONSERVÉE : """ & $aDossiers[$i] & """ (copie USB non vérifiée)", 5, 0)
+                ; USB KO → source conservée, on continue
+                $iNberreurs += 1
+                $aErreurs[0] += 1
+                ReDim $aErreurs[$aErreurs[0] + 1]
+                $aErreurs[$aErreurs[0]] = $aDossiers[$i] & "|Copie USB non vérifiée après 3 essais"
+                _Logging("Source CONSERVÉE (USB KO) : """ & $aDossiers[$i] & """ — récupération continue", 5, 1)
             EndIf
         Next
     Else
@@ -1194,6 +1202,13 @@ Func _CopierEtSupprimerDossiers($aDossiers, $sMsgTypeDossiers, $bRemoveAfter = T
     EndIf
 
     ProgressOff()
+
+    ; Signalement groupé des erreurs en fin de boucle
+    If $aErreurs[0] > 0 Then
+        Local $aDests[2] = [$Dest1FlashUSB, $Dest2LocalFldr]
+        _EcrireFichierErreursCopie($aDests, $aErreurs, $NumeroCandidat)
+    EndIf
+
     Return $iNberreurs
 EndFunc   ;==>_CopierEtSupprimerDossiers
 
@@ -1393,7 +1408,7 @@ Func RecupererSti($NumeroCandidat, $bRemoveAfter = True)
         ProgressOn($PROG_TITLE & $PROG_VERSION, "Copie des sites web...", "", Default, Default, 1)
         For $i = 1 To $Www[0]
             ProgressSet(Round($i / $Www[0] * 100), "[" & Round($i / $Www[0] * 100) & "%] Traitement de " & $Www[$i])
-            Local $iResultat = _TraiterDossierWww($Www[$i], $bRemoveAfter)
+            Local $iResultat = _TraiterDossierWww($Www[$i], $bRemoveAfter, $NumeroCandidat)
             If $iResultat = -1 Then
                 ; Erreur critique
                 Return 10
@@ -1605,16 +1620,30 @@ Func RecupererSti($NumeroCandidat, $bRemoveAfter = True)
     ; ===== Copie des captures d'écran en cas de fraude =====
     _CopierCapturesEcranFraude()
 
-    ; ===== Copie des autres fichiers (sans suppression pour STI) =====
     Local $sMaskAutresFichiers = "*"
-    $iNberreurs += _CopierLeContenuDesAutresDossiersSti($sMaskAutresFichiers)
+    $iNberreurs += _CopierLeContenuDesAutresDossiersSti($sMaskAutresFichiers, $bRemoveAfter, $AGE_MAX_FICHIERS_A_COPIER__EN_MINUTES_STI, $NumeroCandidat)
 
     ; ===== Finalisation =====
     _FinaliserRecuperation()
 
 	; ===== Message final =====
+	; Renommer NNNNNN → NNNNNN_ si _ERREURS_COPIE.txt existe (toutes copies terminées)
+	Local $bErreursCopie = _FinaliserErreursCopie($Dest1FlashUSB, $Dest2LocalFldr)
 
-	If $iNberreurs <> 0 Then
+	If $bErreursCopie Then
+		; Erreurs de copie non vérifiées : priorité sur les autres cas
+		_Logging("Récupération terminée — dossier renommé """ & $NumeroCandidat & "_"" : vérification manuelle requise", 5, 1)
+		_Logging("______", 2, 0)
+		_ExtMsgBoxSet(1, 0, $GUI_COLOR_ERROR, 0xFFFFFF, 9, "Segoe UI", @DesktopWidth - 25, @DesktopWidth - 25)
+		_ExtMsgBox($EMB_ICONEXCLAM, "Ok", $PROG_TITLE & " - Action requise", _
+				"La récupération du candidat N° " & $NumeroCandidat & " est terminée." & @CRLF & @CRLF & _
+				"Certains fichiers n'ont pas pu être copiés/vérifiés." & @CRLF & @CRLF & _
+				"Le dossier du candidat a été renommé :" & @CRLF & _
+				"   " & $NumeroCandidat & "  →  " & $NumeroCandidat & "_" & @CRLF & @CRLF & _
+				"Consulter _ERREURS_COPIE.txt dans ce dossier," & @CRLF & _
+				"copier manuellement les fichiers manquants," & @CRLF & _
+				"puis renommer le dossier de """ & $NumeroCandidat & "_"" en """ & $NumeroCandidat & """.", 0)
+	ElseIf $iNberreurs <> 0 Then
 		; --- CAS 1 : ERREURS CRITIQUES ---
 		Local $iErreursAjustees = $iNberreurs - ($YaDatabase - 1) - ($YaSiteWeb - 1)
 		_Logging("Récupération terminée, avec " & $iErreursAjustees & " erreurs.", 2, 1)
@@ -1776,7 +1805,7 @@ Func _AfficherLeContenuDesDossiersBac()
 			ProgressSet(Round($N / ($Liste[0]) * 100), "[" & Round($N / ($Liste[0]) * 100) & "%] " & "Vérif. de : " & StringRegExpReplace($File_Name, "^.*\\", ""))
 			If FileGetAttrib($File_Name) = 'D' Then
 				If StringInStr(StringTrimLeft($File_Name, 3), "\") = 0 Then
-					$KesTmp = DirGetSize($File_Name, 1)
+					$KesTmp = _DirGetSizeSafe($File_Name)
 					$File_size = $KesTmp[1] & ' fichier(s)'
 				Else
 					ContinueLoop
@@ -2243,7 +2272,7 @@ Func _SubCopyFoldersUserFolders($sSrc, $sDest_RelativePath, $bRemoveAfter = True
 			$Fldr_Name = $Dossier & StringTrimRight($Liste[$N], 1)
 			$Fldr_Name_Relative_Path = $sDest_RelativePath & $Liste[$N]
 			If AgeDuFichierEnMinutesCreation($Fldr_Name) < $iAgeMinutes Then
-				$aFldr_info = DirGetSize($Fldr_Name, 1)
+				$aFldr_info = _DirGetSizeSafe($Fldr_Name)
 				$iFldrSize = $aFldr_info[0]
 				$iFilesCountInFldr = $aFldr_info[1]
 				If $iFilesCountInFldr = 0 And $iFldrSize = 0 Then
@@ -2302,7 +2331,7 @@ EndFunc   ;==>_SubCopyFoldersUserFoldersNoRemove
 ;   $iAgeMinutes - Age maximum en minutes (défaut: $AGE_MAX_FICHIERS_A_COPIER__EN_MINUTES)
 ; Retour: Nombre d'erreurs rencontrées
 ; =========================================================
-Func _CopierLeContenuDesAutresDossiers($Mask, $bRemoveAfter = True, $iAgeMinutes = $AGE_MAX_FICHIERS_A_COPIER__EN_MINUTES)
+Func _CopierLeContenuDesAutresDossiers($Mask, $bRemoveAfter = True, $iAgeMinutes = $AGE_MAX_FICHIERS_A_COPIER__EN_MINUTES, $NumeroCandidat = "")
 	Local $iNberreurs = 0
 
 ;~ ///////**********************************************************************
@@ -2394,7 +2423,7 @@ Func _CopierLeContenuDesAutresDossiers($Mask, $bRemoveAfter = True, $iAgeMinutes
 					$Fldr_Name = StringTrimRight($Liste[$N], 1)
 					ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "Vérif. de : " & $Fldr_Name)
 					If StringRegExp($Fldr_Name, "^(?i)bac\s*\d*2\d*\s*$", $STR_REGEXPMATCH, 1) Or AgeDuFichierEnMinutesCreation($Dossier & $Fldr_Name) < $iAgeMinutes Then
-						$Fldr_info = DirGetSize($Dossier & $Fldr_Name, 1)
+						$Fldr_info = _DirGetSizeSafe($Dossier & $Fldr_Name)
 						$Fldr_size = $Fldr_info[0]
 						$FldrFilesCount = $Fldr_info[1]
 						If $Fldr_size = 0 And $FldrFilesCount = 0 Then
@@ -2463,21 +2492,21 @@ EndFunc   ;==>_CopierLeContenuDesAutresDossiers
 ; Retour: Nombre d'erreurs rencontrées
 ; Note: Version étendue incluant la copie des dossiers Bac*2*
 ; =========================================================
-Func _CopierLeContenuDesAutresDossiersSti($Mask, $bRemoveAfter = True, $iAgeMinutes = $AGE_MAX_FICHIERS_A_COPIER__EN_MINUTES_STI)
+Func _CopierLeContenuDesAutresDossiersSti($Mask, $bRemoveAfter = True, $iAgeMinutes = $AGE_MAX_FICHIERS_A_COPIER__EN_MINUTES_STI, $NumeroCandidat = "")
 	Local $iNberreurs = 0
 
 	; Appel de la fonction principale sans suppression
-	$iNberreurs = _CopierLeContenuDesAutresDossiers($Mask, $bRemoveAfter, $iAgeMinutes)
+	$iNberreurs = _CopierLeContenuDesAutresDossiers($Mask, $bRemoveAfter, $iAgeMinutes, $NumeroCandidat)
 
 ;~ ///////**********************************************************************
 ;~ ///////**********    Copy Dossiers Bac*2* et "Res*ource    ******************
 ;~ ///////**********************************************************************
 
 	Local $aDossiers = DossiersBac()
-	$iNberreurs += _CopierEtSupprimerDossiers($aDossiers, "Bac*2*", $bRemoveAfter)
+	$iNberreurs += _CopierEtSupprimerDossiers($aDossiers, "Bac*2*", $bRemoveAfter, $NumeroCandidat)
 
 	Local $aDossiers = DossiersRessources()
-	$iNberreurs += _CopierEtSupprimerDossiers($aDossiers, "Res*ource*", $bRemoveAfter)
+	$iNberreurs += _CopierEtSupprimerDossiers($aDossiers, "Res*ource*", $bRemoveAfter, $NumeroCandidat)
 
 	Return $iNberreurs
 EndFunc   ;==>_CopierLeContenuDesAutresDossiersSti
@@ -2806,7 +2835,7 @@ EndFunc   ;==>_ScannerFichiersLecteur
 ; Description: Ajoute un dossier au ListView
 ; =========================================================
 Func _AjouterDossierAuListView($sCheminComplet, $sCheminRelatif, $sCheminAffichage, ByRef $sLogMsg, $bVerifierTaille = True)
-    Local $aInfo = DirGetSize($sCheminComplet, 1)
+    Local $aInfo = _DirGetSizeSafe($sCheminComplet)
     Local $iTaille = $aInfo[0]
     Local $iNbFichiers = $aInfo[1]
 
@@ -2913,7 +2942,7 @@ Func Sauvegarder()
 		$sDir = $TmpListe[$N]
 		If StringRegExp($sDir, "([0-9]{6})", 0) = 1 Then
 			$TmpUneLigneMatrice = ""
-			$aFolderInfo = DirGetSize($sCheminScripDir & $sDir, 1)
+			$aFolderInfo = _DirGetSizeSafe($sCheminScripDir & $sDir)
 			$FolderSize = $aFolderInfo[0]
 			$FilesCount = $aFolderInfo[1]
 			$iTotFiles_DossiersRecup += $FilesCount
@@ -3303,11 +3332,6 @@ Func _InitialParams()
 	EndIf
 
 
-	If Not _IsRegistryExist("HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{D50A90DE-3118-4B58-9ABE-FDF795C59970}_is1", "DisplayName") Or Not ProcessExists('UsbCleaner.exe') Then
-		GUICtrlSetState($CUsbCleaner, $GUI_SHOW)
-		GUICtrlSetState($lblUsbCleaner, $GUI_SHOW)
-	EndIf
-
 	ProgressSet(35, "[" & 35 & "%] " & "")
 
 ;~ ******************************************
@@ -3567,10 +3591,6 @@ Func _OpenBacBackupInterface()
 	Return -1
 EndFunc   ;==>_OpenBacBackupInterface
 
-Func _OpenUsbCleanerUrl()
-		_Logging("Ouverture de la page de téléchargement de UsbCleaner", 2, 0)
-		ShellExecute("https://github.com/romoez/UsbCleaner", "", "", "open")
-EndFunc     ;==>_OpenUsbCleanerUrl
 #EndRegion Functions BB
 
 ;=========================================================
@@ -3601,7 +3621,7 @@ Func _ListeDeDossiersRecuperes($SearchMask = "??????", $RegEx = "([0-9]{6})")
 			$sDir = $Liste[$N]
 			ProgressSet(Round($N / $Liste[0] * 100), "[" & Round($N / $Liste[0] * 100) & "%] " & "Vérif. de : [" & StringRegExpReplace($sDir, "^.*\\", "") & "]")
 			If StringRegExp($sDir, $RegEx, 0) = 1 Then
-				$aFolderInfo = DirGetSize($sChemin & $sDir, 1)
+				$aFolderInfo = _DirGetSizeSafe($sChemin & $sDir)
 				$iNombreDossiersRecuperes += 1
 				$iTailleTotaleDossiersRecuperes += $aFolderInfo[0]
 				If $iNombreDossiersRecuperes <= 15 Then
@@ -3640,56 +3660,286 @@ Func _ListeDeDossiersRecuperes($SearchMask = "??????", $RegEx = "([0-9]{6})")
 EndFunc   ;==>_ListeDeDossiersRecuperes
 
 ;=========================================================
+; Met à jour $TextApps et affiche/masque le bouton $bForcerFermeture.
+; $sApps : chaîne des processus détectés ("" = aucun)
+;=========================================================
+Func _MajTextApps($sApps)
+	If $sApps <> "" Then
+		GUICtrlSetData($TextApps, $sApps)
+		GUICtrlSetState($bForcerFermeture, $GUI_SHOW)
+	Else
+		GUICtrlSetData($TextApps, "-")
+		GUICtrlSetState($bForcerFermeture, $GUI_HIDE)
+	EndIf
+EndFunc   ;==>_MajTextApps
 
+;=========================================================
+; Ferme de force tous les processus actuellement détectés.
+; Déclenchée par le bouton ⌧ ou Shift+double-clic sur "Logiciels Ouverts".
+; Étapes :
+;   1. Rescan frais de la liste des processus
+;   2. Message de confirmation avec la liste
+;   3. ProcessClose() × tous → attente 1s
+;   4. Si résistance → ProcessClose() une 2ème fois (évite _WinAPI_TerminateProcess)
+;   5. Rescan final → mise à jour GUI + log de chaque fermeture
+;=========================================================
+Func _ForcerFermetureProcessus()
+	; Rescan frais pour avoir la liste à jour
+	Local $sApps = _ListeDApplicationsOuvertes()
+	If $sApps = "" Then
+		_MajTextApps("")
+		_Logging("Fermeture forcée : aucun processus à fermer.", 2, 0)
+		Return
+	EndIf
+
+	; ── Boîte de confirmation avec saisie ────────────────────────────────────
+	Local Const $iW = 400, $iH = 318
+	Local $hDlg = GUICreate($PROG_TITLE & "- Fermeture forcée", $iW, $iH, -1, -1, -1, $WS_EX_TOPMOST)
+	GUISetBkColor($GUI_COLOR_SIDES, $hDlg)
+
+	; Header rouge
+	GUICtrlCreateGraphic(0, 0, $iW, $GUI_HEADER_HAUTEUR + 4)
+	GUICtrlSetBkColor(-1, $GUI_COLOR_ERROR)
+	GUICtrlSetState(-1, $GUI_DISABLE)
+	Local $hTitle = GUICtrlCreateLabel("Fermeture forcée des applications", 0, 3, $iW, $GUI_HEADER_HAUTEUR, $SS_CENTER)
+	GUICtrlSetColor(-1, 0xFFFFFF)
+	GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
+	GUICtrlSetFont(-1, 11, 800)
+
+	; Message principal
+	Local $iY = $GUI_HEADER_HAUTEUR + 14
+	Local $hMsg1 = GUICtrlCreateLabel( _
+		"Il est fortement préférable de fermer les applications" & @CRLF & _
+		"manuellement pour éviter toute perte de données." & @CRLF & @CRLF & _
+		"N'utilisez la fermeture forcée qu'en dernier recours,", _
+		$GUI_MARGE, $iY, $iW - 2 * $GUI_MARGE, 65, $SS_CENTER)
+	GUICtrlSetColor(-1, 0xDDDDDD)
+	GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
+	GUICtrlSetFont(-1, 9)
+
+	; Applications listées — max 3 lignes dans la boîte, "..." si plus
+	; Hauteur : 3 lignes × ~16px + ~15px pour la ligne "... (N de plus)" + marge = 63px
+	$iY += 70
+	Local $sAppsAffichage = ""
+	Local $aAppsLignes = StringSplit(StringTrimRight($sApps, StringLen(@CRLF)), @CRLF, 1)
+	Local $iNbApps = $aAppsLignes[0]
+	For $k = 1 To ($iNbApps > 3 ? 3 : $iNbApps)
+		$sAppsAffichage &= $aAppsLignes[$k] & @CRLF
+	Next
+	If $iNbApps > 3 Then $sAppsAffichage &= "     ... (" & ($iNbApps - 3) & " de plus)"
+	Local $hAppsLabel = GUICtrlCreateLabel($sAppsAffichage, $GUI_MARGE + 10, $iY, $iW - 2 * $GUI_MARGE - 10, 63, $SS_CENTER)
+	GUICtrlSetColor(-1, 0xFFCC00)
+	GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
+	GUICtrlSetFont(-1, 9, 700)
+
+	; Avertissement perte de données — décalé de +8px pour absorber la hauteur supplémentaire
+	$iY += 68
+	Local $hWarn = GUICtrlCreateLabel("Tous les fichiers non enregistrés seront PERDUS !", _
+		$GUI_MARGE, $iY, $iW - 2 * $GUI_MARGE, 20, $SS_CENTER)
+	GUICtrlSetColor(-1, 0xFF4444)
+	GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
+	GUICtrlSetFont(-1, 10, 800)
+
+	; Invite de saisie
+	$iY += 28
+	Local $hPrompt = GUICtrlCreateLabel("Pour confirmer, saisissez  « oui »  ci-dessous :", _
+		$GUI_MARGE, $iY, $iW - 2 * $GUI_MARGE, 18, $SS_CENTER)
+	GUICtrlSetColor(-1, 0xFFFFFF)
+	GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
+	GUICtrlSetFont(-1, 9, 400)
+
+	; Champ de saisie
+	$iY += 22
+	Local $iInputW = 120
+	Local $hInput = GUICtrlCreateInput("", ($iW - $iInputW) / 2, $iY, $iInputW, 28, $ES_CENTER)
+	GUICtrlSetFont(-1, 13, 700, 0, "Arial")
+	GUICtrlSetColor(-1, $GUI_COLOR_CENTER)
+	GUICtrlSetLimit(-1, 10)
+
+	; Label d'erreur saisie
+	$iY += 32
+	Local $hErrLabel = GUICtrlCreateLabel("", $GUI_MARGE, $iY, $iW - 2 * $GUI_MARGE, 16, $SS_CENTER)
+	GUICtrlSetColor(-1, 0xFF4444)
+	GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
+	GUICtrlSetFont(-1, 8, 700)
+	GUICtrlSetState($hErrLabel, $GUI_HIDE)
+
+	; Boutons
+	$iY += 20
+	Local $iBtnW = 100
+	Local $hBtnOk = GUICtrlCreateButton("Fermer", ($iW / 2) - $iBtnW - 5, $iY, $iBtnW, 28)
+	GUICtrlSetBkColor(-1, $GUI_COLOR_ERROR)
+	GUICtrlSetColor(-1, 0xFFFFFF)
+	GUICtrlSetFont(-1, 10, 700)
+	GUICtrlSetCursor(-1, 0)
+	Local $hBtnCancel = GUICtrlCreateButton("Annuler", ($iW / 2) + 5, $iY, $iBtnW, 28)
+	GUICtrlSetBkColor(-1, $GUI_COLOR_CENTER)
+	GUICtrlSetColor(-1, 0xFFFFFF)
+	GUICtrlSetFont(-1, 10, 700)
+	GUICtrlSetCursor(-1, 0)
+
+	GUISetState(@SW_SHOW, $hDlg)
+
+	; Boucle de la boîte de dialogue
+	Local $bConfirme = False
+	While 1
+		Local $nMsg = GUIGetMsg()
+		Switch $nMsg
+			Case $GUI_EVENT_CLOSE, $hBtnCancel
+				ExitLoop
+			Case $hBtnOk
+				Local $sSaisie = StringLower(StringStripWS(GUICtrlRead($hInput), 3))
+				If $sSaisie = "oui" Then
+					$bConfirme = True
+					ExitLoop
+				Else
+					GUICtrlSetData($hErrLabel, 'Saisissez exactement  « oui »  pour confirmer')
+					GUICtrlSetState($hErrLabel, $GUI_SHOW)
+				EndIf
+		EndSwitch
+	WEnd
+	GUIDelete($hDlg)
+
+	If Not $bConfirme Then
+		_Logging("Fermeture forcée : annulée (confirmation non saisie ou incorrecte).", 2, 0)
+		Return
+	EndIf
+
+	; ── Fermeture effective ───────────────────────────────────────────────────
+	_Logging("Fermeture forcée confirmée par le surveillant.", 5, 1)
+
+	Local $SoftsToClose = _GetSoftsToCloseList()
+
+	; Fonction locale : ferme tous les processus encore actifs de la liste
+	; et retourne True si au moins un a été trouvé et fermé.
+	; $bTerminate = False → ProcessClose (poli)  |  True → TerminateProcess (brutal)
+	Local $aSleepMs[3] = [500, 500, 200] ; durée d'attente après chaque tentative
+
+	For $iTentative = 1 To 3
+		; Mise à jour du splash avec numéro de tentative
+		SplashTextOn($PROG_TITLE, _
+			"Fermeture des applications — tentative " & $iTentative & "/3" & @CRLF & @CRLF & _
+			"Veuillez patienter...", _
+			330, 100, -1, -1, 49, "Segoe UI", 9)
+
+		Local $bTerminate = ($iTentative = 3) ; TerminateProcess uniquement en 3ème tentative
+
+		; Parcourir la liste des processus connus
+		For $i = 0 To UBound($SoftsToClose, 1) - 1
+			Local $sProcName = $SoftsToClose[$i][1]
+			Local $sDisplayName = $SoftsToClose[$i][0]
+			Local $iFlag = $SoftsToClose[$i][2]
+
+			Local $iPID = 0
+			If $iFlag = 1 Then
+				If ProcessExists($sProcName) Then $iPID = ProcessGetStats($sProcName) ; juste pour vérifier
+				If ProcessExists($sProcName) Then $iPID = 1 ; flag présence
+			ElseIf $iFlag = 0 Or $iFlag = 3 Then
+				If _MyProcessByPartName($sProcName) Then $iPID = 1
+			EndIf
+			; Flag 2 (LibreOffice) géré séparément plus bas
+
+			If $iPID > 0 Then
+				If $bTerminate Then
+					; 3ème tentative : TerminateProcess (ne peut pas être refusé)
+					Local $iProcPID = ProcessExists($sProcName)
+					If $iProcPID Then
+						Local $hProc = _WinAPI_OpenProcess($PROCESS_TERMINATE, False, $iProcPID)
+						If $hProc Then
+							_WinAPI_TerminateProcess($hProc)
+							_WinAPI_CloseHandle($hProc)
+							_Logging("TerminateProcess (tentative 3) : """ & $sDisplayName & """", 5, 0)
+						EndIf
+					EndIf
+				Else
+					ProcessClose($sProcName)
+					_Logging("ProcessClose (tentative " & $iTentative & ") : """ & $sDisplayName & """", 5, 0)
+				EndIf
+			EndIf
+		Next
+
+		; Fermer python.exe / pythonw.exe
+		Local $aPyProcs[2] = ["python.exe", "pythonw.exe"]
+		For $j = 0 To 1
+			Local $sPy = $aPyProcs[$j]
+			If ProcessExists($sPy) Then
+				If $bTerminate Then
+					Local $iPyPID = ProcessExists($sPy)
+					Local $hProc = _WinAPI_OpenProcess($PROCESS_TERMINATE, False, $iPyPID)
+					If $hProc Then
+						_WinAPI_TerminateProcess($hProc)
+						_WinAPI_CloseHandle($hProc)
+						_Logging("TerminateProcess (tentative 3) : """ & $sPy & """", 5, 0)
+					EndIf
+				Else
+					ProcessClose($sPy)
+					_Logging("ProcessClose (tentative " & $iTentative & ") : """ & $sPy & """", 5, 0)
+				EndIf
+			EndIf
+		Next
+
+		; Attente progressive avant vérification
+		Sleep($aSleepMs[$iTentative - 1])
+
+		; Vérification anticipée : si plus rien, sortir sans attendre la tentative suivante
+		Local $sCheck = _ListeDApplicationsOuvertes()
+		If $sCheck = "" Then
+			_Logging("Fermeture forcée : tous les processus fermés à la tentative " & $iTentative & ".", 3, 1)
+			ExitLoop
+		EndIf
+	Next
+
+	SplashOff()
+
+	; Rescan final et mise à jour GUI
+	Local $sAppsRestantes = _ListeDApplicationsOuvertes()
+	_MajTextApps($sAppsRestantes)
+	If $sAppsRestantes = "" Then
+		_Logging("Fermeture forcée : tous les processus fermés avec succès.", 3, 1)
+	Else
+		_Logging("Fermeture forcée : processus encore présents après 3 tentatives : " & StringReplace($sAppsRestantes, @CRLF, " | "), 5, 1)
+		_ExtMsgBoxSet(1, 0, $GUI_COLOR_WARNING, 0x000000, 9, "Segoe UI", @DesktopWidth - 25, @DesktopWidth - 25)
+		_ExtMsgBox(16, "Ok", $PROG_TITLE & " - Avertissement", _
+				"Certains processus n'ont pas pu être fermés après 3 tentatives :" & @CRLF & @CRLF & _
+				$sAppsRestantes & @CRLF & _
+				"Veuillez les fermer manuellement avant de continuer.", 0)
+	EndIf
+EndFunc   ;==>_ForcerFermetureProcessus
+
+;=========================================================
 Func _ListeDApplicationsOuvertes()
 ;~ 	SplashTextOn("Sans Titre", "Recherche de logiciels ouverts." & @CRLF & @CRLF & "Veuillez patienter un moment..." & @CRLF, 330, 120, -1, -1, 49, "Segoe UI", 9)
 	ProgressOn("", "Vérif. des logiciels ouverts:", "", Default, Default, 1)
 
 	Local $App = "" ;
 
-	Local $SoftsToClose[][3] = [ _
-			  ["7-Zip", "7zFM.exe", 1] _
-			, ["Atom", "atom.exe", 1] _
-			, ["Dreamweaver", "Dreamweaver.exe", 1] _
-			, ["LibreOffice/OpenOffice...", "soffice.bin", 2] _
-			, ["Microsoft Access", "MSAccess.exe", 1] _
-			, ["Microsoft Excel", "Excel.exe", 1] _
-			, ["Microsoft PowerPoint", "POWERPNT.exe", 1] _
-			, ["Microsoft Word", "WinWord.exe", 1] _
-			, ["Ms Expression Web 4", "ExpressionWeb.exe", 1] _
-			, ["Notepad", "notepad.exe", 1] _
-			, ["Notepad++", "notepad++.exe", 1] _
-			, ["PyScripter", "PyScripter.exe", 1] _
-			, ["PyCharm", "pycharm", 0] _
-			, ["Qt Designer", "designer.exe", 1] _
-			, ["Rapid PHP", "rapidphp.exe", 1] _
-			, ["Sublime Text", "sublime_text.exe", 1] _
-			, ["Thonny", "thonny.exe", 1] _
-			, ["UltraEdit", "uedit", 0] _
-			, ["Visual Studio Code", "Code.exe", 1] _
-			, ["VSCodium", "VSCodium.exe", 1] _
-			, ["Webuilder", "webuild.exe", 1] _
-			, ["Wing Python IDE", "wing", 0] _
-			, ["WinRAR", "WinRAR.exe", 0] _
-			]
-;~ 			, ["Brackets", "Brackets.exe", 1] _
-;~ 			, ["Geany", "geany.exe", 1] _
-;~ 			, ["GIMP", "GIMP", 0] _
-;~ 			, ["Gvim", "gvim.exe", 1] _
-;~ 			, ["Microsoft Frontpage", "FrontPG.exe", 1] _
-;~ 			, ["Microsoft Publisher", "MSPUB.exe", 1] _
-;~ 			, ["Paint .Net", "PaintDotNet.exe", 1] _
-;~ 			, ["Paint", "MSPaint.exe", 1] _
-;~ 			, ["Vim", "vim.exe", 1] _
-;~ 			, ["Windows Movie Maker", "Moviemk.exe", 1] _
+	Local $SoftsToClose = _GetSoftsToCloseList()
 
 	$N = UBound($SoftsToClose, 1) - 1
 	For $i = 0 To $N
 		ProgressSet(Round($i / $N * 100), "[" & Round($i / $N * 100) & "%] " & "Vérif. de : " & $SoftsToClose[$i][0])
 		If $SoftsToClose[$i][2] = 1 Then
+			; Flag 1 : détection par nom exact de processus
 			If ProcessExists($SoftsToClose[$i][1]) Then $App = $App & "» " & $SoftsToClose[$i][0] & @CRLF
 		ElseIf $SoftsToClose[$i][2] = 0 Then
+			; Flag 0 : détection par nom partiel
 			If _MyProcessByPartName($SoftsToClose[$i][1]) Then $App = $App & "» " & $SoftsToClose[$i][0] & @CRLF
+		ElseIf $SoftsToClose[$i][2] = 3 Then
+			; Flag 3 : fermeture silencieuse si processus actif mais sans fenêtre visible
+			; Cas : WinRAR en extraction arrière-plan — pas de données à sauvegarder,
+			; mais le processus bloque les fichiers. On ferme via ProcessClose sans alerter.
+			If ProcessExists($SoftsToClose[$i][1]) Then
+				Local $hWin = WinGetHandle("[CLASS:" & $SoftsToClose[$i][1] & "]")
+				If Not IsHWnd($hWin) Or Not WinExists($hWin) Then
+					; Pas de fenêtre visible → fermeture silencieuse
+					ProcessClose($SoftsToClose[$i][1])
+					Sleep(200)
+					_Logging("Fermeture silencieuse de """ & $SoftsToClose[$i][0] & """ (processus sans fenêtre)", 2, 0)
+				Else
+					; Fenêtre présente → demander à l'utilisateur de fermer
+					$App = $App & "» " & $SoftsToClose[$i][0] & @CRLF
+				EndIf
+			EndIf
 		ElseIf $SoftsToClose[$i][2] = 2 Then ;Openoffice /LibreOffice Process = soffice.bin
 			If ProcessExists($SoftsToClose[$i][1]) Then
 				Local $aWinList = WinList("[REGEXPTITLE:(?i)Office]")
@@ -3718,7 +3968,11 @@ Func _ListeDApplicationsOuvertes()
 	For $i = 1 To $N
 		$temp = _WinGetByPID($aPythonwProcess[$i][1])
 		$sTitle = WinGetTitle($temp)
-		if $sTitle <> "" Then
+		; Ignorer les fenêtres dont le titre commence par "Thonny" :
+		; Thonny est déjà listé via son propre processus (thonny.exe, flag 1).
+		; Certaines versions lancent python/pythonw en subprocess avec un titre "Thonny - fichier.py",
+		; ce qui provoquerait une double détection.
+		If $sTitle <> "" And Not StringRegExp($sTitle, "(?i)^Thonny") Then
 			$App = $App & "» " & $sTitle & @CRLF
 		EndIf
 	Next
@@ -3729,16 +3983,157 @@ Func _ListeDApplicationsOuvertes()
 	For $i = 1 To $N
 		$temp = _WinGetByPID($aPythonwProcess[$i][1])
 		$sTitle = WinGetTitle($temp)
-		if $sTitle <> "" Then
+		; Même filtre anti-doublon Thonny
+		If $sTitle <> "" And Not StringRegExp($sTitle, "(?i)^Thonny") Then
 			$App = $App & "» " & $sTitle & @CRLF
 		EndIf
 	Next
 
 	ProgressOff()
-;~ 	SplashOff()
+
+	; Tronquer le NOM de chaque application (après "» ") pour tenir sur une seule ligne
+	; dans $TextApps. Largeur disponible ≈ 158px à 9pt Segoe UI ≈ 25 chars total.
+	; "» " = 2 chars + "…" = 1 char → nom max = 21 chars utiles.
+	Local Const $iMaxNomLen = 21
+	If $App <> "" Then
+		Local $aLignes = StringSplit(StringTrimRight($App, StringLen(@CRLF)), @CRLF, 1)
+		$App = ""
+		For $i = 1 To $aLignes[0]
+			Local $sLigne = $aLignes[$i]
+			; Extraire le nom après le préfixe "» " (2 chars)
+			If StringLeft($sLigne, 2) = "» " Then
+				Local $sNom = StringMid($sLigne, 3)
+				If StringLen($sNom) > $iMaxNomLen Then
+					$sNom = StringLeft($sNom, $iMaxNomLen) & "…"
+				EndIf
+				$App &= "» " & $sNom & @CRLF
+			Else
+				$App &= $sLigne & @CRLF
+			EndIf
+		Next
+	EndIf
+
 	Return $App
 
 EndFunc   ;==>_ListeDApplicationsOuvertes
+
+; ============================================================================
+; Retourne le tableau des logiciels à détecter/fermer.
+; Centralisé ici pour être partagé par _ListeDApplicationsOuvertes et
+; _ForcerFermetureProcessus sans duplication.
+; Colonnes : [0]=Nom affiché  [1]=Nom processus  [2]=Flag
+;   0 = détection par nom partiel (_MyProcessByPartName)
+;   1 = détection par nom exact (ProcessExists)
+;   2 = LibreOffice/OpenOffice (logique spéciale par titre de fenêtre)
+;   3 = fermeture silencieuse si sans fenêtre (ex: WinRAR en arrière-plan)
+; ============================================================================
+Func _GetSoftsToCloseList()
+	; AutoIt n'accepte pas l'initialisation littérale des tableaux 2D.
+	; On déclare la taille explicitement puis on remplit ligne par ligne.
+	; Colonnes : [0]=Nom affiché  [1]=Nom processus  [2]=Flag
+	;   0 = détection par nom partiel (_MyProcessByPartName)
+	;   1 = détection par nom exact (ProcessExists)
+	;   2 = LibreOffice/OpenOffice (logique spéciale par titre de fenêtre)
+	;   3 = fermeture silencieuse si sans fenêtre (ex: WinRAR en arrière-plan)
+	Local $aList[24][3]
+	Local $iRow = 0
+	$aList[$iRow][0] = "7-Zip File Manager"                  ; $iRow = 0
+	$aList[$iRow][1] = "7zFM.exe"
+	$aList[$iRow][2] = 3
+	$iRow += 1
+	$aList[$iRow][0] = "7-Zip GUI"                  ; $iRow = 0
+	$aList[$iRow][1] = "7zG.exe"
+	$aList[$iRow][2] = 3
+	$iRow += 1
+	$aList[$iRow][0] = "Atom"                   ; $iRow = 1
+	$aList[$iRow][1] = "atom.exe"
+	$aList[$iRow][2] = 1
+	$iRow += 1
+	$aList[$iRow][0] = "Dreamweaver"             ; $iRow = 2
+	$aList[$iRow][1] = "Dreamweaver.exe"
+	$aList[$iRow][2] = 1
+	$iRow += 1
+	$aList[$iRow][0] = "LibreOffice/OpenOffice..." ; $iRow = 3
+	$aList[$iRow][1] = "soffice.bin"
+	$aList[$iRow][2] = 2
+	$iRow += 1
+	$aList[$iRow][0] = "Microsoft Access"        ; $iRow = 4
+	$aList[$iRow][1] = "MSAccess.exe"
+	$aList[$iRow][2] = 1
+	$iRow += 1
+	$aList[$iRow][0] = "Microsoft Excel"         ; $iRow = 5
+	$aList[$iRow][1] = "Excel.exe"
+	$aList[$iRow][2] = 1
+	$iRow += 1
+	$aList[$iRow][0] = "Microsoft PowerPoint"    ; $iRow = 6
+	$aList[$iRow][1] = "POWERPNT.exe"
+	$aList[$iRow][2] = 1
+	$iRow += 1
+	$aList[$iRow][0] = "Microsoft Word"          ; $iRow = 7
+	$aList[$iRow][1] = "WinWord.exe"
+	$aList[$iRow][2] = 1
+	$iRow += 1
+	$aList[$iRow][0] = "Ms Expression Web 4"    ; $iRow = 8
+	$aList[$iRow][1] = "ExpressionWeb.exe"
+	$aList[$iRow][2] = 1
+	$iRow += 1
+	$aList[$iRow][0] = "Notepad"                 ; $iRow = 9
+	$aList[$iRow][1] = "notepad.exe"
+	$aList[$iRow][2] = 1
+	$iRow += 1
+	$aList[$iRow][0] = "Notepad++"               ; $iRow = 10
+	$aList[$iRow][1] = "notepad++.exe"
+	$aList[$iRow][2] = 1
+	$iRow += 1
+	$aList[$iRow][0] = "PyScripter"              ; $iRow = 11
+	$aList[$iRow][1] = "PyScripter.exe"
+	$aList[$iRow][2] = 1
+	$iRow += 1
+	$aList[$iRow][0] = "PyCharm"                 ; $iRow = 12
+	$aList[$iRow][1] = "pycharm"
+	$aList[$iRow][2] = 0
+	$iRow += 1
+	$aList[$iRow][0] = "Qt Designer"             ; $iRow = 13
+	$aList[$iRow][1] = "designer.exe"
+	$aList[$iRow][2] = 1
+	$iRow += 1
+	$aList[$iRow][0] = "Rapid PHP"               ; $iRow = 14
+	$aList[$iRow][1] = "rapidphp.exe"
+	$aList[$iRow][2] = 1
+	$iRow += 1
+	$aList[$iRow][0] = "Sublime Text"            ; $iRow = 15
+	$aList[$iRow][1] = "sublime_text.exe"
+	$aList[$iRow][2] = 1
+	$iRow += 1
+	$aList[$iRow][0] = "Thonny"                  ; $iRow = 16
+	$aList[$iRow][1] = "thonny.exe"
+	$aList[$iRow][2] = 1
+	$iRow += 1
+	$aList[$iRow][0] = "UltraEdit"               ; $iRow = 17
+	$aList[$iRow][1] = "uedit"
+	$aList[$iRow][2] = 0
+	$iRow += 1
+	$aList[$iRow][0] = "Visual Studio Code"      ; $iRow = 18
+	$aList[$iRow][1] = "Code.exe"
+	$aList[$iRow][2] = 1
+	$iRow += 1
+	$aList[$iRow][0] = "VSCodium"                ; $iRow = 19
+	$aList[$iRow][1] = "VSCodium.exe"
+	$aList[$iRow][2] = 1
+	$iRow += 1
+	$aList[$iRow][0] = "Webuilder"               ; $iRow = 20
+	$aList[$iRow][1] = "webuild.exe"
+	$aList[$iRow][2] = 1
+	$iRow += 1
+	$aList[$iRow][0] = "Wing Python IDE"         ; $iRow = 21
+	$aList[$iRow][1] = "wing"
+	$aList[$iRow][2] = 0
+	$iRow += 1
+	$aList[$iRow][0] = "WinRAR"                  ; $iRow = 22 — fermeture silencieuse si sans fenêtre
+	$aList[$iRow][1] = "WinRAR.exe"
+	$aList[$iRow][2] = 3
+	Return $aList
+EndFunc   ;==>_GetSoftsToCloseList
 
 ; #FUNCTION# ====================================================================================================================
 ; Name...........: _NumeroCandidat

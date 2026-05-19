@@ -391,9 +391,9 @@ Func _VerifierIntegriteCopieDossier($sSrc, $sDest)
     EndIf
 
     ; --- Comparaison rapide : nb fichiers et taille ---
-    Local $aSrcInfo = DirGetSize($sSrc, 1)
-    Local $aDstInfo = DirGetSize($sDest, 1)
-    If @error Then Return 0
+    ; _DirGetSizeSafe : retourne toujours [0,0,0] si erreur → pas de crash
+    Local $aSrcInfo = _DirGetSizeSafe($sSrc)
+    Local $aDstInfo = _DirGetSizeSafe($sDest)
     If $aSrcInfo[1] <> $aDstInfo[1] Then
         _Logging("Intégrité ÉCHEC : nb fichiers src=" & $aSrcInfo[1] & " dst=" & $aDstInfo[1], 5, 0)
         Return 0
@@ -408,10 +408,37 @@ Func _VerifierIntegriteCopieDossier($sSrc, $sDest)
     If Not IsArray($aFiles) Then Return 1 ; aucun fichier (dossier vide cohérent)
 
     For $i = 1 To $aFiles[0]
-        Local $sHashSrc = _MD5ForFile($sSrc & "\" & $aFiles[$i])
-        Local $sHashDst = _MD5ForFile($sDest & "\" & $aFiles[$i])
-        If $sHashSrc = "" Or $sHashDst = "" Or $sHashSrc <> $sHashDst Then
-            _Logging("Intégrité ÉCHEC sur : " & $aFiles[$i], 5, 0)
+        Local $sSrcFile = $sSrc & "\" & $aFiles[$i]
+        Local $sDstFile = $sDest & "\" & $aFiles[$i]
+
+        ; Cas fichier vide (taille=0) : _MD5ForFile échoue sur CreateFileMappingW
+        ; (comportement documenté Win32 : mapping mémoire interdit sur fichier vide)
+        ; → vérifier juste que le fichier existe à destination avec taille=0
+        If FileGetSize($sSrcFile) = 0 Then
+            If Not FileExists($sDstFile) Or FileGetSize($sDstFile) <> 0 Then
+                _Logging("Intégrité ÉCHEC (fichier vide manquant ou taille≠0 à dst) : " & $aFiles[$i], 5, 0)
+                Return 0
+            EndIf
+            ContinueLoop ; fichier vide OK côté src et dst
+        EndIf
+
+        ; Fichier non vide : comparaison MD5
+        Local $sHashSrc = _MD5ForFile($sSrcFile)
+        Local $sHashDst = _MD5ForFile($sDstFile)
+        If @error Then
+            ; _MD5ForFile a échoué (fichier verrouillé, accès refusé...)
+            ; → fallback sur comparaison de taille uniquement
+            Local $iSzSrc = FileGetSize($sSrcFile)
+            Local $iSzDst = FileGetSize($sDstFile)
+            If $iSzSrc <> $iSzDst Then
+                _Logging("Intégrité ÉCHEC taille (src=" & $iSzSrc & " dst=" & $iSzDst & ") : " & $aFiles[$i], 5, 0)
+                Return 0
+            EndIf
+            _Logging("Intégrité MD5 non calculable, fallback taille OK : " & $aFiles[$i], 2, 0)
+            ContinueLoop
+        EndIf
+        If $sHashSrc <> $sHashDst Then
+            _Logging("Intégrité ÉCHEC MD5 : " & $aFiles[$i], 5, 0)
             Return 0
         EndIf
     Next
@@ -420,17 +447,56 @@ Func _VerifierIntegriteCopieDossier($sSrc, $sDest)
 EndFunc   ;==>_VerifierIntegriteCopieDossier
 
 ; ============================================================================
-; Copie un dossier avec vérification d'intégrité MD5 et retry automatique.
-; Adapté aux volumes faibles (≤ 10 Mo) : pause courte, 3 essais.
+; Copie un dossier directement vers $sDest avec vérification d'intégrité
+; MD5 et retry automatique (3 essais, pause 300ms).
 ; Retour : 1 si copie ET intégrité OK, 0 sinon.
 ; ============================================================================
 Func _CopierDossierFiable($sSrc, $sDest, $iMaxTry = 3)
     For $iTry = 1 To $iMaxTry
-        ; Tentative de copie
-        Local $iCopy = DirCopy($sSrc, $sDest, $FC_OVERWRITE)
+        ; ===== SIMULATION D'ERREURS (mode test uniquement) =====
+        Local $iCopy
+        Local $bForcerEchecIntegrite = False
+        If $TEST_ERREUR_COPIE > 0 Then
+            Switch $TEST_ERREUR_COPIE
+                Case 1 ; Échec total DirCopy (toutes destinations)
+                    _Logging("[TEST] Simulation échec DirCopy : " & $sDest, 2, 0)
+                    $iCopy = 0
+                Case 2 ; DirCopy OK mais intégrité toujours KO
+                    _Logging("[TEST] Simulation intégrité KO : " & $sDest, 2, 0)
+                    $iCopy = DirCopy($sSrc, $sDest, $FC_OVERWRITE)
+                    $bForcerEchecIntegrite = True
+                Case 3 ; Échec USB seulement
+                    If StringInStr($sDest, $Dest1FlashUSB) Then
+                        _Logging("[TEST] Simulation échec USB uniquement : " & $sDest, 2, 0)
+                        $iCopy = 0
+                    Else
+                        $iCopy = DirCopy($sSrc, $sDest, $FC_OVERWRITE)
+                    EndIf
+                Case 4 ; Échec local seulement
+                    If StringInStr($sDest, $Dest2LocalFldr) Then
+                        _Logging("[TEST] Simulation échec LOCAL uniquement : " & $sDest, 2, 0)
+                        $iCopy = 0
+                    Else
+                        $iCopy = DirCopy($sSrc, $sDest, $FC_OVERWRITE)
+                    EndIf
+                Case 5 ; Échec au 1er essai, succès au 2ème (test retry)
+                    $TEST_ERREUR_COPIE_COMPTEUR += 1
+                    If $iTry = 1 And $TEST_ERREUR_COPIE_COMPTEUR <= 2 Then
+                        _Logging("[TEST] Simulation échec essai 1 (retry attendu) : " & $sDest, 2, 0)
+                        $iCopy = 0
+                    Else
+                        $iCopy = DirCopy($sSrc, $sDest, $FC_OVERWRITE)
+                    EndIf
+            EndSwitch
+        Else
+            ; Mode normal
+            $iCopy = DirCopy($sSrc, $sDest, $FC_OVERWRITE)
+        EndIf
+        ; ===== FIN SIMULATION =====
+
         If $iCopy = 1 Then
-            ; Vérification d'intégrité (taille + nb + MD5 par fichier)
-            If _VerifierIntegriteCopieDossier($sSrc, $sDest) = 1 Then
+            Local $bIntegrite = $bForcerEchecIntegrite ? 0 : _VerifierIntegriteCopieDossier($sSrc, $sDest)
+            If $bIntegrite = 1 Then
                 If $iTry > 1 Then _Logging("Copie réussie au " & $iTry & "ème essai : " & $sDest, 2, 0)
                 Return 1
             EndIf
@@ -438,11 +504,131 @@ Func _CopierDossierFiable($sSrc, $sDest, $iMaxTry = 3)
         Else
             _Logging("Copie ÉCHEC (essai " & $iTry & "/" & $iMaxTry & ") : " & $sDest, 5, 0)
         EndIf
-        ; Pause courte avant retry (volumes faibles, erreurs USB transitoires)
         If $iTry < $iMaxTry Then Sleep(300)
     Next
     Return 0
 EndFunc   ;==>_CopierDossierFiable
+
+; ============================================================================
+; Wrapper sécurisé autour de DirGetSize($sPath, 1).
+; Retourne TOUJOURS un tableau valide [taille, nbFichiers, nbDossiers].
+; En cas d'erreur (dossier inexistant, accès refusé, résultat non-array),
+; retourne [0, 0, 0] au lieu de planter avec
+; "Subscript used on non-accessible variable".
+; ============================================================================
+Func _DirGetSizeSafe($sPath)
+    Local $aDefault[3] = [0, 0, 0]
+    If Not FileExists($sPath) Then Return $aDefault
+    Local $aInfo = DirGetSize($sPath, 1)
+    If @error Or Not IsArray($aInfo) Or UBound($aInfo) < 3 Then Return $aDefault
+    Return $aInfo
+EndFunc   ;==>_DirGetSizeSafe
+
+; ============================================================================
+; Signale les erreurs de copie non vérifiées :
+;   1. Renomme le dossier candidat en NNNNNN_ (ajout d'un tiret bas)
+;      sur chaque destination concernée — le dossier n'est plus détecté
+;      dans la liste des récupérations normales, forçant une vérification manuelle.
+;   2. Crée _ERREURS_COPIE.txt dans le dossier renommé avec la liste
+;      des sources non supprimées et l'action requise.
+; $aDest    : tableau ["USB_path_candidat", "Local_path_candidat"]
+;             (chemins complets incluant déjà le numéro du candidat)
+; $aErreurs : tableau [0]=nb, [1..n]= "SOURCE|RAISON"
+; $sCandidat: numéro du candidat (pour l'en-tête du fichier)
+; ============================================================================
+; ============================================================================
+; Crée ou met à jour _ERREURS_COPIE.txt dans les dossiers destination
+; (USB et local) pour signaler les fichiers/dossiers dont la copie a échoué.
+; Le renommage NNNNNN → NNNNNN_ est fait séparément par _FinaliserErreursCopie,
+; appelé UNE SEULE FOIS à la fin, après que TOUTES les copies soient terminées.
+; $aDest    : tableau [chemin_USB_candidat, chemin_Local_candidat]
+; $aErreurs : tableau [0]=nb, [1..n]= "SOURCE|RAISON"
+; $sCandidat: numéro du candidat (pour l'en-tête du fichier)
+; ============================================================================
+Func _EcrireFichierErreursCopie($aDest, $aErreurs, $sCandidat)
+    If Not IsArray($aErreurs) Or $aErreurs[0] = 0 Then Return
+
+    Local $sNomFichier = "\_ERREURS_COPIE.txt"
+    Local $sContenu = $PROG_TITLE & $PROG_VERSION & " — Rapport d'erreurs de copie" & @CRLF
+    $sContenu &= "Candidat : " & $sCandidat & @CRLF
+    $sContenu &= "Date     : " & @YEAR & "-" & @MON & "-" & @MDAY & " " & @HOUR & ":" & @MIN & ":" & @SEC & @CRLF
+    $sContenu &= @CRLF
+    $sContenu &= "ATTENTION — " & $aErreurs[0] & " source(s) NON supprimée(s) car la copie n'a pas pu être vérifiée :" & @CRLF
+    $sContenu &= @CRLF
+
+    For $i = 1 To $aErreurs[0]
+        Local $aParts = StringSplit($aErreurs[$i], "|", 2)
+        If UBound($aParts) >= 2 Then
+            $sContenu &= "  * " & $aParts[0] & @CRLF
+            $sContenu &= "    Raison : " & $aParts[1] & @CRLF & @CRLF
+        Else
+            $sContenu &= "  * " & $aErreurs[$i] & @CRLF & @CRLF
+        EndIf
+    Next
+
+    $sContenu &= "ACTION REQUISE :" & @CRLF
+    $sContenu &= "  Les fichiers/dossiers listés ci-dessus sont CONSERVES sur le poste candidat." & @CRLF
+    $sContenu &= "  Copier manuellement le contenu manquant dans ce dossier." & @CRLF
+    $sContenu &= "  Renommer ensuite ce dossier de """ & $sCandidat & "_"" vers """ & $sCandidat & """." & @CRLF
+
+    ; Écrire dans chaque destination (USB et locale) — sans renommer
+    ; FO_APPEND : cumule les erreurs si le fichier existe déjà (plusieurs appels)
+    For $k = 0 To UBound($aDest) - 1
+        Local $sChemin = $aDest[$k]
+        If $sChemin = "" Then ContinueLoop
+        If Not FileExists($sChemin) Then DirCreate($sChemin)
+        Local $bFichierExiste = FileExists($sChemin & $sNomFichier)
+        Local $hFile = FileOpen($sChemin & $sNomFichier, $FO_APPEND + $FO_UTF8)
+        If $hFile <> -1 Then
+            ; En-tête uniquement si nouveau fichier
+            If Not $bFichierExiste Then
+                FileWrite($hFile, $sContenu)
+            Else
+                ; Ajouter seulement les nouvelles lignes d'erreurs
+                FileWrite($hFile, @CRLF & "--- Erreurs supplémentaires ---" & @CRLF)
+                For $i = 1 To $aErreurs[0]
+                    Local $aParts2 = StringSplit($aErreurs[$i], "|", 2)
+                    If UBound($aParts2) >= 2 Then
+                        FileWrite($hFile, "  * " & $aParts2[0] & @CRLF)
+                        FileWrite($hFile, "    Raison : " & $aParts2[1] & @CRLF & @CRLF)
+                    Else
+                        FileWrite($hFile, "  * " & $aErreurs[$i] & @CRLF & @CRLF)
+                    EndIf
+                Next
+            EndIf
+            FileClose($hFile)
+            _Logging("Fichier erreurs mis à jour : """ & $sChemin & $sNomFichier & """", 5, 0)
+        EndIf
+    Next
+EndFunc   ;==>_EcrireFichierErreursCopie
+
+; ============================================================================
+; Renomme les dossiers candidat NNNNNN → NNNNNN_ sur USB et local,
+; UNIQUEMENT si _ERREURS_COPIE.txt y existe.
+; À appeler UNE SEULE FOIS, après que TOUTES les copies soient terminées,
+; juste avant le message final.
+; Retour : True si au moins un dossier renommé (= erreurs de copie détectées).
+; ============================================================================
+Func _FinaliserErreursCopie($sDestUSB, $sDestLocal)
+    Local $bErreurs = False
+    Local $aDests[2] = [$sDestUSB, $sDestLocal]
+
+    For $k = 0 To 1
+        Local $sChemin = $aDests[$k]
+        If $sChemin = "" Or Not FileExists($sChemin & "\_ERREURS_COPIE.txt") Then ContinueLoop
+
+        Local $sCheminRenomme = $sChemin & "_"
+        If FileExists($sCheminRenomme) Then DirRemove($sCheminRenomme, 1)
+        If DirMove($sChemin, $sCheminRenomme) Then
+            _Logging("Dossier renommé : """ & $sChemin & """ → """ & $sCheminRenomme & """", 5, 0)
+        Else
+            _Logging("Renommage ÉCHEC : """ & $sChemin & """ (dossier non renommé)", 5, 0)
+        EndIf
+        $bErreurs = True
+    Next
+
+    Return $bErreurs
+EndFunc   ;==>_FinaliserErreursCopie
 
 ; ============================================================================
 Func _EmptyArray()
@@ -1013,9 +1199,9 @@ EndFunc   ;==>_CreerDossierNouvelleSession
 ; www/htdocs avant suppression.
 ; ============================================================================
 Func _LibererVerrousDossierWeb()
+    ; Serveurs web + Navigateurs (cache localhost / onglet ouvert)
     Local $aProcs = [ _
         "httpd.exe", _
-        ; Navigateurs (cache localhost / onglet ouvert) ---
         "chrome.exe", "firefox.exe", "msedge.exe", "iexplore.exe", _
         "opera.exe", "brave.exe", "vivaldi.exe" _
     ]

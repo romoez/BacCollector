@@ -56,10 +56,32 @@ Global Const $FREE_SPACE_DRIVE_BACKUP = 5000 ; en MB
 ; Cache global pour les installations XAMPP-LITE/XAMPP/WAMP
 Global $__g_aEasyPHPRootsCache = 0
 Global $__g_sNomFichierAlerteFraude = "!_FRAUDE_POSSIBLE_USB.txt"
+; ============================================================================
+; MODE SIMULATION D'ERREURS — À DÉSACTIVER AVANT COMPILATION FINALE
+; Valeurs de $TEST_ERREUR_COPIE :
+;   0 = mode normal (production)
+;   1 = DirCopy retourne toujours 0 (échec copie total)
+;   2 = DirCopy réussit mais intégrité MD5 échoue
+;   3 = échec uniquement sur la destination USB (pas locale)
+;   4 = échec uniquement sur la destination locale (pas USB)
+;   5 = échec au 1er essai, succès au 2ème (teste le retry)
+; ============================================================================
+Global $TEST_ERREUR_COPIE = 0
+Global $TEST_ERREUR_COPIE_COMPTEUR = 0  ; compteur interne pour le mode 5
 
 Global $__g_sWarnIcon
 If @OSVersion = "WIN_7" Or @OSVersion = "WIN_XP" Or @OSVersion = "WIN_VISTA" Or @OSVersion = "WIN_2008" Then
     $__g_sWarnIcon = "[!]" ; Rendu propre pour Windows 7 et antérieurs
 Else
     $__g_sWarnIcon = "⚠️"   ; Emoji pour Windows 8, 8.1, 10, 11 et futurs
+EndIf
+
+; Icône du bouton de fermeture forcée des processus
+; ⨂ (U+2A02) = N-ARY CIRCLED TIMES OPERATOR — cercle avec X, sobre et lisible
+; Garanti affichable dans les contrôles GDI Win32 (plan BMP Unicode)
+Global $__g_sKillIcon
+If @OSVersion = "WIN_7" Or @OSVersion = "WIN_XP" Or @OSVersion = "WIN_VISTA" Or @OSVersion = "WIN_2008" Then
+    $__g_sKillIcon = "[X]" ; ASCII pur pour Windows 7 et antérieurs
+Else
+    $__g_sKillIcon = "⨂"   ; U+2A02 pour Windows 8, 8.1, 10, 11 et futurs
 EndIf
